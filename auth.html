@@ -103,6 +103,20 @@
             font-weight: 500;
         }
 
+        .input-wrapper {
+            position: relative;
+        }
+
+        .input-prefix {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #22c5a4;
+            font-weight: 600;
+            pointer-events: none;
+        }
+
         input {
             width: 100%;
             padding: 12px 15px;
@@ -114,6 +128,10 @@
             transition: all 0.3s ease;
         }
 
+        input.with-prefix {
+            padding-left: 30px;
+        }
+
         input:focus {
             outline: none;
             border-color: #22c5a4;
@@ -122,6 +140,12 @@
 
         input::placeholder {
             color: rgba(255, 255, 255, 0.4);
+        }
+
+        .input-hint {
+            font-size: 0.85em;
+            color: rgba(255, 255, 255, 0.6);
+            margin-top: 5px;
         }
 
         .submit-button {
@@ -251,6 +275,19 @@
         <!-- Register Form -->
         <form id="registerForm" class="hidden">
             <div class="form-group">
+                <label for="registerUsername">Username</label>
+                <div class="input-wrapper">
+                    <span class="input-prefix">@</span>
+                    <input type="text" id="registerUsername" class="with-prefix" placeholder="username" required pattern="[a-zA-Z0-9_]{3,20}" minlength="3" maxlength="20">
+                </div>
+                <div class="input-hint">3-20 characters, letters, numbers, and underscores only</div>
+            </div>
+            <div class="form-group">
+                <label for="registerDisplayName">Display Name</label>
+                <input type="text" id="registerDisplayName" placeholder="How you want to be called" required maxlength="30">
+                <div class="input-hint">This is how others will see you (max 30 characters)</div>
+            </div>
+            <div class="form-group">
                 <label for="registerEmail">Email</label>
                 <input type="email" id="registerEmail" placeholder="your@email.com" required>
             </div>
@@ -270,33 +307,34 @@
     <script type="module">
         import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
         import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, sendEmailVerification } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
+        import { getFirestore, doc, setDoc, getDoc, getDocs, collection, query, orderBy, limit, updateDoc, increment } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
 
-        // TODO: Replace with your Firebase config
-        // Get this from Firebase Console -> Project Settings -> Your apps
+        // Firebase Configuration
+        // IMPORTANT: Replace these with your actual Firebase project credentials
+        // Get them from: Firebase Console > Project Settings > General > Your apps
         const firebaseConfig = {
-            apiKey: "YOUR_API_KEY",
+            apiKey: "YOUR_API_KEY_HERE",
             authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
             projectId: "YOUR_PROJECT_ID",
             storageBucket: "YOUR_PROJECT_ID.appspot.com",
-            messagingSenderId: "YOUR_SENDER_ID",
+            messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
             appId: "YOUR_APP_ID"
         };
 
         // Initialize Firebase
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
+        const db = getFirestore(app);
 
         // Check if user is already logged in
-        onAuthStateChanged(auth, (user) => {
+        onAuthStateChanged(auth, async (user) => {
             if (user) {
                 if (user.emailVerified) {
-                    // User is signed in and verified
                     showSuccess('Already logged in! Redirecting...');
                     setTimeout(() => {
                         window.location.href = '/';
                     }, 1500);
                 } else {
-                    // User is signed in but not verified
                     showInfo(`Please verify your email (${user.email}). Check your inbox! <span class="resend-link" onclick="resendVerification()">Resend verification email</span>`);
                 }
             }
@@ -336,6 +374,28 @@
             hideMessages();
         };
 
+        // Check if username is available
+        async function isUsernameAvailable(username) {
+            const usernameDoc = await getDoc(doc(db, 'usernames', username.toLowerCase()));
+            return !usernameDoc.exists();
+        }
+
+        // Get next UID
+        async function getNextUID() {
+            const counterDoc = doc(db, 'metadata', 'userCounter');
+            const counterSnap = await getDoc(counterDoc);
+            
+            if (!counterSnap.exists()) {
+                // Initialize counter
+                await setDoc(counterDoc, { count: 1 });
+                return 1;
+            }
+            
+            const currentCount = counterSnap.data().count;
+            await updateDoc(counterDoc, { count: increment(1) });
+            return currentCount + 1;
+        }
+
         // Login
         document.getElementById('loginForm').addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -362,6 +422,7 @@
                     button.textContent = 'Sign In';
                 }
             } catch (error) {
+                console.error('Login error:', error);
                 showError(getErrorMessage(error.code));
                 button.disabled = false;
                 button.textContent = 'Sign In';
@@ -371,12 +432,27 @@
         // Register
         document.getElementById('registerForm').addEventListener('submit', async (e) => {
             e.preventDefault();
+            const username = document.getElementById('registerUsername').value.trim();
+            const displayName = document.getElementById('registerDisplayName').value.trim();
             const email = document.getElementById('registerEmail').value;
             const password = document.getElementById('registerPassword').value;
             const confirmPassword = document.getElementById('registerPasswordConfirm').value;
             const button = document.getElementById('registerButton');
             
             hideMessages();
+            
+            // Validate username format
+            const usernameRegex = /^[a-zA-Z0-9_]{3,20}$/;
+            if (!usernameRegex.test(username)) {
+                showError('Username must be 3-20 characters and contain only letters, numbers, and underscores!');
+                return;
+            }
+            
+            // Validate display name
+            if (displayName.length < 1 || displayName.length > 30) {
+                showError('Display name must be 1-30 characters!');
+                return;
+            }
             
             if (password !== confirmPassword) {
                 showError('Passwords do not match!');
@@ -392,22 +468,54 @@
             button.textContent = 'Creating account...';
             
             try {
+                // Check if username is available
+                const available = await isUsernameAvailable(username);
+                if (!available) {
+                    showError('Username is already taken! Please choose another.');
+                    button.disabled = false;
+                    button.textContent = 'Create Account';
+                    return;
+                }
+                
+                // Create user account
                 const userCredential = await createUserWithEmailAndPassword(auth, email, password);
                 const user = userCredential.user;
+                
+                // Get next UID
+                const uid = await getNextUID();
+                
+                // Create user profile in Firestore
+                await setDoc(doc(db, 'users', user.uid), {
+                    uid: uid,
+                    username: username,
+                    displayName: displayName,
+                    email: email,
+                    createdAt: new Date(),
+                    emailVerified: false
+                });
+                
+                // Reserve username
+                await setDoc(doc(db, 'usernames', username.toLowerCase()), {
+                    userId: user.uid,
+                    createdAt: new Date()
+                });
                 
                 // Send verification email
                 await sendEmailVerification(user);
                 
-                showSuccess('Account created! Please check your email to verify your account before logging in.');
+                showSuccess(`Account created! You are user #${uid}. Please check your email to verify your account.`);
                 button.disabled = false;
                 button.textContent = 'Create Account';
                 
                 // Clear form
+                document.getElementById('registerUsername').value = '';
+                document.getElementById('registerDisplayName').value = '';
                 document.getElementById('registerEmail').value = '';
                 document.getElementById('registerPassword').value = '';
                 document.getElementById('registerPasswordConfirm').value = '';
                 
             } catch (error) {
+                console.error('Registration error:', error);
                 showError(getErrorMessage(error.code));
                 button.disabled = false;
                 button.textContent = 'Create Account';
@@ -455,7 +563,7 @@
                 case 'auth/too-many-requests':
                     return 'Too many failed attempts. Please try again later.';
                 default:
-                    return 'An error occurred. Please try again.';
+                    return `An error occurred: ${code}. Please try again.`;
             }
         }
     </script>
