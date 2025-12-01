@@ -357,8 +357,8 @@
                         // Set display name
                         userDisplayName.textContent = userData.displayName;
                         
-                        // Set profile link
-                        profileLink.href = `/${userData.username}`;
+                        // Set profile link to use URL parameter format
+                        profileLink.href = `/profile.html?u=${userData.username}`;
                     }
                 } catch (error) {
                     console.error('Error fetching user data:', error);
