@@ -67,6 +67,96 @@
             box-shadow: 0 5px 15px rgba(34, 197, 164, 0.4);
         }
 
+        .user-menu {
+            position: relative;
+        }
+
+        .user-button {
+            background: rgba(34, 197, 164, 0.2);
+            border: 2px solid #22c5a4;
+            color: #fff;
+            padding: 10px 20px;
+            font-size: 1em;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .user-button:hover {
+            background: rgba(34, 197, 164, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .user-avatar {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #22c5a4 0%, #0a8f7a 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2em;
+        }
+
+        .dropdown {
+            position: absolute;
+            top: calc(100% + 10px);
+            right: 0;
+            background: rgba(10, 77, 77, 0.98);
+            border: 2px solid rgba(34, 197, 164, 0.3);
+            border-radius: 12px;
+            min-width: 200px;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-10px);
+            transition: all 0.3s ease;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(10px);
+        }
+
+        .dropdown.show {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+
+        .dropdown-item {
+            padding: 15px 20px;
+            color: rgba(255, 255, 255, 0.9);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            transition: all 0.2s ease;
+            cursor: pointer;
+            border-bottom: 1px solid rgba(34, 197, 164, 0.1);
+        }
+
+        .dropdown-item:last-child {
+            border-bottom: none;
+        }
+
+        .dropdown-item:hover {
+            background: rgba(34, 197, 164, 0.2);
+            color: #22c5a4;
+        }
+
+        .dropdown-item.logout {
+            color: #ff3b30;
+        }
+
+        .dropdown-item.logout:hover {
+            background: rgba(255, 59, 48, 0.2);
+        }
+
+        .hidden {
+            display: none;
+        }
+
         .page-container {
             max-width: 1200px;
             margin: 0 auto;
@@ -158,7 +248,31 @@
 <body>
     <nav>
         <a href="/" class="logo">🌊 Lyko Lake</a>
-        <a href="/auth.html" class="auth-button">Sign Up / Login</a>
+        
+        <!-- Show this when NOT logged in -->
+        <a href="/auth.html" class="auth-button" id="authButton">Sign Up / Login</a>
+        
+        <!-- Show this when logged in -->
+        <div class="user-menu hidden" id="userMenu">
+            <button class="user-button" id="userButton">
+                <div class="user-avatar">👤</div>
+                <span id="userDisplayName">Loading...</span>
+            </button>
+            <div class="dropdown" id="dropdown">
+                <a class="dropdown-item" id="profileLink">
+                    <span>👤</span>
+                    <span>Profile</span>
+                </a>
+                <a href="/help.html" class="dropdown-item">
+                    <span>❓</span>
+                    <span>Help</span>
+                </a>
+                <div class="dropdown-item logout" id="logoutButton">
+                    <span>🚪</span>
+                    <span>Log Out</span>
+                </div>
+            </div>
+        </div>
     </nav>
 
     <div class="page-container">
@@ -172,5 +286,89 @@
             </p>
         </div>
     </div>
+
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+        import { getAuth, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
+        import { getFirestore, doc, getDoc } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDUBeWvs6kOijqST6FVGirWs2EZ12aAAwU",
+            authDomain: "lyko-lake.firebaseapp.com",
+            projectId: "lyko-lake",
+            storageBucket: "lyko-lake.firebasestorage.app",
+            messagingSenderId: "685592614306",
+            appId: "1:685592614306:web:b6a8f6f18407f9c0154efb",
+            measurementId: "G-QN0H7E9NEQ"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        const authButton = document.getElementById('authButton');
+        const userMenu = document.getElementById('userMenu');
+        const userButton = document.getElementById('userButton');
+        const dropdown = document.getElementById('dropdown');
+        const userDisplayName = document.getElementById('userDisplayName');
+        const profileLink = document.getElementById('profileLink');
+        const logoutButton = document.getElementById('logoutButton');
+
+        // Toggle dropdown
+        userButton.addEventListener('click', (e) => {
+            e.stopPropagation();
+            dropdown.classList.toggle('show');
+        });
+
+        // Close dropdown when clicking outside
+        document.addEventListener('click', () => {
+            dropdown.classList.remove('show');
+        });
+
+        // Prevent dropdown from closing when clicking inside it
+        dropdown.addEventListener('click', (e) => {
+            e.stopPropagation();
+        });
+
+        // Logout
+        logoutButton.addEventListener('click', async () => {
+            try {
+                await signOut(auth);
+                window.location.reload();
+            } catch (error) {
+                console.error('Logout error:', error);
+                alert('Failed to log out. Please try again.');
+            }
+        });
+
+        // Check auth state
+        onAuthStateChanged(auth, async (user) => {
+            if (user && user.emailVerified) {
+                // User is logged in and verified
+                try {
+                    const userDoc = await getDoc(doc(db, 'users', user.uid));
+                    if (userDoc.exists()) {
+                        const userData = userDoc.data();
+                        
+                        // Show user menu, hide auth button
+                        authButton.classList.add('hidden');
+                        userMenu.classList.remove('hidden');
+                        
+                        // Set display name
+                        userDisplayName.textContent = userData.displayName;
+                        
+                        // Set profile link
+                        profileLink.href = `/${userData.username}`;
+                    }
+                } catch (error) {
+                    console.error('Error fetching user data:', error);
+                }
+            } else {
+                // User is not logged in or not verified
+                authButton.classList.remove('hidden');
+                userMenu.classList.add('hidden');
+            }
+        });
+    </script>
 </body>
 </html>
