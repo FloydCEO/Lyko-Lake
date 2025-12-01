@@ -4,252 +4,42 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Lyko Lake - Home</title>
-    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2140641372307321"
-     crossorigin="anonymous"></script>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-            background: linear-gradient(135deg, #0a4d4d 0%, #1a6b6b 50%, #0f3d3d 100%);
-            color: #fff;
-            min-height: 100vh;
-        }
-
-        nav {
-            background: rgba(10, 77, 77, 0.95);
-            backdrop-filter: blur(10px);
-            padding: 20px 40px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            position: sticky;
-            top: 0;
-            z-index: 1000;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
-            border-bottom: 2px solid rgba(34, 197, 164, 0.3);
-        }
-
-        .logo {
-            font-size: 1.8em;
-            font-weight: bold;
-            color: #22c5a4;
-            text-decoration: none;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            transition: transform 0.3s ease;
-        }
-
-        .logo:hover {
-            transform: scale(1.05);
-        }
-
-        .auth-button {
-            background: rgba(34, 197, 164, 0.2);
-            border: 2px solid #22c5a4;
-            color: #fff;
-            padding: 10px 30px;
-            font-size: 1em;
-            border-radius: 8px;
-            text-decoration: none;
-            transition: all 0.3s ease;
-            font-weight: 600;
-        }
-
-        .auth-button:hover {
-            background: #22c5a4;
-            color: #0a4d4d;
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(34, 197, 164, 0.4);
-        }
-
-        .user-menu {
-            position: relative;
-        }
-
-        .user-button {
-            background: rgba(34, 197, 164, 0.2);
-            border: 2px solid #22c5a4;
-            color: #fff;
-            padding: 10px 20px;
-            font-size: 1em;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            font-weight: 600;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .user-button:hover {
-            background: rgba(34, 197, 164, 0.3);
-            transform: translateY(-2px);
-        }
-
-        .user-avatar {
-            width: 30px;
-            height: 30px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, #22c5a4 0%, #0a8f7a 100%);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.2em;
-            overflow: hidden;
-        }
-
-        .user-avatar img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-
-        .dropdown {
-            position: absolute;
-            top: calc(100% + 10px);
-            right: 0;
-            background: rgba(10, 77, 77, 0.98);
-            border: 2px solid rgba(34, 197, 164, 0.3);
-            border-radius: 12px;
-            min-width: 200px;
-            opacity: 0;
-            visibility: hidden;
-            transform: translateY(-10px);
-            transition: all 0.3s ease;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-            backdrop-filter: blur(10px);
-        }
-
-        .dropdown.show {
-            opacity: 1;
-            visibility: visible;
-            transform: translateY(0);
-        }
-
-        .dropdown-item {
-            padding: 15px 20px;
-            color: rgba(255, 255, 255, 0.9);
-            text-decoration: none;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            transition: all 0.2s ease;
-            cursor: pointer;
-            border-bottom: 1px solid rgba(34, 197, 164, 0.1);
-        }
-
-        .dropdown-item:last-child {
-            border-bottom: none;
-        }
-
-        .dropdown-item:hover {
-            background: rgba(34, 197, 164, 0.2);
-            color: #22c5a4;
-        }
-
-        .dropdown-item.logout {
-            color: #ff3b30;
-        }
-
-        .dropdown-item.logout:hover {
-            background: rgba(255, 59, 48, 0.2);
-        }
-
-        .hidden {
-            display: none;
-        }
-
-        .page-container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 60px 40px;
-            min-height: calc(100vh - 80px);
-        }
-
-        .home-hero {
-            text-align: center;
-            padding: 80px 20px;
-            animation: fadeIn 0.8s ease-out;
-        }
-
-        .hero-avatar {
-            width: 180px;
-            height: 180px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, #22c5a4 0%, #0a8f7a 100%);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 5em;
-            margin: 0 auto 30px;
-            box-shadow: 0 15px 50px rgba(34, 197, 164, 0.4);
-            animation: float 3s ease-in-out infinite;
-        }
-
-        h1 {
-            font-size: 4em;
-            margin-bottom: 20px;
-            background: linear-gradient(135deg, #22c5a4 0%, #4dd4b8 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-
-        .hero-subtitle {
-            font-size: 1.5em;
-            color: rgba(255, 255, 255, 0.8);
-            margin-bottom: 30px;
-        }
-
-        .hero-description {
-            color: rgba(255, 255, 255, 0.7);
-            font-size: 1.1em;
-            max-width: 600px;
-            margin: 0 auto 40px;
-            line-height: 1.6;
-        }
-
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(30px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        @keyframes float {
-            0%, 100% {
-                transform: translateY(0);
-            }
-            50% {
-                transform: translateY(-15px);
-            }
-        }
-
-        @media (max-width: 768px) {
-            nav {
-                padding: 20px;
-            }
-
-            h1 {
-                font-size: 2.5em;
-            }
-
-            .hero-avatar {
-                width: 140px;
-                height: 140px;
-                font-size: 4em;
-            }
-        }
+        *{margin:0;padding:0;box-sizing:border-box}
+        body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Oxygen,Ubuntu,Cantarell,sans-serif;
+             background:linear-gradient(135deg,#0a4d4d 0%,#1a6b6b 50%,#0f3d3d 100%);color:#fff;min-height:100vh}
+        nav{background:rgba(10,77,77,.95);backdrop-filter:blur(10px);padding:20px 40px;display:flex;justify-content:space-between;align-items:center;
+            position:sticky;top:0;z-index:1000;box-shadow:0 4px 20px rgba(0,0,0,.3);border-bottom:2px solid rgba(34,197,164,.3)}
+        .logo{font-size:1.8em;font-weight:bold;color:#22c5a4;text-decoration:none;display:flex;align-items:center;gap:10px;transition:transform .3s ease}
+        .logo:hover{transform:scale(1.05)}
+        .auth-button{background:rgba(34,197,164,.2);border:2px solid #22c5a4;color:#fff;padding:10px 30px;font-size:1em;border-radius:8px;text-decoration:none;
+                    transition:all .3s ease;font-weight:600}
+        .auth-button:hover{background:#22c5a4;color:#0a4d4d;transform:translateY(-2px);box-shadow:0 5px 15px rgba(34,197,164,.4)}
+        .user-menu{position:relative}
+        .user-button{background:rgba(34,197,164,.2);border:2px solid #22c5a4;color:#fff;padding:10px 20px;font-size:1em;border-radius:8px;cursor:pointer;
+                    transition:all .3s ease;font-weight:600;display:flex;align-items:center;gap:10px}
+        .user-button:hover{background:rgba(34,197,164,.3);transform:translateY(-2px)}
+        .user-avatar{width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,#22c5a4 0%,#0a8f7a 100%);display:flex;align-items:center;justify-content:center;font-size:1.2em;overflow:hidden}
+        .user-avatar img{width:100%;height:100%;object-fit:cover}
+        .dropdown{position:absolute;top:calc(100% + 10px);right:0;background:rgba(10,77,77,.98);border:2px solid rgba(34,197,164,.3);border-radius:12px;
+                 min-width:200px;opacity:0;visibility:hidden;transform:translateY(-10px);transition:all .3s ease;box-shadow:0 10px 30px rgba(0,0,0,.5);backdrop-filter:blur(10px)}
+        .dropdown.show{opacity:1;visibility:visible;transform:translateY(0)}
+        .dropdown-item{padding:15px 20px;color:rgba(255,255,255,.9);text-decoration:none;display:flex;align-items:center;gap:12px;cursor:pointer;
+                      border-bottom:1px solid rgba(34,197,164,.1)}
+        .dropdown-item:last-child{border-bottom:none}
+        .dropdown-item:hover{background:rgba(34,197,164,.2);color:#22c5a4}
+        .dropdown-item.logout{color:#ff3b30}
+        .dropdown-item.logout:hover{background:rgba(255,59,48,.2)}
+        .hidden{display:none}
+        .page-container{max-width:1200px;margin:0 auto;padding:60px 40px;min-height:calc(100vh - 80px)}
+        .home-hero{text-align:center;padding:80px 20px;animation:fadeIn .8s ease-out}
+        .hero-avatar{width:180px;height:180px;border-radius:50%;background:linear-gradient(135deg,#22c5a4 0%,#0a8f7a 100%);display:flex;align-items:center;justify-content:center;font-size:5em;margin:0 auto 30px;box-shadow:0 15px 50px rgba(34,197,164,.4);animation:float 3s ease-in-out infinite}
+        h1{font-size:4em;margin-bottom:20px;background:linear-gradient(135deg,#22c5a4 0%,#4dd4b8 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+        .hero-subtitle{font-size:1.5em;color:rgba(255,255,255,.8);margin-bottom:30px}
+        .hero-description{color:rgba(255,255,255,.7);font-size:1.1em;max-width:600px;margin:0 auto 40px;line-height:1.6}
+        @keyframes fadeIn{from{opacity:0;transform:translateY(30px)}to{opacity:1;transform:translateY(0)}}
+        @keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-15px)}}
+        @media(max-width:768px){nav{padding:20px}h1{font-size:2.5em}.hero-avatar{width:140px;height:140px;font-size:4em}}
     </style>
 </head>
 <body>
@@ -258,25 +48,14 @@
         <a href="/auth.html" class="auth-button" id="authButton">Sign Up / Login</a>
         <div class="user-menu hidden" id="userMenu">
             <button class="user-button" id="userButton">
-                <div class="user-avatar" id="navUserAvatar">
-                    <img id="navAvatarImg" src="" alt="Avatar" style="display:none">
-                </div>
+                <div class="user-avatar" id="navUserAvatar"><img id="navAvatarImg" src="" alt="Avatar" style="display:none"></div>
                 <span id="userDisplayName">Loading...</span>
                 <span class="rank" id="navRank" style="display:none;margin-left:6px;padding:2px 8px;border-radius:999px;font-size:.7em;font-weight:600"></span>
             </button>
             <div class="dropdown" id="dropdown">
-                <a class="dropdown-item" id="profileLink">
-                    <span>👤</span>
-                    <span>Profile</span>
-                </a>
-                <a href="/help.html" class="dropdown-item">
-                    <span>❓</span>
-                    <span>Help</span>
-                </a>
-                <div class="dropdown-item logout" id="logoutButton">
-                    <span>🚪</span>
-                    <span>Log Out</span>
-                </div>
+                <a class="dropdown-item" id="profileLink"><span>👤</span><span>Profile</span></a>
+                <a href="/help.html" class="dropdown-item"><span>❓</span><span>Help</span></a>
+                <div class="dropdown-item logout" id="logoutButton"><span>🚪</span><span>Log Out</span></div>
             </div>
         </div>
     </nav>
@@ -300,15 +79,14 @@
         import { getStorage, ref, getDownloadURL } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js';
 
         const firebaseConfig = {
-  apiKey: "AIzaSyDUBeWvs6kOijqST6FVGirWs2EZ12aAAwU",
-  authDomain: "lyko-lake.firebaseapp.com",
-  projectId: "lyko-lake",
-  storageBucket: "lyko-lake.firebasestorage.app",
-  messagingSenderId: "685592614306",
-  appId: "1:685592614306:web:b6a8f6f18407f9c0154efb",
-  measurementId: "G-QN0H7E9NEQ"
-};
-
+            apiKey: "AIzaSyDUBeWvs6kOijqST6FVGirWs2EZ12aAAwU",
+            authDomain: "lyko-lake.firebaseapp.com",
+            projectId: "lyko-lake",
+            storageBucket: "lyko-lake.firebasestorage.app",
+            messagingSenderId: "685592614306",
+            appId: "1:685592614306:web:b6a8f6f18407f9c0154efb",
+            measurementId: "G-QN0H7E9NEQ"
+        };
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
