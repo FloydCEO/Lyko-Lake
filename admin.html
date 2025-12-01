@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Admin – Lyko Lake</title>
 <style>
 :root{
@@ -12,55 +13,95 @@
 }
 *{margin:0;padding:0;box-sizing:border-box;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;}
 body{background:linear-gradient(135deg,var(--bg) 0%,#1a6b6b 50%,#0f3d3d 100%);color:#fff;min-height:100vh;padding:30px;}
-a.logo{font-size:1.8em;font-weight:bold;color:var(--accent);text-decoration:none;display:flex;align-items:center;gap:10px}
-h1{font-size:2.5em;margin:20px 0 10px}
-table{width:100%;border-collapse:collapse;margin-top:20px}
-th,td{padding:12px;text-align:left;border-bottom:1px solid rgba(255,255,255,.1)}
-th{color:var(--accent);font-weight:600}
-tr:hover{background:rgba(255,255,255,.05)}
-.avatar{width:40px;height:40px;border-radius:50%;object-fit:cover;background:var(--accent)}
-.rank{display:inline-block;padding:4px 10px;border-radius:999px;font-size:.75em;font-weight:600;margin-left:8px;position:relative}
-.rank.ceo{background:var(--ceo);box-shadow:0 0 10px var(--ceo);animation:vibe .8s infinite alternate}
-.rank.admin{background:var(--admin)}
-.rank:hover .info-box{opacity:1;visibility:visible}
-.info-box{position:absolute;top:-40px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,.9);color:#fff;padding:6px 10px;border-radius:6px;font-size:.75em;white-space:nowrap;opacity:0;visibility:hidden;transition:opacity .2s;pointer-events:none}
-button{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.3);color:#fff;padding:6px 12px;border-radius:6px;cursor:pointer;margin:0 2px;font-size:.85em}
-button:hover{background:rgba(255,255,255,.2)}
-button:disabled{opacity:.4;cursor:not-allowed}
-.modal{position:fixed;inset:0;background:rgba(0,0,0,.7);display:flex;align-items:center;justify-content:center;z-index:1000}
-.modal-content{background:#0a4d4d;border:2px solid var(--accent);border-radius:15px;padding:25px;width:90%;max-width:400px}
-.modal h3{margin-bottom:15px}
-.modal input,.modal select,.modal textarea{width:100%;padding:8px;margin:6px 0;border-radius:6px;border:1px solid var(--accent);background:rgba(255,255,255,.05);color:#fff}
-.modal-actions{display:flex;gap:10px;justify-content:flex-end;margin-top:15px}
-.hidden{display:none}
-@keyframes vibe{to{transform:scale(1.05)}}
+nav{background:rgba(10,77,77,.95);backdrop-filter:blur(10px);padding:20px 40px;display:flex;justify-content:space-between;align-items:center;
+    border-radius:15px;margin-bottom:30px;box-shadow:0 4px 20px rgba(0,0,0,.3);border:2px solid rgba(34,197,164,.3);}
+.logo{font-size:1.8em;font-weight:bold;color:var(--accent);text-decoration:none;display:flex;align-items:center;gap:10px;transition:transform .3s ease;}
+.logo:hover{transform:scale(1.05);}
+h1{font-size:2.5em;margin:20px 0 10px;background:linear-gradient(135deg,var(--accent) 0%,#4dd4b8 100%);-webkit-background-clip:text;
+   -webkit-text-fill-color:transparent;background-clip:text;}
+.user-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:20px;margin-top:20px;}
+.user-card{background:rgba(255,255,255,.05);border:2px solid rgba(34,197,164,.3);border-radius:15px;padding:20px;
+          backdrop-filter:blur(10px);transition:all .3s ease;cursor:pointer;position:relative;}
+.user-card:hover{transform:translateY(-5px);box-shadow:0 10px 30px rgba(34,197,164,.4);border-color:var(--accent);}
+.user-header{display:flex;align-items:center;gap:15px;margin-bottom:15px;}
+.user-avatar{width:60px;height:60px;border-radius:50%;overflow:hidden;background:linear-gradient(135deg,var(--accent) 0%,#0a8f7a 100%);}
+.user-avatar img{width:100%;height:100%;object-fit:cover;}
+.user-info{flex:1;}
+.user-name{font-size:1.3em;font-weight:bold;color:var(--accent);display:flex;align-items:center;gap:8px;}
+.user-username{color:rgba(255,255,255,.6);font-size:.9em;}
+.user-uid{color:rgba(255,255,255,.5);font-size:.85em;}
+.rank{display:inline-block;padding:4px 10px;border-radius:999px;font-size:.75em;font-weight:600;position:relative;}
+.rank.CEO{background:var(--ceo);box-shadow:0 0 10px var(--ceo);animation:vibe .8s infinite alternate;}
+.rank.Admin{background:var(--admin);}
+.rank:hover .rank-tooltip{opacity:1;visibility:visible;}
+.rank-tooltip{position:absolute;bottom:calc(100% + 10px);left:50%;transform:translateX(-50%);background:rgba(0,0,0,.95);color:#fff;
+             padding:8px 12px;border-radius:8px;font-size:.9em;white-space:nowrap;opacity:0;visibility:hidden;transition:opacity .2s;
+             pointer-events:none;border:2px solid var(--accent);z-index:1000;}
+.user-actions{display:flex;gap:8px;flex-wrap:wrap;}
+.action-btn{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.3);color:#fff;padding:8px 16px;border-radius:8px;
+           cursor:pointer;font-size:.9em;transition:all .3s ease;font-weight:600;}
+.action-btn:hover:not(:disabled){background:rgba(255,255,255,.2);transform:translateY(-2px);}
+.action-btn:disabled{opacity:.4;cursor:not-allowed;}
+.action-btn.ban{border-color:rgba(255,59,48,.5);}
+.action-btn.ban:hover:not(:disabled){background:rgba(255,59,48,.2);color:#ff3b30;}
+.action-btn.mute{border-color:rgba(255,204,0,.5);}
+.action-btn.mute:hover:not(:disabled){background:rgba(255,204,0,.2);color:#ffcc00;}
+.action-btn.rename{border-color:rgba(52,199,89,.5);}
+.action-btn.rename:hover:not(:disabled){background:rgba(52,199,89,.2);color:#34c759;}
+.action-btn.rank{border-color:rgba(175,82,222,.5);}
+.action-btn.rank:hover:not(:disabled){background:rgba(175,82,222,.2);color:#af52de;}
+.action-btn.unban{border-color:rgba(52,199,89,.5);}
+.action-btn.unban:hover:not(:disabled){background:rgba(52,199,89,.2);color:#34c759;}
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.8);display:flex;align-items:center;justify-content:center;z-index:2000;backdrop-filter:blur(5px);}
+.modal-content{background:var(--bg);border:2px solid var(--accent);border-radius:20px;padding:30px;width:90%;max-width:500px;
+              box-shadow:0 15px 50px rgba(0,0,0,.5);backdrop-filter:blur(10px);}
+.modal h3{margin-bottom:20px;font-size:1.8em;color:var(--accent);}
+.modal label{display:block;margin:15px 0 8px;color:rgba(255,255,255,.9);font-weight:600;}
+.modal input,.modal select,.modal textarea{width:100%;padding:12px;margin:6px 0;border-radius:10px;border:2px solid rgba(34,197,164,.3);
+                                          background:rgba(255,255,255,.05);color:#fff;font-size:1em;transition:all .3s ease;}
+.modal input:focus,.modal select:focus,.modal textarea:focus{outline:none;border-color:var(--accent);background:rgba(34,197,164,.1);}
+.modal textarea{resize:vertical;min-height:80px;font-family:inherit;}
+.modal-actions{display:flex;gap:15px;justify-content:flex-end;margin-top:25px;}
+.modal-btn{padding:12px 25px;border-radius:10px;border:none;cursor:pointer;font-weight:600;font-size:1em;transition:all .3s ease;}
+.modal-btn.cancel{background:rgba(255,255,255,.1);color:rgba(255,255,255,.7);}
+.modal-btn.cancel:hover{background:rgba(255,255,255,.2);}
+.modal-btn.confirm{background:var(--accent);color:var(--bg);}
+.modal-btn.confirm:hover{background:#4dd4b8;transform:translateY(-2px);box-shadow:0 5px 15px rgba(34,197,164,.4);}
+.hidden{display:none;}
+.temp-options{margin-top:10px;display:flex;gap:10px;align-items:center;}
+.temp-options input{flex:1;}
+.temp-options select{flex:1;}
+.status-badge{display:inline-block;padding:4px 10px;border-radius:999px;font-size:.75em;font-weight:600;margin-left:10px;}
+.status-badge.banned{background:rgba(255,59,48,.3);color:#ff3b30;border:1px solid #ff3b30;}
+.status-badge.muted{background:rgba(255,204,0,.3);color:#ffcc00;border:1px solid #ffcc00;}
+.loading{text-align:center;padding:100px 20px;font-size:1.5em;color:rgba(255,255,255,.7);}
+@keyframes vibe{to{transform:scale(1.05);}}
+@media(max-width:768px){
+  body{padding:15px;}
+  nav{padding:15px;flex-direction:column;gap:15px;}
+  .user-grid{grid-template-columns:1fr;}
+  .modal-content{padding:20px;}
+}
 </style>
 </head>
 <body>
-<a href="/" class="logo">🌊 Lyko Lake</a>
-<h1>Admin Panel</h1>
+<nav>
+  <a href="/" class="logo">🌊 Lyko Lake</a>
+  <h1>Admin Panel</h1>
+</nav>
 
-<table id="userTable">
-  <thead>
-    <tr>
-      <th>Avatar</th>
-      <th>User</th>
-      <th>UID</th>
-      <th>Rank</th>
-      <th>Actions</th>
-    </tr>
-  </thead>
-  <tbody></tbody>
-</table>
+<div class="loading" id="loading">Loading users...</div>
 
-<!-- generic modal -->
+<div id="userGrid" class="user-grid hidden"></div>
+
+<!-- MODAL -->
 <div id="modal" class="modal hidden">
   <div class="modal-content">
-    <h3 id="modalTitle"></h3>
+    <h3 id="modalTitle">Action</h3>
     <div id="modalBody"></div>
     <div class="modal-actions">
-      <button id="modalCancel">Cancel</button>
-      <button id="modalConfirm">Confirm</button>
+      <button class="modal-btn cancel" id="modalCancel">Cancel</button>
+      <button class="modal-btn confirm" id="modalConfirm">Confirm</button>
     </div>
   </div>
 </div>
@@ -68,7 +109,7 @@ button:disabled{opacity:.4;cursor:not-allowed}
 <script type="module">
 import {initializeApp} from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
 import {getAuth,onAuthStateChanged} from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
-import {getFirestore,collection,getDocs,doc,updateDoc,setDoc,serverTimestamp,deleteDoc} from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+import {getFirestore,collection,getDocs,doc,getDoc,updateDoc,setDoc,deleteDoc,serverTimestamp} from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
 
 const cfg={
   apiKey:"AIzaSyDUBeWvs6kOijqST6FVGirWs2EZ12aAAwU",
@@ -85,80 +126,124 @@ const db=getFirestore(app);
 const $=q=>document.querySelector(q);
 const modal=$('#modal'),modalTitle=$('#modalTitle'),modalBody=$('#modalBody'),
       modalCancel=$('#modalCancel'),modalConfirm=$('#modalConfirm');
+const loading=$('#loading'),userGrid=$('#userGrid');
 
-let currentRow;
+let currentAction={};
+let myRank='Member';
+let allUsers=[];
+let allBans=[];
 
-/* ----------  UTILS  ---------- */
-const hide=()=>modal.classList.add('hidden');
-const show=(title,body)=>{
+/* ----------  HIDE/SHOW MODAL  ---------- */
+const hideModal=()=>modal.classList.add('hidden');
+const showModal=(title,body)=>{
   modalTitle.textContent=title;
   modalBody.innerHTML=body;
   modal.classList.remove('hidden');
 };
-modalCancel.onclick=hide;
-modalConfirm.onclick=()=>{hide(); currentRow.confirm?.();};
+modalCancel.onclick=hideModal;
+modalConfirm.onclick=()=>{hideModal();currentAction.confirm?.();};
 
-/* ----------  PERM CHECK  ---------- */
+/* ----------  PERMISSION CHECK  ---------- */
 onAuthStateChanged(auth,async user=>{
-  if(!user) return location.href='/auth.html';
+  if(!user){location.href='/auth.html';return;}
   const me=(await getDoc(doc(db,'users',user.uid))).data();
-  if(me?.rank!=='CEO') location.href='/404.html';
-  else loadTable();
+  myRank=me?.rank||'Member';
+  if(myRank==='Member'){location.href='/404.html';return;}
+  loadUsers();
 });
 
-/* ----------  LOAD TABLE  ---------- */
-async function loadTable(){
-  const snap=await getDocs(collection(db,'users'));
-  const frag=document.createDocumentFragment();
-  snap.forEach(d=>{
-    const u=d.data(),tr=document.createElement('tr');
-    tr.dataset.uid=d.id;
-    tr.innerHTML=`
-      <td><img class="avatar" src="${u.avatar||'https://via.placeholder.com/40'}" alt=""></td>
-      <td><b>${u.displayName}</b><span class="rank ${u.rank||''}">${u.rank||''}
-        <span class="info-box">${u.rank==='CEO'?'CEO of Lyko Lake':'This Player is an Admin'}</span>
-      </span></td>
-      <td>#${u.uid}</td>
-      <td>${u.rank||'Member'}</td>
-      <td class="actions"></td>`;
-    const actions=tr.querySelector('.actions');
-    if(u.rank==='CEO') actions.innerHTML='<i>immutable</i>';
-    else{
-      actions.innerHTML=`
-        <button data-act="ban">Ban</button>
-        <button data-act="mute">Mute</button>
-        <button data-act="rename">Rename</button>
-        <button data-act="rank">Rank</button>`;
-    }
-    frag.appendChild(tr);
-  });
-  $('#userTable tbody').appendChild(frag);
-  $('#userTable').addEventListener('click',handleAction);
-}
-
-/* ----------  ACTIONS  ---------- */
-async function handleAction(e){
-  const btn=e.target.closest('button'); if(!btn) return;
-  const uid=btn.closest('tr').dataset.uid;
-  const user=(await getDoc(doc(db,'users',uid))).data();
-  currentRow={uid,user,el:btn.closest('tr')};
-
-  switch(btn.dataset.act){
-    case 'ban': return banUser(user);
-    case 'mute': return muteUser(user);
-    case 'rename': return renameUser(user);
-    case 'rank': return changeRank(user);
+/* ----------  LOAD ALL USERS + BANS  ---------- */
+async function loadUsers(){
+  try{
+    const usersSnap=await getDocs(collection(db,'users'));
+    const bansSnap=await getDocs(collection(db,'bans'));
+    allBans=[];
+    bansSnap.forEach(d=>allBans.push({uid:d.id,...d.data()}));
+    allUsers=[];
+    usersSnap.forEach(d=>allUsers.push({id:d.id,...d.data()}));
+    allUsers.sort((a,b)=>(a.uid||0)-(b.uid||0));
+    renderUsers();
+  }catch(e){
+    console.error(e);
+    loading.textContent='Error loading users.';
   }
 }
 
-/* ---- Ban ---- */
+function renderUsers(){
+  userGrid.innerHTML='';
+  allUsers.forEach(u=>{
+    const card=document.createElement('div');
+    card.className='user-card';
+    const isBanned=allBans.find(b=>b.uid===u.id);
+    const isMuted=u.muted||false;
+    let statusHTML='';
+    if(isBanned)statusHTML='<span class="status-badge banned">BANNED</span>';
+    else if(isMuted)statusHTML='<span class="status-badge muted">MUTED</span>';
+    let rankHTML='';
+    if(u.rank){
+      const tooltip=u.rank==='CEO'?'CEO of Lyko Lake':'This Player is an Admin';
+      rankHTML=`<span class="rank ${u.rank}">${u.rank}<span class="rank-tooltip">${tooltip}</span></span>`;
+    }
+    card.innerHTML=`
+      <div class="user-header">
+        <div class="user-avatar"><img src="${u.avatar||'https://via.placeholder.com/60'}" alt=""></div>
+        <div class="user-info">
+          <div class="user-name">${u.displayName}${rankHTML}${statusHTML}</div>
+          <div class="user-username">@${u.username}</div>
+          <div class="user-uid">UID: #${u.uid}</div>
+        </div>
+      </div>
+      <div class="user-actions" data-uid="${u.id}" data-rank="${u.rank||'Member'}"></div>
+    `;
+    const actions=card.querySelector('.user-actions');
+    if(u.rank==='CEO'){
+      actions.innerHTML='<i style="color:rgba(255,255,255,.5)">CEO – Immutable</i>';
+    }else{
+      const canModify=(myRank==='CEO')||(myRank==='Admin'&&u.rank!=='Admin');
+      if(isBanned){
+        actions.innerHTML=`<button class="action-btn unban" data-action="unban" ${canModify?'':'disabled'}>Unban</button>`;
+      }else{
+        actions.innerHTML=`
+          <button class="action-btn ban" data-action="ban" ${canModify?'':'disabled'}>Ban</button>
+          <button class="action-btn mute" data-action="mute" ${canModify?'':'disabled'}>Mute</button>
+          <button class="action-btn rename" data-action="rename" ${canModify?'':'disabled'}>Rename</button>
+        `;
+      }
+      if(myRank==='CEO'){
+        actions.innerHTML+=`<button class="action-btn rank" data-action="rank">Rank</button>`;
+      }
+    }
+    userGrid.appendChild(card);
+  });
+  loading.classList.add('hidden');
+  userGrid.classList.remove('hidden');
+}
+
+/* ----------  ACTION HANDLERS  ---------- */
+userGrid.addEventListener('click',async e=>{
+  const btn=e.target.closest('button');
+  if(!btn)return;
+  const uid=btn.closest('.user-actions').dataset.uid;
+  const user=allUsers.find(u=>u.id===uid);
+  if(!user)return;
+  currentAction={uid,user};
+  const action=btn.dataset.action;
+  if(action==='ban')banUser(user);
+  else if(action==='unban')unbanUser(user);
+  else if(action==='mute')muteUser(user);
+  else if(action==='rename')renameUser(user);
+  else if(action==='rank')changeRank(user);
+});
+
+/* ---- BAN ---- */
 function banUser(u){
   const body=`
+    <label>Ban Type</label>
     <select id="banType">
       <option value="perm">Permanent</option>
       <option value="temp">Temporary</option>
     </select>
-    <div id="tempOpts" class="hidden">
+    <div id="tempOpts" class="temp-options hidden">
       <input id="banVal" type="number" min="1" value="1">
       <select id="banUnit">
         <option value="s">Seconds</option>
@@ -168,61 +253,79 @@ function banUser(u){
         <option value="y">Years</option>
       </select>
     </div>
-    <textarea id="banReason" placeholder="Reason (visible to user)" rows="2"></textarea>`;
-  show('Ban user',body);
+    <label>Reason (visible to user)</label>
+    <textarea id="banReason" placeholder="Enter ban reason..."></textarea>
+  `;
+  showModal('Ban User',body);
   $('#banType').onchange=e=>{
     $('#tempOpts').classList.toggle('hidden',e.target.value==='perm');
   };
-  currentRow.confirm=async()=>{
+  currentAction.confirm=async()=>{
     const type=$('#banType').value,reason=$('#banReason').value.trim()||'No reason given';
     let until=null;
     if(type==='temp'){
-      const n=Number($('#banVal').value),u=$('#banUnit').value;
-      const ms={s:1000,m:60000,h:3600000,d:86400000,y:31536000000}[u];
-      until=Date.now()+n*ms;
+      const n=Number($('#banVal').value),unit=$('#banUnit').value;
+      const ms={s:1000,m:60000,h:3600000,d:86400000,y:31536000000}[unit];
+      until=new Date(Date.now()+n*ms);
     }
-    await setDoc(doc(db,'bans',currentRow.uid),{until,reason,by:auth.currentUser.uid,at:serverTimestamp()});
-    alert('User banned');
+    await setDoc(doc(db,'bans',currentAction.uid),{until,reason,by:auth.currentUser.uid,at:serverTimestamp()});
+    alert(`${u.displayName} banned.`);
+    loadUsers();
   };
 }
 
-/* ---- Mute ---- */
+/* ---- UNBAN ---- */
+function unbanUser(u){
+  showModal('Unban User',`<p>Unban <strong>${u.displayName}</strong>?</p>`);
+  currentAction.confirm=async()=>{
+    await deleteDoc(doc(db,'bans',currentAction.uid));
+    alert(`${u.displayName} unbanned.`);
+    loadUsers();
+  };
+}
+
+/* ---- MUTE ---- */
 function muteUser(u){
-  const body=`<textarea id="muteReason" placeholder="Reason (internal)" rows="2"></textarea>`;
-  show('Mute user',body);
-  currentRow.confirm=async()=>{
-    await updateDoc(doc(db,'users',currentRow.uid),{muted:true});
-    alert('User muted');
+  const body=`<label>Reason (internal)</label><textarea id="muteReason" placeholder="Enter mute reason..."></textarea>`;
+  showModal('Mute User',body);
+  currentAction.confirm=async()=>{
+    await updateDoc(doc(db,'users',currentAction.uid),{muted:true});
+    alert(`${u.displayName} muted.`);
+    loadUsers();
   };
 }
 
-/* ---- Rename ---- */
+/* ---- RENAME ---- */
 function renameUser(u){
-  const body=`New display name:<br><input id="newName" value="${u.displayName}" maxlength="30">`;
-  show('Rename user',body);
-  currentRow.confirm=async()=>{
+  const body=`<label>New Display Name</label><input id="newName" value="${u.displayName}" maxlength="30">`;
+  showModal('Rename User',body);
+  currentAction.confirm=async()=>{
     const name=$('#newName').value.trim();
-    if(!name) return alert('Name required');
-    await updateDoc(doc(db,'users',currentRow.uid),{displayName:name});
-    currentRow.el.querySelector('td:nth-child(2) b').textContent=name;
+    if(!name){alert('Name required');return;}
+    await updateDoc(doc(db,'users',currentAction.uid),{displayName:name});
+    alert(`${u.displayName} renamed to ${name}.`);
+    loadUsers();
   };
 }
 
-/* ---- Rank ---- */
+/* ---- CHANGE RANK ---- */
 function changeRank(u){
   const body=`
+    <label>Rank</label>
     <select id="rankSel">
       <option value="Member">Member</option>
       <option value="Admin">Admin</option>
-    </select>`;
-  show('Change rank',body);
+      ${myRank==='CEO'?'<option value="CEO">CEO</option>':''}
+    </select>
+  `;
+  showModal('Change Rank',body);
   $('#rankSel').value=u.rank||'Member';
-  currentRow.confirm=async()=>{
+  currentAction.confirm=async()=>{
     const rank=$('#rankSel').value;
-    await updateDoc(doc(db,'users',currentRow.uid),{rank});
-    const badge=currentRow.el.querySelector('.rank');
-    badge.textContent=rank;
-    badge.className='rank '+rank;
+    if(rank==='Member')await updateDoc(doc(db,'users',currentAction.uid),{rank:deleteDoc});
+    else await updateDoc(doc(db,'users',currentAction.uid),{rank});
+    alert(`${u.displayName} is now ${rank}.`);
+    loadUsers();
   };
 }
 </script>
