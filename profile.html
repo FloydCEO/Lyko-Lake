@@ -5,47 +5,59 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Profile – Lyko Lake</title>
     <style>
-        /* ----------  RESET  ---------- */
+        /* --------------  RESET  -------------- */
         *{margin:0;padding:0;box-sizing:border-box}
         body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Oxygen,Ubuntu,Cantarell,"Helvetica Neue",sans-serif;
-             background:linear-gradient(135deg,#0a4d4d 0%,#1a6b6b 50%,#0f3d3d 100%);
-             color:#fff;min-height:100vh}
+             background:linear-gradient(135deg,#0a4d4d 0%,#1a6b6b 50%,#0f3d3d 100%);color:#fff;min-height:100vh}
         .hidden{display:none !important}
 
-        /* ----------  NAV  ---------- */
+        /* --------------  NAV  -------------- */
         nav{background:rgba(10,77,77,.95);backdrop-filter:blur(10px);padding:20px 40px;display:flex;justify-content:space-between;align-items:center;
             position:sticky;top:0;z-index:1000;box-shadow:0 4px 20px rgba(0,0,0,.3);border-bottom:2px solid rgba(34,197,164,.3)}
         .logo{font-size:1.8em;font-weight:bold;color:#22c5a4;text-decoration:none;display:flex;align-items:center;gap:10px}
+
         .auth-button{background:rgba(34,197,164,.2);border:2px solid #22c5a4;color:#fff;padding:10px 30px;border-radius:8px;text-decoration:none;font-weight:600;transition:all .3s ease}
         .auth-button:hover{background:#22c5a4;color:#0a4d4d;transform:translateY(-2px)}
 
-        /* ----------  USER MENU  ---------- */
+        /* --------------  USER MENU  -------------- */
         .user-menu{position:relative}
-        .user-button{background:rgba(34,197,164,.2);border:2px solid #22c5a4;color:#fff;padding:10px 20px;border-radius:8px;cursor:pointer;font-weight:600;display:flex;align-items:center;gap:10px}
+        .user-button{background:rgba(34,197,164,.2);border:2px solid #22c5a4;color:#fff;padding:10px 20px;border-radius:8px;cursor:pointer;font-weight:600;
+                    display:flex;align-items:center;gap:10px;transition:all .3s ease}
         .user-avatar{width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,#22c5a4 0%,#0a8f7a 100%);overflow:hidden}
         .user-avatar img{width:100%;height:100%;object-fit:cover}
-        .dropdown{position:absolute;top:calc(100% + 10px);right:0;background:rgba(10,77,77,.98);border:2px solid rgba(34,197,164,.3);border-radius:12px;min-width:200px;
-                  opacity:0;visibility:hidden;transform:translateY(-10px);transition:all .3s ease;box-shadow:0 10px 30px rgba(0,0,0,.5);backdrop-filter:blur(10px)}
+        .dropdown{position:absolute;top:calc(100% + 10px);right:0;background:rgba(10,77,77,.98);border:2px solid rgba(34,197,164,.3);
+                 border-radius:12px;min-width:200px;opacity:0;visibility:hidden;transform:translateY(-10px);transition:all .3s ease;
+                 box-shadow:0 10px 30px rgba(0,0,0,.5);backdrop-filter:blur(10px)}
         .dropdown.show{opacity:1;visibility:visible;transform:translateY(0)}
-        .dropdown-item{padding:15px 20px;color:rgba(255,255,255,.9);text-decoration:none;display:flex;align-items:center;gap:12px;cursor:pointer;border-bottom:1px solid rgba(34,197,164,.1)}
+        .dropdown-item{padding:15px 20px;color:rgba(255,255,255,.9);text-decoration:none;display:flex;align-items:center;gap:12px;cursor:pointer;
+                      border-bottom:1px solid rgba(34,197,164,.1)}
         .dropdown-item:last-child{border-bottom:none}
         .dropdown-item:hover{background:rgba(34,197,164,.2);color:#22c5a4}
         .dropdown-item.logout{color:#ff3b30}
         .dropdown-item.logout:hover{background:rgba(255,59,48,.2)}
 
-        /* ----------  PROFILE  ---------- */
+        /* --------------  PROFILE  -------------- */
         .container{max-width:900px;margin:0 auto;padding:40px 20px}
         .loading{text-align:center;padding:100px 20px;font-size:1.2em;color:rgba(255,255,255,.7)}
-        .page-title{text-align:center;margin-bottom:40px;position:relative}
+        .page-title{text-align:center;margin-bottom:40px;position:relative;cursor:help}
         .page-title h1{font-size:4em;font-weight:bold;background:linear-gradient(135deg,#22c5a4 0%,#4dd4b8 100%);-webkit-background-clip:text;
-                        -webkit-text-fill-color:transparent;background-clip:text;display:inline-block;animation:fadeIn .6s ease-out}
-        .profile-header{background:rgba(255,255,255,.05);border:2px solid rgba(34,197,164,.3);border-radius:20px;padding:40px;margin-bottom:30px;
-                       backdrop-filter:blur(10px);text-align:center;position:relative}
-        .profile-avatar{width:150px;height:150px;border-radius:50%;background:linear-gradient(135deg,#22c5a4 0%,#0a8f7a 100%);margin:0 auto 20px;
-                       box-shadow:0 10px 30px rgba(34,197,164,.4);overflow:hidden;position:relative;font-size:4em;display:flex;align-items:center;justify-content:center}
+                      -webkit-text-fill-color:transparent;background-clip:text;display:inline-block;animation:fadeIn .6s ease-out}
+        .hover-tooltip{position:fixed;background:rgba(10,77,77,.98);border:2px solid #22c5a4;border-radius:12px;padding:15px 20px;
+                      pointer-events:none;opacity:0;transition:opacity .2s;z-index:10000;backdrop-filter:blur(10px);
+                      box-shadow:0 10px 30px rgba(0,0,0,.5);min-width:200px}
+        .hover-tooltip.show{opacity:1}
+        .tooltip-line{display:flex;align-items:center;gap:8px;margin-bottom:8px;color:rgba(255,255,255,.9);font-size:.95em}
+        .tooltip-line:last-child{margin-bottom:0}
+        .tooltip-label{color:#22c5a4;font-weight:600}
+
+        .profile-header{background:rgba(255,255,255,.05);border:2px solid rgba(34,197,164,.3);border-radius:20px;padding:40px;
+                       margin-bottom:30px;backdrop-filter:blur(10px);text-align:center;position:relative}
+        .profile-avatar{width:150px;height:150px;border-radius:50%;background:linear-gradient(135deg,#22c5a4 0%,#0a8f7a 100%);
+                       margin:0 auto 20px;box-shadow:0 10px 30px rgba(34,197,164,.4);overflow:hidden;position:relative;
+                       font-size:4em;display:flex;align-items:center;justify-content:center}
         .profile-avatar img{width:100%;height:100%;object-fit:cover}
         .profile-avatar.editable{cursor:pointer}
-        .profile-avatar.editable:hover::after{content:"📷 Change Profile";position:absolute;inset:0;background:rgba(0,0,0,.7);
+        .profile-avatar.editable:hover::after{content:"📷 Change Photo";position:absolute;inset:0;background:rgba(0,0,0,.7);
                                            display:flex;align-items:center;justify-content:center;font-size:.8em;color:#fff;border-radius:50%}
         .profile-display-name{font-size:2.5em;font-weight:bold;margin-bottom:10px;background:linear-gradient(135deg,#22c5a4 0%,#4dd4b8 100%);
                              -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
@@ -73,7 +85,7 @@
                      padding:8px 16px;border-radius:8px;cursor:pointer;font-weight:600;transition:all .3s ease}
         .cancel-button:hover{background:rgba(255,255,255,.2)}
 
-        /* ----------  MODAL  ---------- */
+        /* --------------  MODAL  -------------- */
         .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);display:flex;align-items:center;justify-content:center;
                       z-index:10000;backdrop-filter:blur(5px)}
         .modal{background:rgba(10,77,77,.95);border:2px solid rgba(34,197,164,.3);border-radius:20px;padding:30px;
@@ -100,16 +112,10 @@
         .modal-message.error{background:rgba(255,59,48,.2);border:2px solid rgba(255,59,48,.5);color:#ff3b30}
         .modal-message.success{background:rgba(52,199,89,.2);border:2px solid rgba(52,199,89,.5);color:#34c759}
 
-        /* ----------  CUSTOM TOOLTIP  ---------- */
-        .custom-tooltip{position:fixed;background:rgba(10,77,77,.98);border:2px solid #22c5a4;border-radius:8px;
-                       padding:8px 12px;color:#fff;font-size:.85em;pointer-events:none;opacity:0;transition:opacity .2s;
-                       z-index:10001;backdrop-filter:blur(10px);box-shadow:0 5px 15px rgba(0,0,0,.3)}
-        .custom-tooltip.show{opacity:1}
-
-        /* ----------  ANIMATIONS  ---------- */
+        /* --------------  ANIMATIONS  -------------- */
         @keyframes fadeIn{from{opacity:0;transform:translateY(30px)}to{opacity:1;transform:translateY(0)}}
 
-        /* ----------  MOBILE  ---------- */
+        /* --------------  MOBILE  -------------- */
         @media(max-width:768px){.profile-header{padding:30px 20px}.page-title h1{font-size:2.5em}.profile-display-name{font-size:2em}.profile-avatar{width:120px;height:120px;font-size:3em}}
     </style>
 </head>
@@ -121,7 +127,7 @@
 
     <div class="user-menu hidden" id="userMenu">
         <button class="user-button" id="userButton">
-            <div class="user-avatar" id="navUserAvatar"><img id="navAvatarImg" src="" alt="A"></div>
+            <div class="user-avatar"><img id="navAvatarImg" src="" alt="A"></div>
             <span id="navDisplayName">Loading…</span>
         </button>
         <div class="dropdown" id="dropdown">
@@ -140,11 +146,12 @@
             <h1 id="titleName">Loading…</h1>
         </div>
 
+        <!--  hover tooltip  -->
         <div class="hover-tooltip" id="hoverTooltip">
-            <div class="tooltip-line"><span class="tooltip-label">@</span><span id="tooltipUsername">username</span><span class="tooltip-label">UID:</span><span id="tooltipUid">#0</span></div>
+            <div class="tooltip-line"><span class="tooltip-label">@</span><span id="tooltipUsername">username</span></div>
+            <div class="tooltip-line"><span class="tooltip-label">UID:</span><span id="tooltipUid">#0</span></div>
             <div class="tooltip-line"><span class="tooltip-label">JOINED:</span><span id="tooltipJoined">Date</span></div>
         </div>
-        <div class="custom-tooltip" id="customTooltip">Change Profile</div>
 
         <div class="profile-header">
             <div class="profile-avatar" id="profileAvatar"><img id="profileAvatarImg" src="" alt="Profile"></div>
@@ -262,8 +269,6 @@ const previewImage = document.getElementById('previewImage');
 const uploadButton = document.getElementById('uploadButton');
 const modalMessage = document.getElementById('modalMessage');
 
-const customTooltip = document.getElementById('customTooltip');
-
 /*  ------------------------  STATE  ------------------------  */
 let currentUserId = null; // owner of the profile we are viewing
 let currentUsername = null;
@@ -295,10 +300,6 @@ function openUploadModal() {
 function closeUploadModal() {
     uploadModal.classList.add('hidden');
     resetUploadModal();
-}
-function updateTooltipPosition(e) {
-    customTooltip.style.left = (e.clientX + 15) + 'px';
-    customTooltip.style.top = (e.clientY + 15) + 'px';
 }
 
 /*  ------------------------  NAV + AUTH  ------------------------  */
@@ -366,11 +367,14 @@ async function loadProfile(username) {
 function renderProfile(data) {
     document.title = `${data.displayName} (@${data.username}) – Lyko Lake`;
     titleName.textContent = data.displayName;
+
+    /*  --------  FILL TOOLTIP  --------  */
     tooltipUsername.textContent = data.username;
     tooltipUid.textContent = `#${data.uid}`;
     const join = data.createdAt?.toDate ? data.createdAt.toDate() : new Date(data.createdAt);
     tooltipJoined.textContent = join.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
 
+    /*  --------  FILL PAGE  --------  */
     document.getElementById('displayName').textContent = data.displayName;
     document.getElementById('username').textContent = `@${data.username}`;
     document.getElementById('uid').textContent = `User #${data.uid}`;
@@ -415,14 +419,17 @@ bioText.addEventListener('click', () => {
 });
 bioText.addEventListener('mouseenter', e => {
     if (!isOwnProfile) return;
-    customTooltip.textContent = 'Change Bio';
-    customTooltip.classList.add('show');
-    updateTooltipPosition(e);
+    hoverTooltip.classList.add('show');
+    hoverTooltip.style.left = (e.clientX + 15) + 'px';
+    hoverTooltip.style.top = (e.clientY + 15) + 'px';
 });
 bioText.addEventListener('mousemove', e => {
-    if (isOwnProfile) updateTooltipPosition(e);
+    if (isOwnProfile) {
+        hoverTooltip.style.left = (e.clientX + 15) + 'px';
+        hoverTooltip.style.top = (e.clientY + 15) + 'px';
+    }
 });
-bioText.addEventListener('mouseleave', () => customTooltip.classList.remove('show'));
+bioText.addEventListener('mouseleave', () => hoverTooltip.classList.remove('show'));
 
 cancelBioButton.addEventListener('click', () => {
     bioEdit.classList.add('hidden');
@@ -447,17 +454,6 @@ profileAvatar.addEventListener('click', () => {
     if (!isOwnProfile) return;
     openUploadModal();
 });
-profileAvatar.addEventListener('mouseenter', e => {
-    if (!isOwnProfile) return;
-    customTooltip.textContent = 'Change Profile';
-    customTooltip.classList.add('show');
-    updateTooltipPosition(e);
-});
-profileAvatar.addEventListener('mousemove', e => {
-    if (isOwnProfile) updateTooltipPosition(e);
-});
-profileAvatar.addEventListener('mouseleave', () => customTooltip.classList.remove('show'));
-
 uploadArea.addEventListener('click', () => fileInput.click());
 fileInput.addEventListener('change', e => {
     if (!e.target.files || !e.target.files[0]) return;
@@ -478,7 +474,6 @@ fileInput.addEventListener('change', e => {
     };
     reader.readAsDataURL(selectedFile);
 });
-
 uploadButton.addEventListener('click', async () => {
     if (!selectedFile) return;
     uploadButton.disabled = true;
@@ -496,7 +491,6 @@ uploadButton.addEventListener('click', async () => {
         uploadButton.textContent = 'Upload';
     }
 });
-
 closeModal.addEventListener('click', closeUploadModal);
 uploadModal.addEventListener('click', e => {
     if (e.target === uploadModal) closeUploadModal();
