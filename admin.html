@@ -19,6 +19,7 @@ h1{font-size:2.5em;margin:20px 0 10px}
 .rank{display:inline-block;padding:4px 10px;border-radius:999px;font-size:.75em;font-weight:600;margin-left:6px;position:relative}
 .rank.ceo{background:var(--ceo);box-shadow:0 0 10px var(--ceo);animation:vibe .8s infinite alternate}
 .rank.admin{background:var(--admin)}
+.rank.banned{background:#ff3b30;box-shadow:0 0 10px #ff3b30;}
 .rank:hover .info-box{opacity:1;visibility:visible}
 .info-box{position:absolute;top:-40px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,.9);color:#fff;padding:6px 10px;border-radius:6px;font-size:.75em;white-space:nowrap;opacity:0;visibility:hidden;transition:opacity .2s;pointer-events:none}
 .actions{margin-top:12px;display:flex;gap:8px;justify-content:center}
@@ -54,9 +55,8 @@ h1{font-size:2.5em;margin:20px 0 10px}
 <script type="module">
 import {initializeApp} from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
 import {getAuth,onAuthStateChanged} from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
-import {getFirestore,collection,getDocs,doc,getDoc,updateDoc,setDoc,serverTimestamp} from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+import {getFirestore,collection,getDocs,doc,getDoc,updateDoc,setDoc,serverTimestamp,deleteDoc} from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
 
-/* ----------  your short-name config  ---------- */
 const cfg={
   apiKey:"AIzaSyDUBeWvs6kOijqST6FVGirWs2EZ12aAAwU",
   authDomain:"lyko-lake.firebaseapp.com",
@@ -69,11 +69,11 @@ const app=initializeApp(cfg);
 const auth=getAuth(app);
 const db=getFirestore(app);
 
-/* ----------  rest of the file unchanged  ---------- */
 const $=q=>document.querySelector(q);
 const usersGrid=$('#usersGrid');
 const modal=$('#modal'),modalTitle=$('#modalTitle'),modalBody=$('#modalBody'),
       modalCancel=$('#modalCancel'),modalConfirm=$('#modalConfirm');
+
 let currentRow;
 const hide=()=>modal.classList.add('hidden');
 const show=(title,body)=>{
@@ -96,14 +96,15 @@ onAuthStateChanged(auth,async user=>{
 async function loadUsers(){
   const snap=await getDocs(collection(db,'users'));
   usersGrid.innerHTML='';
-  snap.forEach(d=>{
-    const u=d.data(),card=document.createElement('div');
+  for(const d of snap.docs){
+    const u=d.data();
+    const ban=await getDoc(doc(db,'bans',d.id));
+    u.banned=ban.exists() && (!ban.data().until || Date.now()<ban.data().until.toMillis());
+    const card=document.createElement('div');
     card.className='user-card';
     card.innerHTML=`
       <img class="avatar" src="${u.avatar||'https://via.placeholder.com/80'}" alt="">
-      <div class="display">${u.displayName}<span class="rank ${u.rank||''}">${u.rank||''}
-        <span class="info-box">${u.rank==='CEO'?'CEO of Lyko Lake':'This Player is an Admin'}</span>
-      </span></div>
+      <div class="display">${u.displayName}${badge(u)}</div>
       <div class="username">@${u.username}</div>
       <div class="uid">User #${u.uid}</div>
       <div class="actions">${actionButtons(u,d.id)}</div>`;
@@ -111,13 +112,20 @@ async function loadUsers(){
       if(e.target.tagName!=='BUTTON')window.open(`/profile.html?u=${u.username}`,'_blank');
     };
     usersGrid.appendChild(card);
-  });
+  }
+}
+
+function badge(u){
+  if(u.banned)return'<span class="rank banned">BANNED<span class="info-box">This user is currently banned</span></span>';
+  if(u.rank==='CEO')return'<span class="rank ceo">CEO<span class="info-box">CEO of Lyko Lake</span></span>';
+  if(u.rank==='Admin')return'<span class="rank admin">ADMIN<span class="info-box">This Player is an Admin</span></span>';
+  return'';
 }
 
 function actionButtons(u,uid){
   if(u.rank==='CEO')return'<i>immutable</i>';
   return`
-    <button onclick="banUser('${uid}')">Ban</button>
+    <button onclick="banUser('${uid}')">${u.banned?'Unban':'Ban'}</button>
     <button onclick="muteUser('${uid}')">Mute</button>
     <button onclick="renameUser('${uid}')">Rename</button>
     <button onclick="rankUser('${uid}')">Rank</button>`;
@@ -126,35 +134,42 @@ function actionButtons(u,uid){
 /* ----------  ACTIONS  ---------- */
 window.banUser=async uid=>{
   const u=(await getDoc(doc(db,'users',uid))).data();
-  const body=`
-    <select id="banType">
-      <option value="perm">Permanent</option>
-      <option value="temp">Temporary</option>
-    </select>
-    <div id="tempOpts" class="hidden">
-      <input id="banVal" type="number" min="1" value="1">
-      <select id="banUnit">
-        <option value="s">Seconds</option>
-        <option value="m">Minutes</option>
-        <option value="h">Hours</option>
-        <option value="d">Days</option>
-        <option value="y">Years</option>
+  const ban=await getDoc(doc(db,'bans',uid));
+  if(ban.exists()){
+    await deleteDoc(doc(db,'bans',uid));
+    alert('User unbanned');
+  }else{
+    const body=`
+      <select id="banType">
+        <option value="perm">Permanent</option>
+        <option value="temp">Temporary</option>
       </select>
-    </div>
-    <textarea id="banReason" placeholder="Reason (visible to user)" rows="2"></textarea>`;
-  show('Ban user',body);
-  $('#banType').onchange=e=>$('#tempOpts').classList.toggle('hidden',e.target.value==='perm');
-  currentRow.confirm=async()=>{
-    const type=$('#banType').value,reason=$('#banReason').value.trim()||'No reason given';
-    let until=null;
-    if(type==='temp'){
-      const n=Number($('#banVal').value),u=$('#banUnit').value;
-      const ms={s:1000,m:60000,h:3600000,d:86400000,y:31536000000}[u];
-      until=Date.now()+n*ms;
-    }
-    await setDoc(doc(db,'bans',uid),{until,reason,by:auth.currentUser.uid,at:serverTimestamp()});
-    alert('User banned');loadUsers();
-  };
+      <div id="tempOpts" class="hidden">
+        <input id="banVal" type="number" min="1" value="1">
+        <select id="banUnit">
+          <option value="s">Seconds</option>
+          <option value="m">Minutes</option>
+          <option value="h">Hours</option>
+          <option value="d">Days</option>
+          <option value="y">Years</option>
+        </select>
+      </div>
+      <textarea id="banReason" placeholder="Reason (visible to user)" rows="2"></textarea>`;
+    show('Ban user',body);
+    $('#banType').onchange=e=>$('#tempOpts').classList.toggle('hidden',e.target.value==='perm');
+    currentRow.confirm=async()=>{
+      const type=$('#banType').value,reason=$('#banReason').value.trim()||'No reason given';
+      let until=null;
+      if(type==='temp'){
+        const n=Number($('#banVal').value),u=$('#banUnit').value;
+        const ms={s:1000,m:60000,h:3600000,d:86400000,y:31536000000}[u];
+        until=Date.now()+n*ms;
+      }
+      await setDoc(doc(db,'bans',uid),{until,reason,by:auth.currentUser.uid,at:serverTimestamp()});
+      alert('User banned');
+    };
+  }
+  loadUsers();
 };
 window.muteUser=async uid=>{
   show('Mute user','<textarea id="muteReason" placeholder="Reason (internal)" rows="2"></textarea>');
@@ -190,3 +205,5 @@ window.rankUser=async uid=>{
   };
 };
 </script>
+</body>
+</html>
