@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Admin – Lyko Lake</title>
+<style>
+:root{
+  --ceo:#ff3b30;
+  --admin:#34c759;
+  --bg:#0a4d4d;
+  --accent:#22c5a4;
+}
+*{margin:0;padding:0;box-sizing:border-box;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;}
+body{background:linear-gradient(135deg,var(--bg) 0%,#1a6b6b 50%,#0f3d3d 100%);color:#fff;min-height:100vh;padding:30px;}
+a.logo{font-size:1.8em;font-weight:bold;color:var(--accent);text-decoration:none;display:flex;align-items:center;gap:10px}
+h1{font-size:2.5em;margin:20px 0 10px}
+table{width:100%;border-collapse:collapse;margin-top:20px}
+th,td{padding:12px;text-align:left;border-bottom:1px solid rgba(255,255,255,.1)}
+th{color:var(--accent);font-weight:600}
+tr:hover{background:rgba(255,255,255,.05)}
+.avatar{width:40px;height:40px;border-radius:50%;object-fit:cover;background:var(--accent)}
+.rank{display:inline-block;padding:4px 10px;border-radius:999px;font-size:.75em;font-weight:600;margin-left:8px}
+.rank.ceo{background:var(--ceo);box-shadow:0 0 10px var(--ceo);animation:vibe .8s infinite alternate}
+.rank.admin{background:var(--admin)}
+@keyframes vibe{to{transform:scale(1.05)}}
+button{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.3);color:#fff;padding:6px 12px;border-radius:6px;cursor:pointer;margin:0 2px;font-size:.85em}
+button:hover{background:rgba(255,255,255,.2)}
+button:disabled{opacity:.4;cursor:not-allowed}
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.7);display:flex;align-items:center;justify-content:center;z-index:1000}
+.modal-content{background:#0a4d4d;border:2px solid var(--accent);border-radius:15px;padding:25px;width:90%;max-width:400px}
+.modal h3{margin-bottom:15px}
+.modal input,.modal select,.modal textarea{width:100%;padding:8px;margin:6px 0;border-radius:6px;border:1px solid var(--accent);background:rgba(255,255,255,.05);color:#fff}
+.modal-actions{display:flex;gap:10px;justify-content:flex-end;margin-top:15px}
+.hidden{display:none}
+</style>
+</head>
+<body>
+<a href="/" class="logo">🌊 Lyko Lake</a>
+<h1>Admin Panel</h1>
+
+<table id="userTable">
+  <thead>
+    <tr>
+      <th>Avatar</th>
+      <th>User</th>
+      <th>UID</th>
+      <th>Rank</th>
+      <th>Actions</th>
+    </tr>
+  </thead>
+  <tbody></tbody>
+</table>
+
+<!-- generic modal -->
+<div id="modal" class="modal hidden">
+  <div class="modal-content">
+    <h3 id="modalTitle"></h3>
+    <div id="modalBody"></div>
+    <div class="modal-actions">
+      <button id="modalCancel">Cancel</button>
+      <button id="modalConfirm">Confirm</button>
+    </div>
+  </div>
+</div>
+
+<script type="module">
+import {initializeApp} from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+import {getAuth,onAuthStateChanged} from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
+import {getFirestore,collection,getDocs,doc,updateDoc,setDoc,serverTimestamp} from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+
+const cfg={
+  apiKey:"AIzaSyDUBeWvs6kOijqST6FVGirWs2EZ12aAAwU",
+  authDomain:"lyko-lake.firebaseapp.com",
+  projectId:"lyko-lake",
+  storageBucket:"lyko-lake.appspot.com",
+  messagingSenderId:"685592614306",
+  appId:"1:685592614306:web:b6a8f6f18407f9c0154efb"
+};
+const app=initializeApp(cfg);
+const auth=getAuth(app);
+const db=getFirestore(app);
+
+const $=q=>document.querySelector(q);
+const modal=$('#modal'),modalTitle=$('#modalTitle'),modalBody=$('#modalBody'),
+      modalCancel=$('#modalCancel'),modalConfirm=$('#modalConfirm');
+
+let currentRow; // which row we are acting on
+
+/* ----------  UTILS  ---------- */
+const fmt=d=>new Date(d).toLocaleDateString();
+const hide=()=>modal.classList.add('hidden');
+const show=(title,body)=>{
+  modalTitle.textContent=title;
+  modalBody.innerHTML=body;
+  modal.classList.remove('hidden');
+};
+modalCancel.onclick=hide;
+modalConfirm.onclick=()=>{hide(); currentRow.confirm?.();};
+
+/* ----------  CHECK PERMS  ---------- */
+onAuthStateChanged(auth,async user=>{
+  if(!user) return location.href='/auth.html';
+  const me=(await getDoc(doc(db,'users',user.uid))).data();
+  if(me?.rank!=='CEO') location.href='/404.html';
+  else loadTable();
+});
+
+/* ----------  LOAD TABLE  ---------- */
+async function loadTable(){
+  const snap=await getDocs(collection(db,'users'));
+  const frag=document.createDocumentFragment();
+  snap.forEach(d=>{
+    const u=d.data(),tr=document.createElement('tr');
+    tr.dataset.uid=d.id;
+    tr.innerHTML=`
+      <td><img class="avatar" src="${u.avatar||'https://via.placeholder.com/40'}" alt=""></td>
+      <td><b>${u.displayName}</b><span class="rank ${u.rank||''}">${u.rank||''}</span></td>
+      <td>#${u.uid}</td>
+      <td>${u.rank||'Member'}</td>
+      <td class="actions"></td>`;
+    const actions=tr.querySelector('.actions');
+    if(u.rank==='CEO') actions.innerHTML='<i>immutable</i>';
+    else{
+      actions.innerHTML=`
+        <button data-act="ban">Ban</button>
+        <button data-act="mute">Mute</button>
+        <button data-act="rename">Rename</button>
+        <button data-act="rank">Rank</button>`;
+    }
+    frag.appendChild(tr);
+  });
+  $('#userTable tbody').appendChild(frag);
+  $('#userTable').addEventListener('click',handleAction);
+}
+
+/* ----------  ACTIONS  ---------- */
+async function handleAction(e){
+  const btn=e.target.closest('button'); if(!btn) return;
+  const uid=btn.closest('tr').dataset.uid;
+  const user=(await getDoc(doc(db,'users',uid))).data();
+  currentRow={uid,user,el:btn.closest('tr')};
+
+  switch(btn.dataset.act){
+    case 'ban': return banUser(user);
+    case 'mute': return muteUser(user);
+    case 'rename': return renameUser(user);
+    case 'rank': return changeRank(user);
+  }
+}
+
+/* ---- Ban ---- */
+function banUser(u){
+  const body=`
+    <select id="banType">
+      <option value="perm">Permanent</option>
+      <option value="temp">Temporary</option>
+    </select>
+    <div id="tempOpts" class="hidden">
+      <input id="banVal" type="number" min="1" value="1">
+      <select id="banUnit">
+        <option value="s">Seconds</option>
+        <option value="m">Minutes</option>
+        <option value="h">Hours</option>
+        <option value="d">Days</option>
+        <option value="y">Years</option>
+      </select>
+    </div>
+    <textarea id="banReason" placeholder="Reason (visible to user)" rows="2"></textarea>`;
+  show('Ban user',body);
+  $('#banType').onchange=e=>{
+    $('#tempOpts').classList.toggle('hidden',e.target.value==='perm');
+  };
+  currentRow.confirm=async()=>{
+    const type=$('#banType').value,reason=$('#banReason').value.trim()||'No reason given';
+    let until=null;
+    if(type==='temp'){
+      const n=Number($('#banVal').value),u=$('#banUnit').value;
+      const ms={s:1000,m:60000,h:3600000,d:86400000,y:31536000000}[u];
+      until=Date.now()+n*ms;
+    }
+    await setDoc(doc(db,'bans',currentRow.uid),{until,reason,by:auth.currentUser.uid,at:serverTimestamp()});
+    alert('User banned');
+  };
+}
+
+/* ---- Mute ---- */
+function muteUser(u){
+  const body=`<textarea id="muteReason" placeholder="Reason (internal)" rows="2"></textarea>`;
+  show('Mute user',body);
+  currentRow.confirm=async()=>{
+    await updateDoc(doc(db,'users',currentRow.uid),{muted:true});
+    alert('User muted');
+  };
+}
+
+/* ---- Rename ---- */
+function renameUser(u){
+  const body=`New display name:<br><input id="newName" value="${u.displayName}" maxlength="30">`;
+  show('Rename user',body);
+  currentRow.confirm=async()=>{
+    const name=$('#newName').value.trim();
+    if(!name) return alert('Name required');
+    await updateDoc(doc(db,'users',currentRow.uid),{displayName:name});
+    currentRow.el.querySelector('td:nth-child(2) b').textContent=name;
+  };
+}
+
+/* ---- Rank ---- */
+function changeRank(u){
+  const body=`
+    <select id="rankSel">
+      <option value="Member">Member</option>
+      <option value="Admin">Admin</option>
+    </select>`;
+  show('Change rank',body);
+  $('#rankSel').value=u.rank||'Member';
+  currentRow.confirm=async()=>{
+    const rank=$('#rankSel').value;
+    await updateDoc(doc(db,'users',currentRow.uid),{rank});
+    const badge=currentRow.el.querySelector('.rank');
+    badge.textContent=rank;
+    badge.className='rank '+rank;
+  };
+}
+</script>
+</body>
+</html>
