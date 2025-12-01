@@ -1,7 +1,7 @@
 [
   {
-    "origin": ["https://lillyko.space", "http://localhost:*"],
-    "method": ["GET", "POST", "PUT", "DELETE"],
+    "origin": ["https://lillyko.space"],
+    "method": ["GET", "POST", "PUT", "HEAD"],
     "maxAgeSeconds": 3600
   }
 ]
