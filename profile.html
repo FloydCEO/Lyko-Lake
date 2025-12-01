@@ -100,6 +100,13 @@
             align-items: center;
             justify-content: center;
             font-size: 1.2em;
+            overflow: hidden;
+        }
+
+        .user-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
         }
 
         .dropdown {
@@ -239,6 +246,7 @@
             backdrop-filter: blur(10px);
             animation: fadeIn 0.8s ease-out;
             text-align: center;
+            position: relative;
         }
 
         .profile-avatar {
@@ -252,6 +260,34 @@
             font-size: 4em;
             margin: 0 auto 20px;
             box-shadow: 0 10px 30px rgba(34, 197, 164, 0.4);
+            overflow: hidden;
+            position: relative;
+        }
+
+        .profile-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .profile-avatar.editable {
+            cursor: pointer;
+        }
+
+        .profile-avatar.editable:hover::after {
+            content: '📷 Change Photo';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8em;
+            color: white;
+            border-radius: 50%;
         }
 
         .profile-display-name {
@@ -319,6 +355,7 @@
             padding: 30px;
             backdrop-filter: blur(10px);
             animation: fadeIn 1.2s ease-out;
+            margin-bottom: 20px;
         }
 
         .section-title {
@@ -328,6 +365,92 @@
             display: flex;
             align-items: center;
             gap: 10px;
+        }
+
+        .bio-text {
+            color: rgba(255, 255, 255, 0.8);
+            line-height: 1.6;
+            margin-bottom: 15px;
+        }
+
+        .bio-placeholder {
+            color: rgba(255, 255, 255, 0.5);
+            font-style: italic;
+        }
+
+        .edit-bio-button {
+            background: rgba(34, 197, 164, 0.2);
+            border: 2px solid #22c5a4;
+            color: #22c5a4;
+            padding: 8px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .edit-bio-button:hover {
+            background: rgba(34, 197, 164, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .bio-input {
+            width: 100%;
+            min-height: 100px;
+            padding: 12px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px solid rgba(34, 197, 164, 0.3);
+            border-radius: 10px;
+            color: #fff;
+            font-size: 1em;
+            font-family: inherit;
+            resize: vertical;
+            margin-bottom: 15px;
+        }
+
+        .bio-input:focus {
+            outline: none;
+            border-color: #22c5a4;
+            background: rgba(34, 197, 164, 0.1);
+        }
+
+        .bio-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .save-button {
+            background: rgba(34, 197, 164, 0.2);
+            border: 2px solid #22c5a4;
+            color: #22c5a4;
+            padding: 8px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .save-button:hover {
+            background: #22c5a4;
+            color: #0a4d4d;
+        }
+
+        .cancel-button {
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            color: rgba(255, 255, 255, 0.7);
+            padding: 8px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .cancel-button:hover {
+            background: rgba(255, 255, 255, 0.2);
         }
 
         .error-message {
@@ -344,6 +467,150 @@
             font-size: 1.2em;
             color: rgba(255, 255, 255, 0.7);
             margin-bottom: 30px;
+        }
+
+        /* Modal styles for image upload */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10000;
+            backdrop-filter: blur(5px);
+        }
+
+        .modal {
+            background: rgba(10, 77, 77, 0.95);
+            border: 2px solid rgba(34, 197, 164, 0.3);
+            border-radius: 20px;
+            padding: 30px;
+            max-width: 500px;
+            width: 90%;
+            box-shadow: 0 15px 50px rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(10px);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .modal-title {
+            font-size: 1.5em;
+            color: #22c5a4;
+        }
+
+        .close-button {
+            background: none;
+            border: none;
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 1.5em;
+            cursor: pointer;
+            transition: color 0.3s ease;
+        }
+
+        .close-button:hover {
+            color: #22c5a4;
+        }
+
+        .upload-area {
+            border: 2px dashed rgba(34, 197, 164, 0.3);
+            border-radius: 15px;
+            padding: 40px 20px;
+            text-align: center;
+            margin-bottom: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .upload-area:hover {
+            border-color: #22c5a4;
+            background: rgba(34, 197, 164, 0.1);
+        }
+
+        .upload-icon {
+            font-size: 3em;
+            margin-bottom: 15px;
+        }
+
+        .upload-text {
+            color: rgba(255, 255, 255, 0.8);
+            margin-bottom: 10px;
+        }
+
+        .upload-hint {
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 0.9em;
+        }
+
+        .file-input {
+            display: none;
+        }
+
+        .preview-container {
+            text-align: center;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .preview-image {
+            max-width: 200px;
+            max-height: 200px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+        }
+
+        .upload-button {
+            background: rgba(34, 197, 164, 0.2);
+            border: 2px solid #22c5a4;
+            color: #22c5a4;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .upload-button:hover:not(:disabled) {
+            background: #22c5a4;
+            color: #0a4d4d;
+        }
+
+        .upload-button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .modal-message {
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            display: none;
+        }
+
+        .modal-message.error {
+            background: rgba(255, 59, 48, 0.2);
+            border: 2px solid rgba(255, 59, 48, 0.5);
+            color: #ff3b30;
+        }
+
+        .modal-message.success {
+            background: rgba(52, 199, 89, 0.2);
+            border: 2px solid rgba(52, 199, 89, 0.5);
+            color: #34c759;
         }
 
         @keyframes fadeIn {
@@ -386,7 +653,9 @@
         
         <div class="user-menu hidden" id="userMenu">
             <button class="user-button" id="userButton">
-                <div class="user-avatar">👤</div>
+                <div class="user-avatar" id="navUserAvatar">
+                    <img id="navAvatarImg" src="" alt="Avatar">
+                </div>
                 <span id="navDisplayName">Loading...</span>
             </button>
             <div class="dropdown" id="dropdown">
@@ -428,7 +697,9 @@
             </div>
 
             <div class="profile-header">
-                <div class="profile-avatar">👤</div>
+                <div class="profile-avatar" id="profileAvatar">
+                    <img id="profileAvatarImg" src="" alt="Profile Picture">
+                </div>
                 <h2 class="profile-display-name" id="displayName">Loading...</h2>
                 <div class="profile-username" id="username">@loading</div>
                 <div class="profile-uid" id="uid">User #0</div>
@@ -442,6 +713,27 @@
                 <div class="stat-card">
                     <div class="stat-label">User ID</div>
                     <div class="stat-value" id="userNumber">#0</div>
+                </div>
+            </div>
+
+            <div class="profile-section">
+                <h2 class="section-title">
+                    <span>📝</span>
+                    <span>Bio</span>
+                    <span class="edit-bio-button hidden" id="editBioButton">
+                        <span>✏️</span>
+                        <span>Edit</span>
+                    </span>
+                </h2>
+                <div id="bioDisplay">
+                    <p class="bio-text bio-placeholder" id="bioText">This user hasn't written a bio yet.</p>
+                </div>
+                <div class="hidden" id="bioEdit">
+                    <textarea class="bio-input" id="bioInput" placeholder="Tell everyone about yourself..." maxlength="500"></textarea>
+                    <div class="bio-actions">
+                        <button class="save-button" id="saveBioButton">Save</button>
+                        <button class="cancel-button" id="cancelBioButton">Cancel</button>
+                    </div>
                 </div>
             </div>
 
@@ -463,10 +755,35 @@
         </div>
     </div>
 
+    <!-- Image Upload Modal -->
+    <div class="modal-overlay hidden" id="uploadModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h2 class="modal-title">Change Profile Picture</h2>
+                <button class="close-button" id="closeModal">&times;</button>
+            </div>
+            <div class="modal-message" id="modalMessage"></div>
+            <div class="upload-area" id="uploadArea">
+                <div class="upload-icon">📷</div>
+                <div class="upload-text">Click to upload an image</div>
+                <div class="upload-hint">Square images work best (1:1 ratio)</div>
+                <input type="file" id="fileInput" class="file-input" accept="image/*">
+            </div>
+            <div class="preview-container" id="previewContainer">
+                <img id="previewImage" class="preview-image" src="" alt="Preview">
+                <div class="upload-hint">Preview - Make sure your face is centered</div>
+            </div>
+            <div class="modal-actions">
+                <button class="upload-button" id="uploadButton" disabled>Upload</button>
+            </div>
+        </div>
+    </div>
+
     <script type="module">
         import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
         import { getAuth, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
-        import { getFirestore, doc, getDoc } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+        import { getFirestore, doc, getDoc, updateDoc } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+        import { getStorage, ref, uploadBytes, getDownloadURL, deleteObject } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js';
 
         const firebaseConfig = {
             apiKey: "AIzaSyDUBeWvs6kOijqST6FVGirWs2EZ12aAAwU",
@@ -481,6 +798,7 @@
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
+        const storage = getStorage(app);
 
         // Navigation elements
         const authButton = document.getElementById('authButton');
@@ -490,6 +808,8 @@
         const navDisplayName = document.getElementById('navDisplayName');
         const navProfileLink = document.getElementById('navProfileLink');
         const logoutButton = document.getElementById('logoutButton');
+        const navUserAvatar = document.getElementById('navUserAvatar');
+        const navAvatarImg = document.getElementById('navAvatarImg');
 
         // Profile elements
         const loading = document.getElementById('loading');
@@ -504,6 +824,32 @@
         const tooltipUsername = document.getElementById('tooltipUsername');
         const tooltipUid = document.getElementById('tooltipUid');
         const tooltipJoined = document.getElementById('tooltipJoined');
+
+        // Profile customization elements
+        const profileAvatar = document.getElementById('profileAvatar');
+        const profileAvatarImg = document.getElementById('profileAvatarImg');
+        const editBioButton = document.getElementById('editBioButton');
+        const bioDisplay = document.getElementById('bioDisplay');
+        const bioEdit = document.getElementById('bioEdit');
+        const bioText = document.getElementById('bioText');
+        const bioInput = document.getElementById('bioInput');
+        const saveBioButton = document.getElementById('saveBioButton');
+        const cancelBioButton = document.getElementById('cancelBioButton');
+
+        // Image upload modal elements
+        const uploadModal = document.getElementById('uploadModal');
+        const closeModal = document.getElementById('closeModal');
+        const uploadArea = document.getElementById('uploadArea');
+        const fileInput = document.getElementById('fileInput');
+        const previewContainer = document.getElementById('previewContainer');
+        const previewImage = document.getElementById('previewImage');
+        const uploadButton = document.getElementById('uploadButton');
+        const modalMessage = document.getElementById('modalMessage');
+
+        let currentUserId = null;
+        let currentUsername = null;
+        let isOwnProfile = false;
+        let selectedFile = null;
 
         // Hover tooltip functionality
         pageTitle.addEventListener('mouseenter', () => {
@@ -544,6 +890,209 @@
             }
         });
 
+        // Bio editing
+        editBioButton.addEventListener('click', () => {
+            bioDisplay.classList.add('hidden');
+            bioEdit.classList.remove('hidden');
+            bioInput.focus();
+        });
+
+        cancelBioButton.addEventListener('click', () => {
+            bioEdit.classList.add('hidden');
+            bioDisplay.classList.remove('hidden');
+        });
+
+        saveBioButton.addEventListener('click', async () => {
+            const newBio = bioInput.value.trim();
+            try {
+                await updateDoc(doc(db, 'users', currentUserId), {
+                    bio: newBio
+                });
+                
+                bioText.textContent = newBio || 'This user hasn\'t written a bio yet.';
+                if (newBio) {
+                    bioText.classList.remove('bio-placeholder');
+                } else {
+                    bioText.classList.add('bio-placeholder');
+                }
+                
+                bioEdit.classList.add('hidden');
+                bioDisplay.classList.remove('hidden');
+                
+                showModalMessage('Bio updated successfully!', 'success');
+            } catch (error) {
+                console.error('Error updating bio:', error);
+                showModalMessage('Failed to update bio. Please try again.', 'error');
+            }
+        });
+
+        // Image upload functionality
+        profileAvatar.addEventListener('click', () => {
+            if (isOwnProfile) {
+                openUploadModal();
+            }
+        });
+
+        uploadArea.addEventListener('click', () => {
+            fileInput.click();
+        });
+
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files && e.target.files[0]) {
+                selectedFile = e.target.files[0];
+                
+                // Validate file type
+                if (!selectedFile.type.startsWith('image/')) {
+                    showModalMessage('Please select an image file.', 'error');
+                    return;
+                }
+                
+                // Validate file size (max 5MB)
+                if (selectedFile.size > 5 * 1024 * 1024) {
+                    showModalMessage('Image must be smaller than 5MB.', 'error');
+                    return;
+                }
+                
+                // Create preview
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    previewImage.src = e.target.result;
+                    previewContainer.style.display = 'block';
+                    uploadButton.disabled = false;
+                };
+                reader.readAsDataURL(selectedFile);
+            }
+        });
+
+        uploadButton.addEventListener('click', async () => {
+            if (!selectedFile) return;
+            
+            uploadButton.disabled = true;
+            uploadButton.textContent = 'Uploading...';
+            
+            try {
+                // Create a square canvas for the image
+                const img = new Image();
+                img.onload = () => {
+                    const canvas = document.createElement('canvas');
+                    const size = Math.min(img.width, img.height);
+                    canvas.width = 500;
+                    canvas.height = 500;
+                    
+                    const ctx = canvas.getContext('2d');
+                    
+                    // Calculate source dimensions for square crop
+                    const sourceX = (img.width - size) / 2;
+                    const sourceY = (img.height - size) / 2;
+                    
+                    // Draw image centered and cropped to square
+                    ctx.drawImage(img, sourceX, sourceY, size, size, 0, 0, 500, 500);
+                    
+                    // Convert to blob and upload
+                    canvas.toBlob(async (blob) => {
+                        try {
+                            const avatarRef = ref(storage, `avatars/${currentUserId}`);
+                            await uploadBytes(avatarRef, blob);
+                            const downloadURL = await getDownloadURL(avatarRef);
+                            
+                            // Update user document with avatar URL
+                            await updateDoc(doc(db, 'users', currentUserId), {
+                                avatarURL: downloadURL
+                            });
+                            
+                            // Update all avatar images on the page
+                            updateAvatarImages(downloadURL);
+                            
+                            showModalMessage('Profile picture updated successfully!', 'success');
+                            setTimeout(() => {
+                                closeUploadModal();
+                            }, 1500);
+                        } catch (error) {
+                            console.error('Upload error:', error);
+                            showModalMessage('Failed to upload image. Please try again.', 'error');
+                            uploadButton.disabled = false;
+                            uploadButton.textContent = 'Upload';
+                        }
+                    }, 'image/jpeg', 0.9);
+                };
+                
+                img.src = URL.createObjectURL(selectedFile);
+            } catch (error) {
+                console.error('Upload error:', error);
+                showModalMessage('Failed to upload image. Please try again.', 'error');
+                uploadButton.disabled = false;
+                uploadButton.textContent = 'Upload';
+            }
+        });
+
+        closeModal.addEventListener('click', closeUploadModal);
+        uploadModal.addEventListener('click', (e) => {
+            if (e.target === uploadModal) {
+                closeUploadModal();
+            }
+        });
+
+        function openUploadModal() {
+            uploadModal.classList.remove('hidden');
+            resetUploadModal();
+        }
+
+        function closeUploadModal() {
+            uploadModal.classList.add('hidden');
+            resetUploadModal();
+        }
+
+        function resetUploadModal() {
+            fileInput.value = '';
+            previewContainer.style.display = 'none';
+            uploadButton.disabled = true;
+            uploadButton.textContent = 'Upload';
+            selectedFile = null;
+            hideModalMessage();
+        }
+
+        function showModalMessage(message, type) {
+            modalMessage.textContent = message;
+            modalMessage.className = `modal-message ${type}`;
+            modalMessage.style.display = 'block';
+        }
+
+        function hideModalMessage() {
+            modalMessage.style.display = 'none';
+        }
+
+        // Function to update avatar images
+        function updateAvatarImages(url) {
+            profileAvatarImg.src = url;
+            profileAvatar.style.background = 'none';
+            navAvatarImg.src = url;
+            
+            // Also update the avatar in the dropdown if it's open
+            const dropdownAvatar = document.querySelector('.dropdown .user-avatar img');
+            if (dropdownAvatar) {
+                dropdownAvatar.src = url;
+            }
+        }
+
+        // Function to load avatar image
+        async function loadAvatarImage(userId) {
+            try {
+                // First try to get from user document
+                const userDoc = await getDoc(doc(db, 'users', userId));
+                if (userDoc.exists() && userDoc.data().avatarURL) {
+                    return userDoc.data().avatarURL;
+                }
+                
+                // Fallback to storage
+                const avatarRef = ref(storage, `avatars/${userId}`);
+                const avatarUrl = await getDownloadURL(avatarRef);
+                return avatarUrl;
+            } catch (error) {
+                console.log('No custom avatar found, using default');
+                return null;
+            }
+        }
+
         // Check auth state for navigation
         onAuthStateChanged(auth, async (user) => {
             if (user && user.emailVerified) {
@@ -555,6 +1104,13 @@
                         userMenu.classList.remove('hidden');
                         navDisplayName.textContent = userData.displayName;
                         navProfileLink.href = `/profile.html?u=${userData.username}`;
+                        
+                        // Load avatar for navigation
+                        const avatarUrl = await loadAvatarImage(user.uid);
+                        if (avatarUrl) {
+                            navAvatarImg.src = avatarUrl;
+                            navUserAvatar.style.background = 'none';
+                        }
                     }
                 } catch (error) {
                     console.error('Error fetching user data:', error);
@@ -593,6 +1149,13 @@
                 }
 
                 const userData = userDoc.data();
+                currentUserId = userId;
+                currentUsername = userData.username;
+                
+                // Check if this is the current user's profile
+                const currentUser = auth.currentUser;
+                isOwnProfile = currentUser && currentUser.uid === userId;
+                
                 displayProfile(userData);
             } catch (error) {
                 console.error('Error loading profile:', error);
@@ -629,6 +1192,29 @@
                 year: 'numeric' 
             });
             document.getElementById('joinDate').textContent = formattedDate;
+
+            // Load avatar
+            loadAvatarImage(currentUserId).then(avatarUrl => {
+                if (avatarUrl) {
+                    profileAvatarImg.src = avatarUrl;
+                    profileAvatar.style.background = 'none';
+                }
+            });
+
+            // Set bio
+            if (userData.bio) {
+                bioText.textContent = userData.bio;
+                bioText.classList.remove('bio-placeholder');
+            } else {
+                bioText.textContent = 'This user hasn\'t written a bio yet.';
+                bioText.classList.add('bio-placeholder');
+            }
+
+            // Show edit button if this is the user's own profile
+            if (isOwnProfile) {
+                editBioButton.classList.remove('hidden');
+                profileAvatar.classList.add('editable');
+            }
 
             loading.classList.add('hidden');
             profileContent.classList.remove('hidden');
