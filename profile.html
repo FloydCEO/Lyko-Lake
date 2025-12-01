@@ -786,14 +786,15 @@
         import { getStorage, ref, uploadBytes, getDownloadURL, deleteObject } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js';
 
         const firebaseConfig = {
-            apiKey: "AIzaSyDUBeWvs6kOijqST6FVGirWs2EZ12aAAwU",
-            authDomain: "lyko-lake.firebaseapp.com",
-            projectId: "lyko-lake",
-            storageBucket: "lyko-lake.firebasestorage.app",
-            messagingSenderId: "685592614306",
-            appId: "1:685592614306:web:b6a8f6f18407f9c0154efb",
-            measurementId: "G-QN0H7E9NEQ"
-        };
+  apiKey: "AIzaSyDUBeWvs6kOijqST6FVGirWs2EZ12aAAwU",
+  authDomain: "lyko-lake.firebaseapp.com",
+  projectId: "lyko-lake",
+  storageBucket: "lyko-lake.appspot.com",
+  messagingSenderId: "685592614306",
+  appId: "1:685592614306:web:b6a8f6f18407f9c0154efb",
+  measurementId: "G-QN0H7E9NEQ"
+};
+
 
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
