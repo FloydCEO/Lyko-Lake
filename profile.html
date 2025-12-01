@@ -276,7 +276,7 @@
         }
 
         .profile-avatar.editable:hover::after {
-            content: '📷 Change Photo';
+            content: '📷 Change Profile';
             position: absolute;
             top: 0;
             left: 0;
@@ -373,6 +373,15 @@
             color: rgba(255, 255, 255, 0.8);
             line-height: 1.6;
             margin-bottom: 15px;
+            position: relative;
+            padding: 15px;
+            border-radius: 10px;
+            transition: background-color 0.3s ease;
+        }
+
+        .bio-text.editable:hover {
+            background: rgba(34, 197, 164, 0.1);
+            cursor: pointer;
         }
 
         .bio-placeholder {
@@ -615,6 +624,27 @@
             color: #34c759;
         }
 
+        /* Custom tooltip for editable elements */
+        .custom-tooltip {
+            position: fixed;
+            background: rgba(10, 77, 77, 0.98);
+            border: 2px solid #22c5a4;
+            border-radius: 8px;
+            padding: 8px 12px;
+            color: white;
+            font-size: 0.85em;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.2s ease;
+            z-index: 10001;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .custom-tooltip.show {
+            opacity: 1;
+        }
+
         @keyframes fadeIn {
             from {
                 opacity: 0;
@@ -698,6 +728,9 @@
                 </div>
             </div>
 
+            <!-- Custom tooltip for editable elements -->
+            <div class="custom-tooltip" id="customTooltip">Change Profile</div>
+
             <div class="profile-header">
                 <div class="profile-avatar" id="profileAvatar">
                     <img id="profileAvatarImg" src="" alt="Profile Picture">
@@ -722,13 +755,9 @@
                 <h2 class="section-title">
                     <span>📝</span>
                     <span>Bio</span>
-                    <span class="edit-bio-button hidden" id="editBioButton">
-                        <span>✏️</span>
-                        <span>Edit</span>
-                    </span>
                 </h2>
                 <div id="bioDisplay">
-                    <p class="bio-text bio-placeholder" id="bioText">This user hasn't written a bio yet.</p>
+                    <p class="bio-text" id="bioText">This user hasn't written a bio yet.</p>
                 </div>
                 <div class="hidden" id="bioEdit">
                     <textarea class="bio-input" id="bioInput" placeholder="Tell everyone about yourself..." maxlength="500"></textarea>
@@ -828,7 +857,6 @@
         // Profile customization elements
         const profileAvatar = document.getElementById('profileAvatar');
         const profileAvatarImg = document.getElementById('profileAvatarImg');
-        const editBioButton = document.getElementById('editBioButton');
         const bioDisplay = document.getElementById('bioDisplay');
         const bioEdit = document.getElementById('bioEdit');
         const bioText = document.getElementById('bioText');
@@ -845,6 +873,9 @@
         const previewImage = document.getElementById('previewImage');
         const uploadButton = document.getElementById('uploadButton');
         const modalMessage = document.getElementById('modalMessage');
+
+        // Custom tooltip
+        const customTooltip = document.getElementById('customTooltip');
 
         let currentUserId = null;
         let currentUsername = null;
@@ -890,12 +921,33 @@
             }
         });
 
-        // Bio editing
-        editBioButton.addEventListener('click', () => {
-            bioDisplay.classList.add('hidden');
-            bioEdit.classList.remove('hidden');
-            bioInput.value = bioText.textContent === 'This user hasn\'t written a bio yet.' ? '' : bioText.textContent;
-            bioInput.focus();
+        // Bio editing - FIXED: Only works when user is on their own profile
+        bioText.addEventListener('click', () => {
+            if (isOwnProfile) {
+                bioDisplay.classList.add('hidden');
+                bioEdit.classList.remove('hidden');
+                bioInput.value = bioText.textContent === 'This user hasn\'t written a bio yet.' ? '' : bioText.textContent;
+                bioInput.focus();
+            }
+        });
+
+        // Show "Change Bio" tooltip when hovering over bio (only on own profile)
+        bioText.addEventListener('mouseenter', (e) => {
+            if (isOwnProfile) {
+                customTooltip.textContent = 'Change Bio';
+                customTooltip.classList.add('show');
+                updateTooltipPosition(e);
+            }
+        });
+
+        bioText.addEventListener('mousemove', (e) => {
+            if (isOwnProfile) {
+                updateTooltipPosition(e);
+            }
+        });
+
+        bioText.addEventListener('mouseleave', () => {
+            customTooltip.classList.remove('show');
         });
 
         cancelBioButton.addEventListener('click', () => {
@@ -932,6 +984,25 @@
             if (isOwnProfile) {
                 openUploadModal();
             }
+        });
+
+        // Show "Change Profile" tooltip when hovering over avatar (only on own profile)
+        profileAvatar.addEventListener('mouseenter', (e) => {
+            if (isOwnProfile) {
+                customTooltip.textContent = 'Change Profile';
+                customTooltip.classList.add('show');
+                updateTooltipPosition(e);
+            }
+        });
+
+        profileAvatar.addEventListener('mousemove', (e) => {
+            if (isOwnProfile) {
+                updateTooltipPosition(e);
+            }
+        });
+
+        profileAvatar.addEventListener('mouseleave', () => {
+            customTooltip.classList.remove('show');
         });
 
         uploadArea.addEventListener('click', () => {
@@ -1076,6 +1147,12 @@
             }
         }
 
+        // Function to update tooltip position
+        function updateTooltipPosition(e) {
+            customTooltip.style.left = (e.clientX + 15) + 'px';
+            customTooltip.style.top = (e.clientY + 15) + 'px';
+        }
+
         // Function to load avatar image from Firestore
         async function loadAvatarImage(userId) {
             try {
@@ -1205,9 +1282,9 @@
                 bioText.classList.add('bio-placeholder');
             }
 
-            // Show edit button if this is the user's own profile
+            // Make bio and avatar editable if this is the user's own profile
             if (isOwnProfile) {
-                editBioButton.classList.remove('hidden');
+                bioText.classList.add('editable');
                 profileAvatar.classList.add('editable');
             }
 
