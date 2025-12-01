@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profile - Lyko Lake</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #0a4d4d 0%, #1a6b6b 50%, #0f3d3d 100%);
+            color: #fff;
+            min-height: 100vh;
+        }
+
+        nav {
+            background: rgba(10, 77, 77, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 20px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            border-bottom: 2px solid rgba(34, 197, 164, 0.3);
+        }
+
+        .logo {
+            font-size: 1.8em;
+            font-weight: bold;
+            color: #22c5a4;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: transform 0.3s ease;
+        }
+
+        .logo:hover {
+            transform: scale(1.05);
+        }
+
+        .auth-button {
+            background: rgba(34, 197, 164, 0.2);
+            border: 2px solid #22c5a4;
+            color: #fff;
+            padding: 10px 30px;
+            font-size: 1em;
+            border-radius: 8px;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .auth-button:hover {
+            background: #22c5a4;
+            color: #0a4d4d;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(34, 197, 164, 0.4);
+        }
+
+        .user-menu {
+            position: relative;
+        }
+
+        .user-button {
+            background: rgba(34, 197, 164, 0.2);
+            border: 2px solid #22c5a4;
+            color: #fff;
+            padding: 10px 20px;
+            font-size: 1em;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .user-button:hover {
+            background: rgba(34, 197, 164, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .user-avatar {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #22c5a4 0%, #0a8f7a 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2em;
+        }
+
+        .dropdown {
+            position: absolute;
+            top: calc(100% + 10px);
+            right: 0;
+            background: rgba(10, 77, 77, 0.98);
+            border: 2px solid rgba(34, 197, 164, 0.3);
+            border-radius: 12px;
+            min-width: 200px;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-10px);
+            transition: all 0.3s ease;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(10px);
+        }
+
+        .dropdown.show {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+
+        .dropdown-item {
+            padding: 15px 20px;
+            color: rgba(255, 255, 255, 0.9);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            transition: all 0.2s ease;
+            cursor: pointer;
+            border-bottom: 1px solid rgba(34, 197, 164, 0.1);
+        }
+
+        .dropdown-item:last-child {
+            border-bottom: none;
+        }
+
+        .dropdown-item:hover {
+            background: rgba(34, 197, 164, 0.2);
+            color: #22c5a4;
+        }
+
+        .dropdown-item.logout {
+            color: #ff3b30;
+        }
+
+        .dropdown-item.logout:hover {
+            background: rgba(255, 59, 48, 0.2);
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 100px 20px;
+            font-size: 1.2em;
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .profile-header {
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px solid rgba(34, 197, 164, 0.3);
+            border-radius: 20px;
+            padding: 40px;
+            margin-bottom: 30px;
+            backdrop-filter: blur(10px);
+            animation: fadeIn 0.6s ease-out;
+            text-align: center;
+        }
+
+        .profile-avatar {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #22c5a4 0%, #0a8f7a 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 4em;
+            margin: 0 auto 20px;
+            box-shadow: 0 10px 30px rgba(34, 197, 164, 0.4);
+        }
+
+        .profile-display-name {
+            font-size: 2.5em;
+            font-weight: bold;
+            margin-bottom: 10px;
+            background: linear-gradient(135deg, #22c5a4 0%, #4dd4b8 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .profile-username {
+            font-size: 1.3em;
+            color: rgba(255, 255, 255, 0.6);
+            margin-bottom: 15px;
+        }
+
+        .profile-uid {
+            display: inline-block;
+            background: rgba(34, 197, 164, 0.2);
+            border: 2px solid rgba(34, 197, 164, 0.5);
+            color: #22c5a4;
+            padding: 8px 20px;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 1.1em;
+        }
+
+        .profile-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px solid rgba(34, 197, 164, 0.3);
+            border-radius: 15px;
+            padding: 25px;
+            backdrop-filter: blur(10px);
+            animation: fadeIn 0.8s ease-out;
+            text-align: center;
+        }
+
+        .stat-label {
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 0.9em;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .stat-value {
+            font-size: 2em;
+            font-weight: bold;
+            color: #22c5a4;
+        }
+
+        .profile-section {
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px solid rgba(34, 197, 164, 0.3);
+            border-radius: 15px;
+            padding: 30px;
+            backdrop-filter: blur(10px);
+            animation: fadeIn 1s ease-out;
+        }
+
+        .section-title {
+            font-size: 1.5em;
+            color: #22c5a4;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .error-message {
+            text-align: center;
+            padding: 100px 20px;
+        }
+
+        .error-title {
+            font-size: 3em;
+            margin-bottom: 20px;
+        }
+
+        .error-text {
+            font-size: 1.2em;
+            color: rgba(255, 255, 255, 0.7);
+            margin-bottom: 30px;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .profile-header {
+                padding: 30px 20px;
+            }
+
+            .profile-display-name {
+                font-size: 2em;
+            }
+
+            .profile-avatar {
+                width: 120px;
+                height: 120px;
+                font-size: 3em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav>
+        <a href="/" class="logo">🌊 Lyko Lake</a>
+        
+        <a href="/auth.html" class="auth-button hidden" id="authButton">Sign Up / Login</a>
+        
+        <div class="user-menu hidden" id="userMenu">
+            <button class="user-button" id="userButton">
+                <div class="user-avatar">👤</div>
+                <span id="navDisplayName">Loading...</span>
+            </button>
+            <div class="dropdown" id="dropdown">
+                <a class="dropdown-item" id="navProfileLink">
+                    <span>👤</span>
+                    <span>Profile</span>
+                </a>
+                <a href="/help.html" class="dropdown-item">
+                    <span>❓</span>
+                    <span>Help</span>
+                </a>
+                <div class="dropdown-item logout" id="logoutButton">
+                    <span>🚪</span>
+                    <span>Log Out</span>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="loading" id="loading">Loading profile...</div>
+        
+        <div class="hidden" id="profileContent">
+            <div class="profile-header">
+                <div class="profile-avatar">👤</div>
+                <h1 class="profile-display-name" id="displayName">Loading...</h1>
+                <div class="profile-username" id="username">@loading</div>
+                <div class="profile-uid" id="uid">User #0</div>
+            </div>
+
+            <div class="profile-stats">
+                <div class="stat-card">
+                    <div class="stat-label">Member Since</div>
+                    <div class="stat-value" id="joinDate">...</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">User ID</div>
+                    <div class="stat-value" id="userNumber">#0</div>
+                </div>
+            </div>
+
+            <div class="profile-section">
+                <h2 class="section-title">
+                    <span>📊</span>
+                    <span>About</span>
+                </h2>
+                <p style="color: rgba(255, 255, 255, 0.7); line-height: 1.6;">
+                    This profile page will be expanded in future updates with posts, achievements, and more!
+                </p>
+            </div>
+        </div>
+
+        <div class="error-message hidden" id="errorContent">
+            <div class="error-title">🌊</div>
+            <h2 class="error-text" id="errorText">User not found</h2>
+            <a href="/" class="auth-button">Go Home</a>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+        import { getAuth, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
+        import { getFirestore, doc, getDoc, collection, query, where, getDocs } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDUBeWvs6kOijqST6FVGirWs2EZ12aAAwU",
+            authDomain: "lyko-lake.firebaseapp.com",
+            projectId: "lyko-lake",
+            storageBucket: "lyko-lake.firebasestorage.app",
+            messagingSenderId: "685592614306",
+            appId: "1:685592614306:web:b6a8f6f18407f9c0154efb",
+            measurementId: "G-QN0H7E9NEQ"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        // Navigation elements
+        const authButton = document.getElementById('authButton');
+        const userMenu = document.getElementById('userMenu');
+        const userButton = document.getElementById('userButton');
+        const dropdown = document.getElementById('dropdown');
+        const navDisplayName = document.getElementById('navDisplayName');
+        const navProfileLink = document.getElementById('navProfileLink');
+        const logoutButton = document.getElementById('logoutButton');
+
+        // Profile elements
+        const loading = document.getElementById('loading');
+        const profileContent = document.getElementById('profileContent');
+        const errorContent = document.getElementById('errorContent');
+        const errorText = document.getElementById('errorText');
+
+        // Toggle dropdown
+        userButton.addEventListener('click', (e) => {
+            e.stopPropagation();
+            dropdown.classList.toggle('show');
+        });
+
+        document.addEventListener('click', () => {
+            dropdown.classList.remove('show');
+        });
+
+        dropdown.addEventListener('click', (e) => {
+            e.stopPropagation();
+        });
+
+        // Logout
+        logoutButton.addEventListener('click', async () => {
+            try {
+                await signOut(auth);
+                window.location.href = '/';
+            } catch (error) {
+                console.error('Logout error:', error);
+                alert('Failed to log out. Please try again.');
+            }
+        });
+
+        // Check auth state for navigation
+        onAuthStateChanged(auth, async (user) => {
+            if (user && user.emailVerified) {
+                try {
+                    const userDoc = await getDoc(doc(db, 'users', user.uid));
+                    if (userDoc.exists()) {
+                        const userData = userDoc.data();
+                        authButton.classList.add('hidden');
+                        userMenu.classList.remove('hidden');
+                        navDisplayName.textContent = userData.displayName;
+                        navProfileLink.href = `/${userData.username}`;
+                    }
+                } catch (error) {
+                    console.error('Error fetching user data:', error);
+                }
+            } else {
+                authButton.classList.remove('hidden');
+                userMenu.classList.add('hidden');
+            }
+        });
+
+        // Get username from URL
+        const pathParts = window.location.pathname.split('/').filter(p => p);
+        const username = pathParts[0]; // Gets first part of path after domain
+
+        if (!username) {
+            showError('No username provided');
+        } else {
+            loadProfile(username);
+        }
+
+        async function loadProfile(username) {
+            try {
+                // Query the usernames collection to find the user
+                const usernameDoc = await getDoc(doc(db, 'usernames', username.toLowerCase()));
+                
+                if (!usernameDoc.exists()) {
+                    showError(`User @${username} not found`);
+                    return;
+                }
+
+                const userId = usernameDoc.data().userId;
+                const userDoc = await getDoc(doc(db, 'users', userId));
+
+                if (!userDoc.exists()) {
+                    showError('User profile not found');
+                    return;
+                }
+
+                const userData = userDoc.data();
+                displayProfile(userData);
+            } catch (error) {
+                console.error('Error loading profile:', error);
+                showError('Error loading profile. Please try again.');
+            }
+        }
+
+        function displayProfile(userData) {
+            // Update page title
+            document.title = `${userData.displayName} (@${userData.username}) - Lyko Lake`;
+
+            // Fill in profile data
+            document.getElementById('displayName').textContent = userData.displayName;
+            document.getElementById('username').textContent = `@${userData.username}`;
+            document.getElementById('uid').textContent = `User #${userData.uid}`;
+            document.getElementById('userNumber').textContent = `#${userData.uid}`;
+
+            // Format join date
+            const joinDate = userData.createdAt?.toDate ? userData.createdAt.toDate() : new Date(userData.createdAt);
+            const formattedDate = joinDate.toLocaleDateString('en-US', { 
+                month: 'short', 
+                year: 'numeric' 
+            });
+            document.getElementById('joinDate').textContent = formattedDate;
+
+            // Show profile, hide loading
+            loading.classList.add('hidden');
+            profileContent.classList.remove('hidden');
+        }
+
+        function showError(message) {
+            errorText.textContent = message;
+            loading.classList.add('hidden');
+            errorContent.classList.remove('hidden');
+        }
+    </script>
+</body>
+</html>
