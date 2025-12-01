@@ -170,6 +170,66 @@
             color: rgba(255, 255, 255, 0.7);
         }
 
+        .page-title {
+            text-align: center;
+            margin-bottom: 40px;
+            position: relative;
+            cursor: help;
+        }
+
+        .page-title h1 {
+            font-size: 4em;
+            font-weight: bold;
+            background: linear-gradient(135deg, #22c5a4 0%, #4dd4b8 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            display: inline-block;
+            animation: fadeIn 0.6s ease-out;
+            transition: transform 0.3s ease;
+        }
+
+        .page-title h1:hover {
+            transform: scale(1.05);
+        }
+
+        .hover-tooltip {
+            position: fixed;
+            background: rgba(10, 77, 77, 0.98);
+            border: 2px solid #22c5a4;
+            border-radius: 12px;
+            padding: 15px 20px;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.2s ease;
+            z-index: 10000;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            min-width: 200px;
+        }
+
+        .hover-tooltip.show {
+            opacity: 1;
+        }
+
+        .tooltip-line {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 8px;
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 0.95em;
+        }
+
+        .tooltip-line:last-child {
+            margin-bottom: 0;
+        }
+
+        .tooltip-label {
+            color: #22c5a4;
+            font-weight: 600;
+        }
+
         .profile-header {
             background: rgba(255, 255, 255, 0.05);
             border: 2px solid rgba(34, 197, 164, 0.3);
@@ -177,7 +237,7 @@
             padding: 40px;
             margin-bottom: 30px;
             backdrop-filter: blur(10px);
-            animation: fadeIn 0.6s ease-out;
+            animation: fadeIn 0.8s ease-out;
             text-align: center;
         }
 
@@ -234,7 +294,7 @@
             border-radius: 15px;
             padding: 25px;
             backdrop-filter: blur(10px);
-            animation: fadeIn 0.8s ease-out;
+            animation: fadeIn 1s ease-out;
             text-align: center;
         }
 
@@ -258,7 +318,7 @@
             border-radius: 15px;
             padding: 30px;
             backdrop-filter: blur(10px);
-            animation: fadeIn 1s ease-out;
+            animation: fadeIn 1.2s ease-out;
         }
 
         .section-title {
@@ -300,6 +360,10 @@
         @media (max-width: 768px) {
             .profile-header {
                 padding: 30px 20px;
+            }
+
+            .page-title h1 {
+                font-size: 2.5em;
             }
 
             .profile-display-name {
@@ -346,9 +410,26 @@
         <div class="loading" id="loading">Loading profile...</div>
         
         <div class="hidden" id="profileContent">
+            <div class="page-title" id="pageTitle">
+                <h1 id="titleName">Loading...</h1>
+            </div>
+
+            <div class="hover-tooltip" id="hoverTooltip">
+                <div class="tooltip-line">
+                    <span class="tooltip-label">@</span>
+                    <span id="tooltipUsername">username</span>
+                    <span class="tooltip-label">UID:</span>
+                    <span id="tooltipUid">#0</span>
+                </div>
+                <div class="tooltip-line">
+                    <span class="tooltip-label">JOINED:</span>
+                    <span id="tooltipJoined">Date</span>
+                </div>
+            </div>
+
             <div class="profile-header">
                 <div class="profile-avatar">👤</div>
-                <h1 class="profile-display-name" id="displayName">Loading...</h1>
+                <h2 class="profile-display-name" id="displayName">Loading...</h2>
                 <div class="profile-username" id="username">@loading</div>
                 <div class="profile-uid" id="uid">User #0</div>
             </div>
@@ -385,7 +466,7 @@
     <script type="module">
         import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
         import { getAuth, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
-        import { getFirestore, doc, getDoc, collection, query, where, getDocs } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+        import { getFirestore, doc, getDoc } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
 
         const firebaseConfig = {
             apiKey: "AIzaSyDUBeWvs6kOijqST6FVGirWs2EZ12aAAwU",
@@ -415,6 +496,28 @@
         const profileContent = document.getElementById('profileContent');
         const errorContent = document.getElementById('errorContent');
         const errorText = document.getElementById('errorText');
+        const pageTitle = document.getElementById('pageTitle');
+        const titleName = document.getElementById('titleName');
+        const hoverTooltip = document.getElementById('hoverTooltip');
+
+        // Tooltip elements
+        const tooltipUsername = document.getElementById('tooltipUsername');
+        const tooltipUid = document.getElementById('tooltipUid');
+        const tooltipJoined = document.getElementById('tooltipJoined');
+
+        // Hover tooltip functionality
+        pageTitle.addEventListener('mouseenter', () => {
+            hoverTooltip.classList.add('show');
+        });
+
+        pageTitle.addEventListener('mouseleave', () => {
+            hoverTooltip.classList.remove('show');
+        });
+
+        pageTitle.addEventListener('mousemove', (e) => {
+            hoverTooltip.style.left = (e.clientX + 15) + 'px';
+            hoverTooltip.style.top = (e.clientY + 15) + 'px';
+        });
 
         // Toggle dropdown
         userButton.addEventListener('click', (e) => {
@@ -463,8 +566,8 @@
         });
 
         // Get username from URL
-        const pathParts = window.location.pathname.split('/').filter(p => p);
-        const username = pathParts[0]; // Gets first part of path after domain
+        const urlParams = new URLSearchParams(window.location.search);
+        const username = urlParams.get('u') || window.location.pathname.split('/').filter(p => p)[0];
 
         if (!username) {
             showError('No username provided');
@@ -474,7 +577,6 @@
 
         async function loadProfile(username) {
             try {
-                // Query the usernames collection to find the user
                 const usernameDoc = await getDoc(doc(db, 'usernames', username.toLowerCase()));
                 
                 if (!usernameDoc.exists()) {
@@ -499,8 +601,22 @@
         }
 
         function displayProfile(userData) {
-            // Update page title
             document.title = `${userData.displayName} (@${userData.username}) - Lyko Lake`;
+
+            // Set page title
+            titleName.textContent = userData.displayName;
+
+            // Set tooltip data
+            tooltipUsername.textContent = userData.username;
+            tooltipUid.textContent = `#${userData.uid}`;
+            
+            const joinDate = userData.createdAt?.toDate ? userData.createdAt.toDate() : new Date(userData.createdAt);
+            const formattedTooltipDate = joinDate.toLocaleDateString('en-US', { 
+                month: 'short',
+                day: 'numeric',
+                year: 'numeric' 
+            });
+            tooltipJoined.textContent = formattedTooltipDate;
 
             // Fill in profile data
             document.getElementById('displayName').textContent = userData.displayName;
@@ -508,15 +624,12 @@
             document.getElementById('uid').textContent = `User #${userData.uid}`;
             document.getElementById('userNumber').textContent = `#${userData.uid}`;
 
-            // Format join date
-            const joinDate = userData.createdAt?.toDate ? userData.createdAt.toDate() : new Date(userData.createdAt);
             const formattedDate = joinDate.toLocaleDateString('en-US', { 
                 month: 'short', 
                 year: 'numeric' 
             });
             document.getElementById('joinDate').textContent = formattedDate;
 
-            // Show profile, hide loading
             loading.classList.add('hidden');
             profileContent.classList.remove('hidden');
         }
