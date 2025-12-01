@@ -207,16 +207,6 @@
             display: none;
         }
 
-        .warning-message {
-            background: rgba(255, 159, 10, 0.2);
-            border: 2px solid rgba(255, 159, 10, 0.5);
-            color: #ff9f0a;
-            padding: 12px;
-            border-radius: 10px;
-            margin-bottom: 20px;
-            display: none;
-        }
-
         .hidden {
             display: none;
         }
@@ -297,13 +287,15 @@
         <div class="error-message" id="errorMessage"></div>
         <div class="success-message" id="successMessage"></div>
         <div class="info-message" id="infoMessage"></div>
-        <div class="warning-message" id="warningMessage"></div>
 
         <!-- Login Form -->
         <form id="loginForm">
             <div class="form-group">
-                <label for="loginEmail">Email</label>
-                <input type="email" id="loginEmail" placeholder="your@email.com" required>
+                <label for="loginUsername">Username</label>
+                <div class="input-wrapper">
+                    <span class="input-prefix">@</span>
+                    <input type="text" id="loginUsername" class="with-prefix" placeholder="username" required>
+                </div>
             </div>
             <div class="form-group">
                 <label for="loginPassword">Password</label>
@@ -330,6 +322,7 @@
             <div class="form-group">
                 <label for="registerEmail">Email</label>
                 <input type="email" id="registerEmail" placeholder="your@email.com" required>
+                <div class="input-hint">For account recovery only</div>
             </div>
             <div class="form-group">
                 <label for="registerPassword">Password</label>
@@ -343,27 +336,22 @@
         </form>
     </div>
 
-    <!-- Firebase SDK -->
     <script type="module">
         import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
         import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, sendEmailVerification } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
-        import { getFirestore, doc, setDoc, getDoc, collection, updateDoc, increment } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+        import { getFirestore, doc, setDoc, getDoc, updateDoc, increment } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
         import { getStorage } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js';
 
-        // ⚠️ IMPORTANT: Replace this with YOUR Firebase configuration
-        // Get it from: Firebase Console > Project Settings > General > Your apps > Web app
-const firebaseConfig = {
-  apiKey: "AIzaSyDUBeWvs6kOijqST6FVGirWs2EZ12aAAwU",
-  authDomain: "lyko-lake.firebaseapp.com",
-  projectId: "lyko-lake",
-  storageBucket: "lyko-lake.appspot.com",
-  messagingSenderId: "685592614306",
-  appId: "1:685592614306:web:b6a8f6f18407f9c0154efb",
-  measurementId: "G-QN0H7E9NEQ"
-};
+        const firebaseConfig = {
+            apiKey: "AIzaSyDUBeWvs6kOijqST6FVGirWs2EZ12aAAwU",
+            authDomain: "lyko-lake.firebaseapp.com",
+            projectId: "lyko-lake",
+            storageBucket: "lyko-lake.appspot.com",
+            messagingSenderId: "685592614306",
+            appId: "1:685592614306:web:b6a8f6f18407f9c0154efb",
+            measurementId: "G-QN0H7E9NEQ"
+        };
 
-
-        // Check if config is still placeholder
         const isConfigured = !firebaseConfig.apiKey.includes('YOUR_');
         
         let app, auth, db, storage;
@@ -376,25 +364,24 @@ const firebaseConfig = {
                 db = getFirestore(app);
                 storage = getStorage(app);
                 
-                // Test Firestore connection
                 const testRef = doc(db, 'metadata', 'test');
                 getDoc(testRef).then(() => {
                     firebaseReady = true;
                     showConfigStatus('success', '✓ Firebase connected');
                 }).catch((error) => {
                     if (error.code === 'unavailable') {
-                        showConfigStatus('error', '❌ Firestore database not created yet. Please create it in Firebase Console.');
+                        showConfigStatus('error', '✗ Firestore database not created yet. Please create it in Firebase Console.');
                     } else if (error.code === 'permission-denied') {
-                        showConfigStatus('error', '❌ Firestore security rules not set. Please update rules in Firebase Console.');
+                        showConfigStatus('error', '✗ Firestore security rules not set. Please update rules in Firebase Console.');
                     } else {
-                        showConfigStatus('error', `❌ Firebase error: ${error.message}`);
+                        showConfigStatus('error', `✗ Firebase error: ${error.message}`);
                     }
                 });
             } catch (error) {
-                showConfigStatus('error', `❌ Firebase initialization failed: ${error.message}`);
+                showConfigStatus('error', `✗ Firebase initialization failed: ${error.message}`);
             }
         } else {
-            showConfigStatus('error', '❌ Firebase not configured! Please add your Firebase config to this file. See setup guide.');
+            showConfigStatus('error', '✗ Firebase not configured! Please add your Firebase config to this file.');
         }
 
         function showConfigStatus(type, message) {
@@ -409,7 +396,6 @@ const firebaseConfig = {
             }
         }
 
-        // Check if user is already logged in
         if (isConfigured && auth) {
             onAuthStateChanged(auth, async (user) => {
                 if (user) {
@@ -425,7 +411,6 @@ const firebaseConfig = {
             });
         }
 
-        // Make resend function globally available
         window.resendVerification = async function() {
             if (!firebaseReady) {
                 showError('Firebase is not ready. Please check your configuration.');
@@ -443,7 +428,6 @@ const firebaseConfig = {
             }
         };
 
-        // Tab switching
         window.switchTab = function(tab) {
             const tabs = document.querySelectorAll('.tab');
             const loginForm = document.getElementById('loginForm');
@@ -464,7 +448,6 @@ const firebaseConfig = {
             hideMessages();
         };
 
-        // Check if username is available
         async function isUsernameAvailable(username) {
             if (!firebaseReady) {
                 throw new Error('Firebase not ready');
@@ -473,7 +456,22 @@ const firebaseConfig = {
             return !usernameDoc.exists();
         }
 
-        // Get next UID
+        async function getUserEmailByUsername(username) {
+            if (!firebaseReady) {
+                throw new Error('Firebase not ready');
+            }
+            const usernameDoc = await getDoc(doc(db, 'usernames', username.toLowerCase()));
+            if (!usernameDoc.exists()) {
+                return null;
+            }
+            const userId = usernameDoc.data().userId;
+            const userDoc = await getDoc(doc(db, 'users', userId));
+            if (!userDoc.exists()) {
+                return null;
+            }
+            return userDoc.data().email;
+        }
+
         async function getNextUID() {
             if (!firebaseReady) {
                 throw new Error('Firebase not ready');
@@ -492,7 +490,6 @@ const firebaseConfig = {
             return currentCount + 1;
         }
 
-        // Login
         document.getElementById('loginForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             
@@ -501,7 +498,7 @@ const firebaseConfig = {
                 return;
             }
             
-            const email = document.getElementById('loginEmail').value;
+            const username = document.getElementById('loginUsername').value.trim();
             const password = document.getElementById('loginPassword').value;
             const button = document.getElementById('loginButton');
             
@@ -510,6 +507,14 @@ const firebaseConfig = {
             hideMessages();
             
             try {
+                const email = await getUserEmailByUsername(username);
+                if (!email) {
+                    showError('Username not found!');
+                    button.disabled = false;
+                    button.textContent = 'Sign In';
+                    return;
+                }
+
                 const userCredential = await signInWithEmailAndPassword(auth, email, password);
                 const user = userCredential.user;
                 
@@ -525,13 +530,16 @@ const firebaseConfig = {
                 }
             } catch (error) {
                 console.error('Login error:', error);
-                showError(getErrorMessage(error.code));
+                if (error.message.includes('Firebase not ready')) {
+                    showError('Username not found!');
+                } else {
+                    showError(getErrorMessage(error.code));
+                }
                 button.disabled = false;
                 button.textContent = 'Sign In';
             }
         });
 
-        // Register
         document.getElementById('registerForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             
@@ -549,7 +557,6 @@ const firebaseConfig = {
             
             hideMessages();
             
-            // Validate username format
             const usernameRegex = /^[a-zA-Z0-9_]{3,20}$/;
             if (!usernameRegex.test(username)) {
                 showError('Username must be 3-20 characters and contain only letters, numbers, and underscores!');
@@ -575,7 +582,6 @@ const firebaseConfig = {
             button.textContent = 'Creating account...';
             
             try {
-                // Check if username is available
                 const available = await isUsernameAvailable(username);
                 if (!available) {
                     showError('Username is already taken! Please choose another.');
@@ -584,37 +590,32 @@ const firebaseConfig = {
                     return;
                 }
                 
-                // Create user account
                 const userCredential = await createUserWithEmailAndPassword(auth, email, password);
                 const user = userCredential.user;
                 
-                // Get next UID
                 const uid = await getNextUID();
                 
-                // Create user profile in Firestore
                 await setDoc(doc(db, 'users', user.uid), {
                     uid: uid,
                     username: username,
                     displayName: displayName,
                     email: email,
                     createdAt: new Date(),
-                    emailVerified: false
+                    emailVerified: false,
+                    bio: ''
                 });
                 
-                // Reserve username
                 await setDoc(doc(db, 'usernames', username.toLowerCase()), {
                     userId: user.uid,
                     createdAt: new Date()
                 });
                 
-                // Send verification email
                 await sendEmailVerification(user);
                 
                 showSuccess(`🎉 Account created! You are user #${uid}. Please check your email to verify your account.`);
                 button.disabled = false;
                 button.textContent = 'Create Account';
                 
-                // Clear form
                 document.getElementById('registerUsername').value = '';
                 document.getElementById('registerDisplayName').value = '';
                 document.getElementById('registerEmail').value = '';
@@ -651,7 +652,6 @@ const firebaseConfig = {
             document.getElementById('errorMessage').style.display = 'none';
             document.getElementById('successMessage').style.display = 'none';
             document.getElementById('infoMessage').style.display = 'none';
-            document.getElementById('warningMessage').style.display = 'none';
         }
 
         function getErrorMessage(code) {
@@ -663,11 +663,11 @@ const firebaseConfig = {
                 case 'auth/weak-password':
                     return 'Password is too weak!';
                 case 'auth/user-not-found':
-                    return 'No account found with this email!';
+                    return 'Incorrect username or password!';
                 case 'auth/wrong-password':
-                    return 'Incorrect password!';
+                    return 'Incorrect username or password!';
                 case 'auth/invalid-credential':
-                    return 'Invalid email or password!';
+                    return 'Incorrect username or password!';
                 case 'auth/too-many-requests':
                     return 'Too many failed attempts. Please try again later.';
                 default:
