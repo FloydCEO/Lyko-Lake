@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Profile – Lyko Lake</title>
+    <title>Profile â€“ Lyko Lake</title>
     <style>
         *{margin:0;padding:0;box-sizing:border-box}
         body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Oxygen,Ubuntu,Cantarell,"Helvetica Neue",sans-serif;
@@ -52,14 +52,10 @@
                        font-size:4em;display:flex;align-items:center;justify-content:center}
         .profile-avatar img{width:100%;height:100%;object-fit:cover}
         .profile-avatar.editable{cursor:pointer}
-        .profile-avatar.editable:hover::after{content:"📷 Change Photo";position:absolute;inset:0;background:rgba(0,0,0,.7);
+        .profile-avatar.editable:hover::after{content:"ðŸ“· Change Photo";position:absolute;inset:0;background:rgba(0,0,0,.7);
                                            display:flex;align-items:center;justify-content:center;font-size:.8em;color:#fff;border-radius:50%}
         .profile-display-name{font-size:2.5em;font-weight:bold;margin-bottom:10px;background:linear-gradient(135deg,#22c5a4 0%,#4dd4b8 100%);
                              -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;position:relative;display:inline-block}
-        .profile-rank{display:inline-block;padding:6px 16px;border-radius:999px;font-size:.65em;font-weight:700;
-                     margin-left:12px;vertical-align:middle;text-transform:uppercase;letter-spacing:1px;position:relative;top:-4px}
-        .profile-rank.ceo{background:#ff3b30;box-shadow:0 0 15px #ff3b30;animation:vibe .8s infinite alternate}
-        .profile-rank.admin{background:#34c759;box-shadow:0 0 10px #34c759}
         .profile-username{font-size:1.3em;color:rgba(255,255,255,.6);margin-bottom:15px}
         .profile-uid{display:inline-block;background:rgba(34,197,164,.2);border:2px solid rgba(34,197,164,.5);color:#22c5a4;
                     padding:8px 20px;border-radius:20px;font-weight:600;font-size:1.1em}
@@ -110,42 +106,38 @@
         .modal-message.error{background:rgba(255,59,48,.2);border:2px solid rgba(255,59,48,.5);color:#ff3b30}
         .modal-message.success{background:rgba(52,199,89,.2);border:2px solid rgba(52,199,89,.5);color:#34c759}
 
-        .error-message{text-align:center;padding:60px 20px}
-        .error-title{font-size:4em;margin-bottom:20px}
-        .error-text{font-size:1.8em;color:rgba(255,255,255,.8);margin-bottom:30px}
-
         @keyframes fadeIn{from{opacity:0;transform:translateY(30px)}to{opacity:1;transform:translateY(0)}}
-        @keyframes vibe{to{transform:scale(1.08)}}
         @media(max-width:768px){.profile-header{padding:30px 20px}.page-title h1{font-size:2.5em}.profile-display-name{font-size:2em}.profile-avatar{width:120px;height:120px;font-size:3em}}
     </style>
 </head>
 <body>
 
 <nav>
-    <a href="/" class="logo">🌊 Lyko Lake</a>
+    <a href="/" class="logo">ðŸŒŠ Lyko Lake</a>
     <a href="/auth.html" class="auth-button hidden" id="authButton">Sign Up / Login</a>
 
     <div class="user-menu hidden" id="userMenu">
         <button class="user-button" id="userButton">
             <div class="user-avatar"><img id="navAvatarImg" src="" alt="A"></div>
-            <span id="navDisplayName">Loading…</span>
+            <span id="navDisplayName">Loadingâ€¦</span>
         </button>
         <div class="dropdown" id="dropdown">
-            <a class="dropdown-item" id="navProfileLink"><span>👤</span><span>Profile</span></a>
-            <a href="/help.html" class="dropdown-item"><span>❓</span><span>Help</span></a>
-            <div class="dropdown-item logout" id="logoutButton"><span>🚪</span><span>Log Out</span></div>
+            <a class="dropdown-item" id="navProfileLink"><span>ðŸ‘¤</span><span>Profile</span></a>
+            <a href="/help.html" class="dropdown-item"><span>â“</span><span>Help</span></a>
+            <div class="dropdown-item logout" id="logoutButton"><span>ðŸšª</span><span>Log Out</span></div>
         </div>
     </div>
 </nav>
 
 <div class="container">
-    <div class="loading" id="loading">Loading profile…</div>
+    <div class="loading" id="loading">Loading profileâ€¦</div>
 
     <div class="hidden" id="profileContent">
         <div class="page-title">
-            <h1 id="titleName">Loading…</h1>
+            <h1 id="titleName">Loadingâ€¦</h1>
         </div>
 
+        <!--  hover tooltip  -->
         <div class="hover-tooltip" id="hoverTooltip">
             <div class="tooltip-line"><span class="tooltip-label">@</span><span id="tooltipUsername">username</span></div>
             <div class="tooltip-line"><span class="tooltip-label">UID:</span><span id="tooltipUid">#0</span></div>
@@ -154,38 +146,39 @@
 
         <div class="profile-header">
             <div class="profile-avatar" id="profileAvatar"><img id="profileAvatarImg" src="" alt="Profile"></div>
-            <h2 class="profile-display-name" id="displayName">Loading…<span class="profile-rank hidden" id="profileRank"></span></h2>
+            <h2 class="profile-display-name" id="displayName">Loadingâ€¦</h2>
             <div class="profile-username" id="username">@loading</div>
             <div class="profile-uid" id="uid">User #0</div>
         </div>
 
         <div class="profile-stats">
-            <div class="stat-card"><div class="stat-label">Member Since</div><div class="stat-value" id="joinDate">…</div></div>
+            <div class="stat-card"><div class="stat-label">Member Since</div><div class="stat-value" id="joinDate">â€¦</div></div>
             <div class="stat-card"><div class="stat-label">User ID</div><div class="stat-value" id="userNumber">#0</div></div>
         </div>
 
         <div class="profile-section">
-            <h2 class="section-title"><span>📝</span><span>Bio</span></h2>
+            <h2 class="section-title"><span>ðŸ“</span><span>Bio</span></h2>
             <div id="bioDisplay"><p class="bio-text" id="bioText">This user hasn't written a bio yet.</p></div>
             <div class="hidden" id="bioEdit">
-                <textarea class="bio-input" id="bioInput" placeholder="Tell everyone about yourself…" maxlength="500"></textarea>
+                <textarea class="bio-input" id="bioInput" placeholder="Tell everyone about yourselfâ€¦" maxlength="500"></textarea>
                 <div class="bio-actions"><button class="save-button" id="saveBioButton">Save</button><button class="cancel-button" id="cancelBioButton">Cancel</button></div>
             </div>
         </div>
 
         <div class="profile-section">
-            <h2 class="section-title"><span>📊</span><span>About</span></h2>
+            <h2 class="section-title"><span>ðŸ“Š</span><span>About</span></h2>
             <p style="color:rgba(255,255,255,.7);line-height:1.6;">This profile page will be expanded in future updates with posts, achievements, and more!</p>
         </div>
     </div>
 
     <div class="error-message hidden" id="errorContent">
-        <div class="error-title">🌊</div>
+        <div class="error-title">ðŸŒŠ</div>
         <h2 class="error-text" id="errorText">User not found</h2>
         <a href="/" class="auth-button">Go Home</a>
     </div>
 </div>
 
+<!--  CHANGE-PICTURE MODAL  -->
 <div class="modal-overlay hidden" id="uploadModal">
     <div class="modal">
         <div class="modal-header">
@@ -194,14 +187,14 @@
         </div>
         <div class="modal-message" id="modalMessage"></div>
         <div class="upload-area" id="uploadArea">
-            <div class="upload-icon">📷</div>
+            <div class="upload-icon">ðŸ“·</div>
             <div class="upload-text">Click to upload an image</div>
             <div class="upload-hint">Square images work best (1:1 ratio)</div>
             <input type="file" id="fileInput" class="file-input" accept="image/*">
         </div>
         <div class="preview-container" id="previewContainer">
             <img id="previewImage" class="preview-image" src="" alt="Preview">
-            <div class="upload-hint">Preview – make sure your face is centered</div>
+            <div class="upload-hint">Preview â€“ make sure your face is centered</div>
         </div>
         <div class="modal-actions">
             <button class="upload-button" id="uploadButton" disabled>Upload</button>
@@ -210,56 +203,306 @@
 </div>
 
 <script type="module">
-import{initializeApp}from'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
-import{getAuth,onAuthStateChanged,signOut}from'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
-import{getFirestore,doc,getDoc,updateDoc}from'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+import { getAuth, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
+import { getFirestore, doc, getDoc, updateDoc } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
 
-const cfg={apiKey:"AIzaSyDUBeWvs6kOijqST6FVGirWs2EZ12aAAwU",authDomain:"lyko-lake.firebaseapp.com",projectId:"lyko-lake",storageBucket:"lyko-lake.firebasestorage.app",messagingSenderId:"685592614306",appId:"1:685592614306:web:b6a8f6f18407f9c0154efb"};
-const app=initializeApp(cfg),auth=getAuth(app),db=getFirestore(app);
+const firebaseConfig = {
+    apiKey: "AIzaSyDUBeWvs6kOijqST6FVGirWs2EZ12aAAwU",
+    authDomain: "lyko-lake.firebaseapp.com",
+    projectId: "lyko-lake",
+    storageBucket: "lyko-lake.firebasestorage.app",
+    messagingSenderId: "685592614306",
+    appId: "1:685592614306:web:b6a8f6f18407f9c0154efb",
+    measurementId: "G-QN0H7E9NEQ"
+};
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
 
-const $=id=>document.getElementById(id);
-let currentUserId,currentUsername,isOwnProfile=false,selectedFile,authUser;
+/*  ------------------------  CACHED ELEMENTS  ------------------------  */
+const authButton = document.getElementById('authButton');
+const userMenu = document.getElementById('userMenu');
+const userButton = document.getElementById('userButton');
+const dropdown = document.getElementById('dropdown');
+const navDisplayName = document.getElementById('navDisplayName');
+const navProfileLink = document.getElementById('navProfileLink');
+const logoutButton = document.getElementById('logoutButton');
+const navAvatarImg = document.getElementById('navAvatarImg');
 
-function showModalMessage(m,t){const msg=$('modalMessage');msg.textContent=m;msg.className=`modal-message ${t}`;msg.style.display='block'}
-function hideModalMessage(){$('modalMessage').style.display='none'}
-function resetUploadModal(){$('fileInput').value='';$('previewContainer').style.display='none';$('uploadButton').disabled=true;$('uploadButton').textContent='Upload';selectedFile=null;hideModalMessage()}
-function openUploadModal(){$('uploadModal').classList.remove('hidden');resetUploadModal()}
-function closeUploadModal(){$('uploadModal').classList.add('hidden');resetUploadModal()}
+const loading = document.getElementById('loading');
+const profileContent = document.getElementById('profileContent');
+const errorContent = document.getElementById('errorContent');
+const errorText = document.getElementById('errorText');
+const titleName = document.getElementById('titleName');
+const hoverTooltip = document.getElementById('hoverTooltip');
 
-onAuthStateChanged(auth,async user=>{authUser=user;if(user&&user.emailVerified){const snap=await getDoc(doc(db,'users',user.uid));if(snap.exists()){const d=snap.data();$('authButton').classList.add('hidden');$('userMenu').classList.remove('hidden');$('navDisplayName').textContent=d.displayName;$('navProfileLink').href=`/${d.username}`;if(d.avatar){$('navAvatarImg').src=d.avatar;$('navAvatarImg').style.display='block'}}}else{$('authButton').classList.remove('hidden');$('userMenu').classList.add('hidden')}});
+const tooltipUsername = document.getElementById('tooltipUsername');
+const tooltipUid = document.getElementById('tooltipUid');
+const tooltipJoined = document.getElementById('tooltipJoined');
 
-$('logoutButton').addEventListener('click',()=>signOut(auth).then(()=>window.location.href='/'));
-$('userButton').addEventListener('click',e=>{e.stopPropagation();$('dropdown').classList.toggle('show')});
-document.addEventListener('click',()=>$('dropdown').classList.remove('show'));
+const profileAvatar = document.getElementById('profileAvatar');
+const profileAvatarImg = document.getElementById('profileAvatarImg');
+const bioDisplay = document.getElementById('bioDisplay');
+const bioEdit = document.getElementById('bioEdit');
+const bioText = document.getElementById('bioText');
+const bioInput = document.getElementById('bioInput');
+const saveBioButton = document.getElementById('saveBioButton');
+const cancelBioButton = document.getElementById('cancelBioButton');
 
-const urlParams=new URLSearchParams(window.location.search);
-let profileUsername=urlParams.get('u');
-if(!profileUsername){const path=window.location.pathname;const match=path.match(/^\/([^\/]+)$/);if(match&&match[1]!=='index.html'&&match[1]!=='')profileUsername=match[1]}
-if(!profileUsername)showError('No username provided');else loadProfile(profileUsername);
+const uploadModal = document.getElementById('uploadModal');
+const closeModal = document.getElementById('closeModal');
+const uploadArea = document.getElementById('uploadArea');
+const fileInput = document.getElementById('fileInput');
+const previewContainer = document.getElementById('previewContainer');
+const previewImage = document.getElementById('previewImage');
+const uploadButton = document.getElementById('uploadButton');
+const modalMessage = document.getElementById('modalMessage');
 
-async function loadProfile(username){try{const usernameSnap=await getDoc(doc(db,'usernames',username.toLowerCase()));if(!usernameSnap.exists()){showError(`User @${username} not found`);return}const uid=usernameSnap.data().userId;const userSnap=await getDoc(doc(db,'users',uid));if(!userSnap.exists()){showError('User profile not found');return}const data=userSnap.data();currentUserId=uid;currentUsername=data.username;isOwnProfile=!!(authUser&&authUser.uid===uid);renderProfile(data)}catch(e){console.error(e);showError('Error loading profile.')}}
+/*  ------------------------  STATE  ------------------------  */
+let currentUserId = null;
+let currentUsername = null;
+let isOwnProfile = false;
+let selectedFile = null;
+let authUser = null;
 
-function renderProfile(data){document.title=`${data.displayName} (@${data.username}) – Lyko Lake`;$('titleName').textContent=data.displayName;$('tooltipUsername').textContent=data.username;$('tooltipUid').textContent=`#${data.uid}`;const join=data.createdAt?.toDate?data.createdAt.toDate():new Date(data.createdAt);$('tooltipJoined').textContent=join.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});$('displayName').textContent=data.displayName;if(data.rank&&(data.rank==='CEO'||data.rank==='Admin')){const rankEl=$('profileRank');rankEl.textContent=data.rank;rankEl.className='profile-rank '+(data.rank==='CEO'?'ceo':'admin');rankEl.classList.remove('hidden')}$('username').textContent=`@${data.username}`;$('uid').textContent=`User #${data.uid}`;$('userNumber').textContent=`#${data.uid}`;$('joinDate').textContent=join.toLocaleDateString('en-US',{month:'short',year:'numeric'});if(data.avatar){$('profileAvatarImg').src=data.avatar;$('profileAvatar').style.background='none'}if(data.bio){$('bioText').textContent=data.bio;$('bioText').classList.remove('bio-placeholder')}else{$('bioText').textContent='This user hasn\'t written a bio yet.';$('bioText').classList.add('bio-placeholder')}if(isOwnProfile){$('bioText').classList.add('editable');$('profileAvatar').classList.add('editable')}$('loading').classList.add('hidden');$('profileContent').classList.remove('hidden')}
+/*  ------------------------  UTILS  ------------------------  */
+function showModalMessage(msg, type) {
+    modalMessage.textContent = msg;
+    modalMessage.className = `modal-message ${type}`;
+    modalMessage.style.display = 'block';
+}
+function hideModalMessage() {
+    modalMessage.style.display = 'none';
+}
+function resetUploadModal() {
+    fileInput.value = '';
+    previewContainer.style.display = 'none';
+    uploadButton.disabled = true;
+    uploadButton.textContent = 'Upload';
+    selectedFile = null;
+    hideModalMessage();
+}
+function openUploadModal() {
+    uploadModal.classList.remove('hidden');
+    resetUploadModal();
+}
+function closeUploadModal() {
+    uploadModal.classList.add('hidden');
+    resetUploadModal();
+}
 
-function showError(msg){$('errorText').textContent=msg;$('loading').classList.add('hidden');$('errorContent').classList.remove('hidden')}
+/*  ------------------------  NAV + AUTH  ------------------------  */
+onAuthStateChanged(auth, async user => {
+    authUser = user;
+    if (user && user.emailVerified) {
+        const snap = await getDoc(doc(db, 'users', user.uid));
+        if (snap.exists()) {
+            const d = snap.data();
+            authButton.classList.add('hidden');
+            userMenu.classList.remove('hidden');
+            navDisplayName.textContent = d.displayName;
+            navProfileLink.href = `/profile.html?u=${d.username}`;
+            if (d.avatar) {
+                navAvatarImg.src = d.avatar;
+                navAvatarImg.style.display = 'block';
+            }
+        }
+    } else {
+        authButton.classList.remove('hidden');
+        userMenu.classList.add('hidden');
+    }
+});
+logoutButton.addEventListener('click', () => signOut(auth).then(() => window.location.href = '/'));
+userButton.addEventListener('click', e => {
+    e.stopPropagation();
+    dropdown.classList.toggle('show');
+});
+document.addEventListener('click', () => dropdown.classList.remove('show'));
 
-function attachTooltip(el){el.addEventListener('mouseenter',e=>{$('hoverTooltip').classList.add('show');positionTooltip(e)});el.addEventListener('mousemove',positionTooltip);el.addEventListener('mouseleave',()=>$('hoverTooltip').classList.remove('show'))}
-function positionTooltip(e){const tt=$('hoverTooltip');tt.style.left=(e.clientX+15)+'px';tt.style.top=(e.clientY+15)+'px'}
-attachTooltip($('displayName'));
-attachTooltip($('profileAvatar'));
+/*  ------------------------  PROFILE LOADER  ------------------------  */
+const urlParams = new URLSearchParams(window.location.search);
+const profileUsername = urlParams.get('u');
+if (!profileUsername) {
+    showError('No username provided. Use: profile.html?u=username');
+} else {
+    loadProfile(profileUsername);
+}
 
-$('bioText').addEventListener('click',()=>{if(!isOwnProfile)return;$('bioDisplay').classList.add('hidden');$('bioEdit').classList.remove('hidden');$('bioInput').value=$('bioText').textContent==='This user hasn\'t written a bio yet.''':$('bioText').textContent;$('bioInput').focus()});
-$('cancelBioButton').addEventListener('click',()=>{$('bioEdit').classList.add('hidden');$('bioDisplay').classList.remove('hidden')});
-$('saveBioButton').addEventListener('click',async()=>{const newBio=$('bioInput').value.trim();try{await updateDoc(doc(db,'users',currentUserId),{bio:newBio});$('bioText').textContent=newBio||'This user hasn\'t written a bio yet.';$('bioText').classList.toggle('bio-placeholder',!newBio);$('bioEdit').classList.add('hidden');$('bioDisplay').classList.remove('hidden');showModalMessage('Bio updated!','success')}catch{showModalMessage('Failed to update bio.','error')}});
+async function loadProfile(username) {
+    try {
+        const usernameSnap = await getDoc(doc(db, 'usernames', username.toLowerCase()));
+        if (!usernameSnap.exists()) {
+            showError(`User @${username} not found`);
+            return;
+        }
+        const uid = usernameSnap.data().userId;
+        const userSnap = await getDoc(doc(db, 'users', uid));
+        if (!userSnap.exists()) {
+            showError('User profile not found');
+            return;
+        }
+        const data = userSnap.data();
+        currentUserId = uid;
+        currentUsername = data.username;
+        isOwnProfile = !!(authUser && authUser.uid === uid);
+        renderProfile(data);
+    } catch (e) {
+        console.error(e);
+        showError('Error loading profile.');
+    }
+}
 
-$('profileAvatar').addEventListener('click',()=>{if(!isOwnProfile)return;openUploadModal()});
-$('uploadArea').addEventListener('click',()=>$('fileInput').click());
-$('fileInput').addEventListener('change',e=>{if(!e.target.files||!e.target.files[0])return;selectedFile=e.target.files[0];if(!selectedFile.type.startsWith('image/')){showModalMessage('Please select an image file.','error');return}if(selectedFile.size>2*1024*1024){showModalMessage('Image must be smaller than 2 MB.','error');return}const reader=new FileReader();reader.onload=ev=>{$('previewImage').src=ev.target.result;$('previewContainer').style.display='block';$('uploadButton').disabled=false};reader.readAsDataURL(selectedFile)});
-$('uploadButton').addEventListener('click',async()=>{if(!selectedFile)return;$('uploadButton').disabled=true;$('uploadButton').textContent='Uploading…';try{const processed=await processImage(selectedFile);await updateDoc(doc(db,'users',currentUserId),{avatar:processed});$('profileAvatarImg').src=processed;$('navAvatarImg').src=processed;showModalMessage('Picture updated!','success');setTimeout(closeUploadModal,1200)}catch{showModalMessage('Upload failed.','error');$('uploadButton').disabled=false;$('uploadButton').textContent='Upload'}});
-$('closeModal').addEventListener('click',closeUploadModal);
-$('uploadModal').addEventListener('click',e=>{if(e.target===$('uploadModal'))closeUploadModal()});
+function renderProfile(data) {
+    document.title = `${data.displayName} (@${data.username}) â€“ Lyko Lake`;
+    titleName.textContent = data.displayName;
 
-function processImage(file){return new Promise((resolve,reject)=>{const img=new Image();img.onload=()=>{const canvas=document.createElement('canvas');const ctx=canvas.getContext('2d');canvas.width=canvas.height=500;const scale=Math.min(500/img.width,500/img.height);const w=img.width*scale;const h=img.height*scale;ctx.fillStyle='#22c5a4';ctx.fillRect(0,0,500,500);ctx.drawImage(img,(500-w)/2,(500-h)/2,w,h);resolve(canvas.toDataURL('image/jpeg',0.8))};img.onerror=reject;img.src=URL.createObjectURL(file)})}
+    tooltipUsername.textContent = data.username;
+    tooltipUid.textContent = `#${data.uid}`;
+    const join = data.createdAt?.toDate ? data.createdAt.toDate() : new Date(data.createdAt);
+    tooltipJoined.textContent = join.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+
+    document.getElementById('displayName').textContent = data.displayName;
+    document.getElementById('username').textContent = `@${data.username}`;
+    document.getElementById('uid').textContent = `User #${data.uid}`;
+    document.getElementById('userNumber').textContent = `#${data.uid}`;
+    document.getElementById('joinDate').textContent = join.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+
+    if (data.avatar) {
+        profileAvatarImg.src = data.avatar;
+        profileAvatar.style.background = 'none';
+    }
+    if (data.bio) {
+        bioText.textContent = data.bio;
+        bioText.classList.remove('bio-placeholder');
+    } else {
+        bioText.textContent = 'This user hasn\'t written a bio yet.';
+        bioText.classList.add('bio-placeholder');
+    }
+
+    if (isOwnProfile) {
+        bioText.classList.add('editable');
+        profileAvatar.classList.add('editable');
+    }
+
+    loading.classList.add('hidden');
+    profileContent.classList.remove('hidden');
+}
+
+function showError(msg) {
+    errorText.textContent = msg;
+    loading.classList.add('hidden');
+    errorContent.classList.remove('hidden');
+}
+
+/*  ------------------------  HOVER TOOLTIP ON DISPLAY NAME + AVATAR  ------------------------  */
+function attachTooltip(el) {
+    el.addEventListener('mouseenter', e => {
+        hoverTooltip.classList.add('show');
+        positionTooltip(e);
+    });
+    el.addEventListener('mousemove', positionTooltip);
+    el.addEventListener('mouseleave', () => hoverTooltip.classList.remove('show'));
+}
+function positionTooltip(e) {
+    hoverTooltip.style.left = (e.clientX + 15) + 'px';
+    hoverTooltip.style.top = (e.clientY + 15) + 'px';
+}
+attachTooltip(document.getElementById('displayName'));
+attachTooltip(profileAvatar);
+
+/*  ------------------------  BIO EDIT  ------------------------  */
+bioText.addEventListener('click', () => {
+    if (!isOwnProfile) return;
+    bioDisplay.classList.add('hidden');
+    bioEdit.classList.remove('hidden');
+    bioInput.value = bioText.textContent === 'This user hasn\'t written a bio yet.' ? '' : bioText.textContent;
+    bioInput.focus();
+});
+cancelBioButton.addEventListener('click', () => {
+    bioEdit.classList.add('hidden');
+    bioDisplay.classList.remove('hidden');
+});
+saveBioButton.addEventListener('click', async () => {
+    const newBio = bioInput.value.trim();
+    try {
+        await updateDoc(doc(db, 'users', currentUserId), { bio: newBio });
+        bioText.textContent = newBio || 'This user hasn\'t written a bio yet.';
+        bioText.classList.toggle('bio-placeholder', !newBio);
+        bioEdit.classList.add('hidden');
+        bioDisplay.classList.remove('hidden');
+        showModalMessage('Bio updated!', 'success');
+    } catch {
+        showModalMessage('Failed to update bio.', 'error');
+    }
+});
+
+/*  ------------------------  AVATAR + MODAL  ------------------------  */
+profileAvatar.addEventListener('click', () => {
+    if (!isOwnProfile) return;
+    openUploadModal();
+});
+uploadArea.addEventListener('click', () => fileInput.click());
+fileInput.addEventListener('change', e => {
+    if (!e.target.files || !e.target.files[0]) return;
+    selectedFile = e.target.files[0];
+    if (!selectedFile.type.startsWith('image/')) {
+        showModalMessage('Please select an image file.', 'error');
+        return;
+    }
+    if (selectedFile.size > 2 * 1024 * 1024) {
+        showModalMessage('Image must be smaller than 2 MB.', 'error');
+        return;
+    }
+    const reader = new FileReader();
+    reader.onload = ev => {
+        previewImage.src = ev.target.result;
+        previewContainer.style.display = 'block';
+        uploadButton.disabled = false;
+    };
+    reader.readAsDataURL(selectedFile);
+});
+uploadButton.addEventListener('click', async () => {
+    if (!selectedFile) return;
+    uploadButton.disabled = true;
+    uploadButton.textContent = 'Uploadingâ€¦';
+    try {
+        const processed = await processImage(selectedFile);
+        await updateDoc(doc(db, 'users', currentUserId), { avatar: processed });
+        profileAvatarImg.src = processed;
+        navAvatarImg.src = processed;
+        showModalMessage('Picture updated!', 'success');
+        setTimeout(closeUploadModal, 1200);
+    } catch {
+        showModalMessage('Upload failed.', 'error');
+        uploadButton.disabled = false;
+        uploadButton.textContent = 'Upload';
+    }
+});
+closeModal.addEventListener('click', closeUploadModal);
+uploadModal.addEventListener('click', e => {
+    if (e.target === uploadModal) closeUploadModal();
+});
+
+function processImage(file) {
+    return new Promise((resolve, reject) => {
+        const img = new Image();
+        img.onload = () => {
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            canvas.width = canvas.height = 500;
+            const scale = Math.min(500 / img.width, 500 / img.height);
+            const w = img.width * scale;
+            const h = img.height * scale;
+            ctx.fillStyle = '#22c5a4';
+            ctx.fillRect(0, 0, 500, 500);
+            ctx.drawImage(img, (500 - w) / 2, (500 - h) / 2, w, h);
+            resolve(canvas.toDataURL('image/jpeg', 0.8));
+        };
+        img.onerror = reject;
+        img.src = URL.createObjectURL(file);
+    });
+}
 </script>
 </body>
 </html>
