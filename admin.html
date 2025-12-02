@@ -9,28 +9,31 @@
 body{background:linear-gradient(135deg,var(--bg) 0%,#1a6b6b 50%,#0f3d3d 100%);color:#fff;min-height:100vh;padding:30px}
 a.logo{font-size:1.8em;font-weight:bold;color:var(--accent);text-decoration:none;display:flex;align-items:center;gap:10px}
 h1{font-size:2.5em;margin:20px 0 10px}
-.users-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:25px;margin-top:30px}
-.user-card{background:rgba(255,255,255,.05);border:2px solid rgba(34,197,164,.3);border-radius:15px;padding:20px;text-align:center;backdrop-filter:blur(10px);transition:transform .3s,box-shadow .3s;cursor:pointer;position:relative}
+.users-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:25px;margin-top:30px}
+.user-card{background:rgba(255,255,255,.05);border:2px solid rgba(34,197,164,.3);border-radius:15px;padding:20px;text-align:center;backdrop-filter:blur(10px);transition:transform .3s,box-shadow .3s;cursor:pointer;position:relative;min-height:280px;display:flex;flex-direction:column}
 .user-card:hover{transform:translateY(-5px);box-shadow:0 10px 30px rgba(0,0,0,.4)}
 .user-card img.avatar{width:80px;height:80px;border-radius:50%;object-fit:cover;margin:0 auto 12px;background:var(--accent)}
-.user-card .display{font-size:1.3em;font-weight:600}
-.user-card .username{color:rgba(255,255,255,.6);margin:4px 0}
-.user-card .uid{font-size:.9em;color:rgba(255,255,255,.4)}
+.user-card .display{font-size:1.2em;font-weight:600;word-wrap:break-word;margin-bottom:4px}
+.user-card .username{color:rgba(255,255,255,.6);margin:4px 0;font-size:.9em;word-wrap:break-word}
+.user-card .uid{font-size:.85em;color:rgba(255,255,255,.4);margin-bottom:auto;padding-bottom:12px}
 .rank{display:inline-block;padding:4px 10px;border-radius:999px;font-size:.75em;font-weight:600;margin-left:6px;position:relative}
 .rank.ceo{background:var(--ceo);box-shadow:0 0 10px var(--ceo);animation:vibe .8s infinite alternate}
 .rank.admin{background:var(--admin)}
 .rank.banned{background:#ff3b30;box-shadow:0 0 10px #ff3b30;}
 .rank:hover .info-box{opacity:1;visibility:visible}
-.info-box{position:absolute;top:-40px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,.9);color:#fff;padding:6px 10px;border-radius:6px;font-size:.75em;white-space:nowrap;opacity:0;visibility:hidden;transition:opacity .2s;pointer-events:none}
-.actions{margin-top:12px;display:flex;gap:8px;justify-content:center}
-.actions button{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.3);color:#fff;padding:6px 12px;border-radius:6px;cursor:pointer;font-size:.8em}
-.actions button:hover{background:rgba(255,255,255,.2)}
+.info-box{position:absolute;top:-40px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,.9);color:#fff;padding:6px 10px;border-radius:6px;font-size:.75em;white-space:nowrap;opacity:0;visibility:hidden;transition:opacity .2s;pointer-events:none;z-index:100}
+.actions{margin-top:auto;display:flex;flex-wrap:wrap;gap:6px;justify-content:center}
+.actions button{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.3);color:#fff;padding:6px 10px;border-radius:6px;cursor:pointer;font-size:.75em;transition:all .2s;white-space:nowrap}
+.actions button:hover{background:rgba(255,255,255,.2);transform:translateY(-1px)}
 .actions button:disabled{opacity:.4;cursor:not-allowed}
 .modal{position:fixed;inset:0;background:rgba(0,0,0,.7);display:flex;align-items:center;justify-content:center;z-index:1000}
-.modal-content{background:#0a4d4d;border:2px solid var(--accent);border-radius:15px;padding:25px;width:90%;max-width:400px}
+.modal-content{background:#0a4d4d;border:2px solid var(--accent);border-radius:15px;padding:25px;width:90%;max-width:400px;max-height:90vh;overflow-y:auto}
 .modal h3{margin-bottom:15px}
-.modal input,.modal select,.modal textarea{width:100%;padding:8px;margin:6px 0;border-radius:6px;border:1px solid var(--accent);background:rgba(255,255,255,.05);color:#fff}
+.modal input,.modal select,.modal textarea{width:100%;padding:8px;margin:6px 0;border-radius:6px;border:1px solid var(--accent);background:rgba(255,255,255,.05);color:#fff;font-family:inherit}
 .modal-actions{display:flex;gap:10px;justify-content:flex-end;margin-top:15px}
+.modal-actions button{background:rgba(34,197,164,.2);border:2px solid var(--accent);color:#fff;padding:8px 16px;border-radius:6px;cursor:pointer;font-weight:600;transition:all .3s}
+.modal-actions button:hover{background:var(--accent);color:#0a4d4d}
+.modal-actions button:first-child{background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.3)}
 .hidden{display:none}
 @keyframes vibe{to{transform:scale(1.05)}}
 </style>
@@ -55,7 +58,7 @@ h1{font-size:2.5em;margin:20px 0 10px}
 <script type="module">
 import {initializeApp} from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
 import {getAuth,onAuthStateChanged} from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
-import {getFirestore,collection,getDocs,doc,getDoc,updateDoc,setDoc,serverTimestamp,deleteDoc} from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+import {getFirestore,collection,getDocs,doc,getDoc,updateDoc,setDoc,serverTimestamp,deleteDoc,Timestamp} from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
 
 const cfg={
   apiKey:"AIzaSyDUBeWvs6kOijqST6FVGirWs2EZ12aAAwU",
@@ -74,15 +77,27 @@ const usersGrid=$('#usersGrid');
 const modal=$('#modal'),modalTitle=$('#modalTitle'),modalBody=$('#modalBody'),
       modalCancel=$('#modalCancel'),modalConfirm=$('#modalConfirm');
 
-let currentRow;
-const hide=()=>modal.classList.add('hidden');
-const show=(title,body)=>{
+let currentAction = null;
+
+const hide=()=>{
+  modal.classList.add('hidden');
+  currentAction = null;
+};
+const show=(title,body,confirmCallback)=>{
   modalTitle.textContent=title;
   modalBody.innerHTML=body;
   modal.classList.remove('hidden');
+  currentAction = confirmCallback;
 };
+
 modalCancel.onclick=hide;
-modalConfirm.onclick=()=>{hide(); currentRow.confirm?.();};
+modalConfirm.onclick=async()=>{
+  if(currentAction){
+    await currentAction();
+  }
+  hide();
+  loadUsers();
+};
 
 /* ----------  PERM CHECK  ---------- */
 onAuthStateChanged(auth,async user=>{
@@ -109,7 +124,7 @@ async function loadUsers(){
       <div class="uid">User #${u.uid}</div>
       <div class="actions">${actionButtons(u,d.id)}</div>`;
     card.onclick=e=>{
-      if(e.target.tagName!=='BUTTON')window.open(`/profile.html?u=${u.username}`,'_blank');
+      if(e.target.tagName!=='BUTTON')window.open(`/${u.username}`,'_blank');
     };
     usersGrid.appendChild(card);
   }
@@ -123,28 +138,30 @@ function badge(u){
 }
 
 function actionButtons(u,uid){
-  if(u.rank==='CEO')return'<i>immutable</i>';
+  if(u.rank==='CEO')return'<i style="font-size:.8em;color:rgba(255,255,255,.5)">immutable</i>';
   return`
-    <button onclick="banUser('${uid}')">${u.banned?'Unban':'Ban'}</button>
-    <button onclick="muteUser('${uid}')">Mute</button>
-    <button onclick="renameUser('${uid}')">Rename</button>
-    <button onclick="rankUser('${uid}')">Rank</button>`;
+    <button onclick="event.stopPropagation();banUser('${uid}','${u.banned?'unban':'ban'}')">${u.banned?'Unban':'Ban'}</button>
+    <button onclick="event.stopPropagation();muteUser('${uid}')">Mute</button>
+    <button onclick="event.stopPropagation();renameUser('${uid}')">Rename</button>
+    <button onclick="event.stopPropagation();rankUser('${uid}','${u.rank||'Member'}')">Rank</button>`;
 }
 
 /* ----------  ACTIONS  ---------- */
-window.banUser=async uid=>{
-  const u=(await getDoc(doc(db,'users',uid))).data();
-  const ban=await getDoc(doc(db,'bans',uid));
-  if(ban.exists()){
-    await deleteDoc(doc(db,'bans',uid));
-    alert('User unbanned');
+window.banUser=async(uid,action)=>{
+  if(action==='unban'){
+    show('Unban User','Are you sure you want to unban this user?',async()=>{
+      await deleteDoc(doc(db,'bans',uid));
+      alert('User unbanned');
+    });
   }else{
     const body=`
+      <label>Ban Type:</label>
       <select id="banType">
         <option value="perm">Permanent</option>
         <option value="temp">Temporary</option>
       </select>
-      <div id="tempOpts" class="hidden">
+      <div id="tempOpts" style="display:none;">
+        <label>Duration:</label>
         <input id="banVal" type="number" min="1" value="1">
         <select id="banUnit">
           <option value="s">Seconds</option>
@@ -154,55 +171,58 @@ window.banUser=async uid=>{
           <option value="y">Years</option>
         </select>
       </div>
-      <textarea id="banReason" placeholder="Reason (visible to user)" rows="2"></textarea>`;
-    show('Ban user',body);
-    $('#banType').onchange=e=>$('#tempOpts').classList.toggle('hidden',e.target.value==='perm');
-    currentRow.confirm=async()=>{
+      <label>Reason (visible to user):</label>
+      <textarea id="banReason" rows="2" placeholder="No reason given"></textarea>`;
+    show('Ban User',body,async()=>{
       const type=$('#banType').value,reason=$('#banReason').value.trim()||'No reason given';
       let until=null;
       if(type==='temp'){
         const n=Number($('#banVal').value),u=$('#banUnit').value;
         const ms={s:1000,m:60000,h:3600000,d:86400000,y:31536000000}[u];
-        until=Date.now()+n*ms;
+        until=Timestamp.fromMillis(Date.now()+n*ms);
       }
       await setDoc(doc(db,'bans',uid),{until,reason,by:auth.currentUser.uid,at:serverTimestamp()});
       alert('User banned');
-    };
+    });
+    setTimeout(()=>{
+      $('#banType').onchange=e=>$('#tempOpts').style.display=e.target.value==='perm'?'none':'block';
+    },100);
   }
-  loadUsers();
 };
-window.muteUser=async uid=>{
-  show('Mute user','<textarea id="muteReason" placeholder="Reason (internal)" rows="2"></textarea>');
-  currentRow.confirm=async()=>{
+
+window.muteUser=async(uid)=>{
+  show('Mute User','<label>Reason (internal):</label><textarea id="muteReason" rows="2" placeholder="No reason given"></textarea>',async()=>{
     await updateDoc(doc(db,'users',uid),{muted:true});
-    alert('User muted');loadUsers();
-  };
+    alert('User muted');
+  });
 };
-window.renameUser=async uid=>{
+
+window.renameUser=async(uid)=>{
   const u=(await getDoc(doc(db,'users',uid))).data();
-  const body=`New display name:<br><input id="newName" value="${u.displayName}" maxlength="30">`;
-  show('Rename user',body);
-  currentRow.confirm=async()=>{
+  const body=`<label>New display name:</label><br><input id="newName" value="${u.displayName}" maxlength="30">`;
+  show('Rename User',body,async()=>{
     const name=$('#newName').value.trim();
     if(!name)return alert('Name required');
     await updateDoc(doc(db,'users',uid),{displayName:name});
-    alert('Name updated');loadUsers();
-  };
+    alert('Name updated');
+  });
 };
-window.rankUser=async uid=>{
-  const u=(await getDoc(doc(db,'users',uid))).data();
+
+window.rankUser=async(uid,currentRank)=>{
   const body=`
+    <label>Select Rank:</label>
     <select id="rankSel">
       <option value="Member">Member</option>
       <option value="Admin">Admin</option>
     </select>`;
-  show('Change rank',body);
-  $('#rankSel').value=u.rank||'Member';
-  currentRow.confirm=async()=>{
+  show('Change Rank',body,async()=>{
     const rank=$('#rankSel').value;
     await updateDoc(doc(db,'users',uid),{rank});
-    alert('Rank updated');loadUsers();
-  };
+    alert('Rank updated');
+  });
+  setTimeout(()=>{
+    $('#rankSel').value=currentRank;
+  },100);
 };
 </script>
 </body>
