@@ -360,7 +360,7 @@ h1{
 <script type="module">
 import {initializeApp} from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
 import {getAuth,onAuthStateChanged} from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
-import {getFirestore,collection,getDocs,doc,getDoc,updateDoc,setDoc,deleteDoc,serverTimestamp,Timestamp} from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+import {getFirestore,collection,getDocs,doc,getDoc,updateDoc,setDoc,deleteDoc,serverTimestamp,Timestamp,query,orderBy} from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
 
 const firebaseConfig = {
   apiKey: "AIzaSyDUBeWvs6kOijqST6FVGirWs2EZ12aAAwU",
@@ -388,6 +388,7 @@ const totalAdminsEl = document.getElementById('totalAdmins');
 const totalBannedEl = document.getElementById('totalBanned');
 
 let currentAction = null;
+let currentUser = null;
 let allUsers = [];
 
 function showError(msg) {
@@ -408,6 +409,7 @@ function showModal(title, body, onConfirm) {
 function hideModal() {
   modal.classList.remove('show');
   currentAction = null;
+  currentUser = null;
 }
 
 modalCancel.onclick = hideModal;
@@ -432,8 +434,8 @@ onAuthStateChanged(auth, async user => {
   
   try {
     const userDoc = await getDoc(doc(db, 'users', user.uid));
-    if (!userDoc.exists() || userDoc.data().rank !== 'CEO') {
-      showError('Access denied. CEO rank required.');
+    if (!userDoc.exists() || !(userDoc.data().rank === 'CEO' || userDoc.data().rank === 'Admin')) {
+      showError('Access denied. Admin or CEO rank required.');
       loadingContainer.classList.add('hidden');
       return;
     }
@@ -450,7 +452,8 @@ async function loadUsers() {
   usersGrid.innerHTML = '';
   
   try {
-    const usersSnap = await getDocs(collection(db, 'users'));
+    const usersQuery = query(collection(db, 'users'), orderBy('uid', 'asc'));
+    const usersSnap = await getDocs(usersQuery);
     const bansSnap = await getDocs(collection(db, 'bans'));
     
     const banMap = {};
@@ -504,7 +507,7 @@ function createUserCard(user) {
   const isBanned = user.banned;
   
   let badges = '';
-  if (isBanned) badges += '<span class="rank-badge banned">Banned</span>';
+  if (isBanned) badges += '<span class="rank-badge banned">Banned</span> ';
   if (isCEO) badges += '<span class="rank-badge ceo">CEO</span>';
   else if (isAdmin) badges += '<span class="rank-badge admin">Admin</span>';
   
@@ -513,7 +516,7 @@ function createUserCard(user) {
   
   card.innerHTML = `
     <div class="user-header">
-      <img class="user-avatar" src="${user.avatar || 'https://via.placeholder.com/60'}" alt="${user.displayName}">
+      <img class="user-avatar" src="${user.avatar || ''}" onerror="this.src='https://via.placeholder.com/60'" alt="${user.displayName}">
       <div class="user-info">
         <div class="user-display">
           ${user.displayName}
@@ -571,6 +574,7 @@ function createUserCard(user) {
 }
 
 async function banUser(user) {
+  currentUser = user;
   const body = `
     <div class="form-group">
       <label class="form-label">Ban Type</label>
@@ -584,11 +588,10 @@ async function banUser(user) {
       <div style="display:flex;gap:10px;">
         <input type="number" id="banDuration" class="form-input" min="1" value="1" style="flex:1;">
         <select id="banUnit" class="form-select" style="flex:1;">
-          <option value="m">Minutes</option>
-          <option value="h">Hours</option>
-          <option value="d">Days</option>
-          <option value="w">Weeks</option>
-          <option value="y">Years</option>
+          <option value="minutes">Minutes</option>
+          <option value="hours">Hours</option>
+          <option value="days">Days</option>
+          <option value="weeks">Weeks</option>
         </select>
       </div>
     </div>
@@ -606,16 +609,27 @@ async function banUser(user) {
     if (banType === 'temp') {
       const duration = parseInt(document.getElementById('banDuration').value);
       const unit = document.getElementById('banUnit').value;
-      const multipliers = {m: 60000, h: 3600000, d: 86400000, w: 604800000, y: 31536000000};
-      const ms = duration * multipliers[unit];
-      until = Timestamp.fromMillis(Date.now() + ms);
+      const now = new Date();
+      
+      if (unit === 'minutes') now.setMinutes(now.getMinutes() + duration);
+      else if (unit === 'hours') now.setHours(now.getHours() + duration);
+      else if (unit === 'days') now.setDate(now.getDate() + duration);
+      else if (unit === 'weeks') now.setDate(now.getDate() + (duration * 7));
+      
+      until = Timestamp.fromDate(now);
     }
     
-    await setDoc(doc(db, 'bans', user.userId), {
+    await setDoc(doc(db, 'bans', currentUser.userId), {
       until,
       reason,
       by: auth.currentUser.uid,
+      byName: auth.currentUser.email,
       at: serverTimestamp()
+    });
+    
+    // Update user muted status
+    await updateDoc(doc(db, 'users', currentUser.userId), {
+      muted: true
     });
   });
   
@@ -629,28 +643,37 @@ async function banUser(user) {
 }
 
 async function unbanUser(user) {
+  currentUser = user;
   const banInfo = user.banData ? `<p style="color:rgba(255,255,255,0.7);margin-bottom:15px;">Reason: ${user.banData.reason}</p>` : '';
   showModal(
     `Unban @${user.username}`,
     `${banInfo}<p style="color:rgba(255,255,255,0.9);">Are you sure you want to unban this user?</p>`,
     async () => {
-      await deleteDoc(doc(db, 'bans', user.userId));
+      await deleteDoc(doc(db, 'bans', currentUser.userId));
+      // Unmute user when unbanned
+      await updateDoc(doc(db, 'users', currentUser.userId), {
+        muted: false
+      });
     }
   );
 }
 
 async function muteUser(user) {
+  currentUser = user;
   const action = user.muted ? 'unmute' : 'mute';
   showModal(
     `${action.charAt(0).toUpperCase() + action.slice(1)} @${user.username}`,
     `<p style="color:rgba(255,255,255,0.9);">Are you sure you want to ${action} this user?</p>`,
     async () => {
-      await updateDoc(doc(db, 'users', user.userId), {muted: !user.muted});
+      await updateDoc(doc(db, 'users', currentUser.userId), {
+        muted: !currentUser.muted
+      });
     }
   );
 }
 
 async function renameUser(user) {
+  currentUser = user;
   const body = `
     <div class="form-group">
       <label class="form-label">New Display Name</label>
@@ -661,11 +684,12 @@ async function renameUser(user) {
   showModal(`Rename @${user.username}`, body, async () => {
     const newName = document.getElementById('newName').value.trim();
     if (!newName) throw new Error('Name cannot be empty');
-    await updateDoc(doc(db, 'users', user.userId), {displayName: newName});
+    await updateDoc(doc(db, 'users', currentUser.userId), {displayName: newName});
   });
 }
 
 async function changeRank(user) {
+  currentUser = user;
   const body = `
     <div class="form-group">
       <label class="form-label">Select Rank</label>
@@ -678,11 +702,11 @@ async function changeRank(user) {
   
   showModal(`Change Rank for @${user.username}`, body, async () => {
     const newRank = document.getElementById('newRank').value;
-    await updateDoc(doc(db, 'users', user.userId), {rank: newRank});
+    await updateDoc(doc(db, 'users', currentUser.userId), {rank: newRank});
   });
   
   setTimeout(() => {
-    document.getElementById('newRank').value = user.rank || 'Member';
+    document.getElementById('newRank').value = currentUser.rank || 'Member';
   }, 100);
 }
 </script>
