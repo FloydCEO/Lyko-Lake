@@ -24,6 +24,10 @@
         "destination": "/profile.html"
       },
       {
+        "source": "/:username",
+        "destination": "/profile.html"
+      },
+      {
         "source": "**",
         "destination": "/index.html"
       }
@@ -31,5 +35,8 @@
   },
   "storage": {
     "rules": "storage.rules"
+  },
+  "firestore": {
+    "rules": "firestore.rules"
   }
 }
