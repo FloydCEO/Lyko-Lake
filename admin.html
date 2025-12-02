@@ -434,14 +434,27 @@ onAuthStateChanged(auth, async user => {
   
   try {
     const userDoc = await getDoc(doc(db, 'users', user.uid));
-    if (!userDoc.exists() || !(userDoc.data().rank === 'CEO' || userDoc.data().rank === 'Admin')) {
+    if (!userDoc.exists()) {
+      showError('User profile not found.');
+      loadingContainer.classList.add('hidden');
+      return;
+    }
+    
+    const userData = userDoc.data();
+    if (!(userData.rank === 'CEO' || userData.rank === 'Admin')) {
       showError('Access denied. Admin or CEO rank required.');
       loadingContainer.classList.add('hidden');
       return;
     }
+    
     await loadUsers();
   } catch (e) {
-    showError(`Permission check failed: ${e.message}`);
+    console.error('Permission check error:', e);
+    if (e.code === 'permission-denied') {
+      showError('Firestore permissions not set. Please update Firestore rules in Firebase Console.');
+    } else {
+      showError(`Permission check failed: ${e.message}`);
+    }
     loadingContainer.classList.add('hidden');
   }
 });
@@ -454,7 +467,15 @@ async function loadUsers() {
   try {
     const usersQuery = query(collection(db, 'users'), orderBy('uid', 'asc'));
     const usersSnap = await getDocs(usersQuery);
-    const bansSnap = await getDocs(collection(db, 'bans'));
+    
+    // Try to load bans, but continue if it fails
+    let bansSnap;
+    try {
+      bansSnap = await getDocs(collection(db, 'bans'));
+    } catch (e) {
+      console.warn('Could not load bans:', e.message);
+      bansSnap = { forEach: () => {} }; // Empty iterator
+    }
     
     const banMap = {};
     bansSnap.forEach(d => {
@@ -493,6 +514,7 @@ async function loadUsers() {
     loadingContainer.classList.add('hidden');
     
   } catch (e) {
+    console.error('Error loading users:', e);
     showError(`Failed to load users: ${e.message}`);
     loadingContainer.classList.add('hidden');
   }
@@ -516,7 +538,7 @@ function createUserCard(user) {
   
   card.innerHTML = `
     <div class="user-header">
-      <img class="user-avatar" src="${user.avatar || ''}" onerror="this.src='https://via.placeholder.com/60'" alt="${user.displayName}">
+      <img class="user-avatar" src="${user.avatar || ''}" onerror="this.onerror=null;this.src='https://via.placeholder.com/60';" alt="${user.displayName}">
       <div class="user-info">
         <div class="user-display">
           ${user.displayName}
