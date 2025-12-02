@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Profile â€“ Lyko Lake</title>
+    <title>Profile – Lyko Lake</title>
     <style>
         *{margin:0;padding:0;box-sizing:border-box}
         body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Oxygen,Ubuntu,Cantarell,"Helvetica Neue",sans-serif;
@@ -13,8 +13,11 @@
         nav{background:rgba(10,77,77,.95);backdrop-filter:blur(10px);padding:20px 40px;display:flex;justify-content:space-between;align-items:center;
             position:sticky;top:0;z-index:1000;box-shadow:0 4px 20px rgba(0,0,0,.3);border-bottom:2px solid rgba(34,197,164,.3)}
         .logo{font-size:1.8em;font-weight:bold;color:#22c5a4;text-decoration:none;display:flex;align-items:center;gap:10px}
+        .nav-right{display:flex;gap:15px;align-items:center}
         .auth-button{background:rgba(34,197,164,.2);border:2px solid #22c5a4;color:#fff;padding:10px 30px;border-radius:8px;text-decoration:none;font-weight:600;transition:all .3s ease}
         .auth-button:hover{background:#22c5a4;color:#0a4d4d;transform:translateY(-2px)}
+        .admin-button{background:rgba(255,59,48,.2);border:2px solid #ff3b30;color:#fff;padding:10px 30px;border-radius:8px;text-decoration:none;font-weight:600;transition:all .3s ease}
+        .admin-button:hover{background:#ff3b30;color:#fff;transform:translateY(-2px);box-shadow:0 5px 15px rgba(255,59,48,.4)}
 
         .user-menu{position:relative}
         .user-button{background:rgba(34,197,164,.2);border:2px solid #22c5a4;color:#fff;padding:10px 20px;border-radius:8px;cursor:pointer;font-weight:600;
@@ -52,10 +55,13 @@
                        font-size:4em;display:flex;align-items:center;justify-content:center}
         .profile-avatar img{width:100%;height:100%;object-fit:cover}
         .profile-avatar.editable{cursor:pointer}
-        .profile-avatar.editable:hover::after{content:"ðŸ“· Change Photo";position:absolute;inset:0;background:rgba(0,0,0,.7);
+        .profile-avatar.editable:hover::after{content:"📷 Change Photo";position:absolute;inset:0;background:rgba(0,0,0,.7);
                                            display:flex;align-items:center;justify-content:center;font-size:.8em;color:#fff;border-radius:50%}
-        .profile-display-name{font-size:2.5em;font-weight:bold;margin-bottom:10px;background:linear-gradient(135deg,#22c5a4 0%,#4dd4b8 100%);
-                             -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;position:relative;display:inline-block}
+        .profile-display-name{font-size:2.5em;font-weight:bold;margin-bottom:10px;display:flex;align-items:center;justify-content:center;gap:10px;flex-wrap:wrap}
+        .profile-rank-badge{display:inline-block;padding:4px 12px;border-radius:12px;font-size:0.7em;font-weight:700;text-transform:uppercase;letter-spacing:0.5px}
+        .rank-ceo{background:#ff3b30;box-shadow:0 0 10px #ff3b30;animation:pulse 2s infinite}
+        .rank-admin{background:#34c759}
+        @keyframes pulse{0%,100%{opacity:1}50%{opacity:0.7}}
         .profile-username{font-size:1.3em;color:rgba(255,255,255,.6);margin-bottom:15px}
         .profile-uid{display:inline-block;background:rgba(34,197,164,.2);border:2px solid rgba(34,197,164,.5);color:#22c5a4;
                     padding:8px 20px;border-radius:20px;font-weight:600;font-size:1.1em}
@@ -106,35 +112,42 @@
         .modal-message.error{background:rgba(255,59,48,.2);border:2px solid rgba(255,59,48,.5);color:#ff3b30}
         .modal-message.success{background:rgba(52,199,89,.2);border:2px solid rgba(52,199,89,.5);color:#34c759}
 
+        .error-message{text-align:center;padding:100px 20px}
+        .error-title{font-size:5em;margin-bottom:20px}
+        .error-text{font-size:1.5em;color:#22c5a4;margin-bottom:30px}
+
         @keyframes fadeIn{from{opacity:0;transform:translateY(30px)}to{opacity:1;transform:translateY(0)}}
-        @media(max-width:768px){.profile-header{padding:30px 20px}.page-title h1{font-size:2.5em}.profile-display-name{font-size:2em}.profile-avatar{width:120px;height:120px;font-size:3em}}
+        @media(max-width:768px){.profile-header{padding:30px 20px}.page-title h1{font-size:2.5em}.profile-display-name{font-size:2em}.profile-avatar{width:120px;height:120px;font-size:3em}.nav-right{flex-direction:column;align-items:flex-end;gap:10px}}
     </style>
 </head>
 <body>
 
 <nav>
-    <a href="/" class="logo">ðŸŒŠ Lyko Lake</a>
-    <a href="/auth.html" class="auth-button hidden" id="authButton">Sign Up / Login</a>
+    <a href="/" class="logo">🌊 Lyko Lake</a>
+    <div class="nav-right">
+        <a href="/auth.html" class="auth-button hidden" id="authButton">Sign Up / Login</a>
+        <a href="/admin.html" class="admin-button hidden" id="adminButton">Admin</a>
 
-    <div class="user-menu hidden" id="userMenu">
-        <button class="user-button" id="userButton">
-            <div class="user-avatar"><img id="navAvatarImg" src="" alt="A"></div>
-            <span id="navDisplayName">Loadingâ€¦</span>
-        </button>
-        <div class="dropdown" id="dropdown">
-            <a class="dropdown-item" id="navProfileLink"><span>ðŸ‘¤</span><span>Profile</span></a>
-            <a href="/help.html" class="dropdown-item"><span>â“</span><span>Help</span></a>
-            <div class="dropdown-item logout" id="logoutButton"><span>ðŸšª</span><span>Log Out</span></div>
+        <div class="user-menu hidden" id="userMenu">
+            <button class="user-button" id="userButton">
+                <div class="user-avatar"><img id="navAvatarImg" src="" alt="A"></div>
+                <span id="navDisplayName">Loading…</span>
+            </button>
+            <div class="dropdown" id="dropdown">
+                <a class="dropdown-item" id="navProfileLink"><span>👤</span><span>Profile</span></a>
+                <a href="/help.html" class="dropdown-item"><span>❓</span><span>Help</span></a>
+                <div class="dropdown-item logout" id="logoutButton"><span>🚪</span><span>Log Out</span></div>
+            </div>
         </div>
     </div>
 </nav>
 
 <div class="container">
-    <div class="loading" id="loading">Loading profileâ€¦</div>
+    <div class="loading" id="loading">Loading profile…</div>
 
     <div class="hidden" id="profileContent">
         <div class="page-title">
-            <h1 id="titleName">Loadingâ€¦</h1>
+            <h1 id="titleName">Loading…</h1>
         </div>
 
         <!--  hover tooltip  -->
@@ -146,33 +159,33 @@
 
         <div class="profile-header">
             <div class="profile-avatar" id="profileAvatar"><img id="profileAvatarImg" src="" alt="Profile"></div>
-            <h2 class="profile-display-name" id="displayName">Loadingâ€¦</h2>
+            <h2 class="profile-display-name" id="displayName">Loading…</h2>
             <div class="profile-username" id="username">@loading</div>
             <div class="profile-uid" id="uid">User #0</div>
         </div>
 
         <div class="profile-stats">
-            <div class="stat-card"><div class="stat-label">Member Since</div><div class="stat-value" id="joinDate">â€¦</div></div>
+            <div class="stat-card"><div class="stat-label">Member Since</div><div class="stat-value" id="joinDate">…</div></div>
             <div class="stat-card"><div class="stat-label">User ID</div><div class="stat-value" id="userNumber">#0</div></div>
         </div>
 
         <div class="profile-section">
-            <h2 class="section-title"><span>ðŸ“</span><span>Bio</span></h2>
+            <h2 class="section-title"><span>📝</span><span>Bio</span></h2>
             <div id="bioDisplay"><p class="bio-text" id="bioText">This user hasn't written a bio yet.</p></div>
             <div class="hidden" id="bioEdit">
-                <textarea class="bio-input" id="bioInput" placeholder="Tell everyone about yourselfâ€¦" maxlength="500"></textarea>
+                <textarea class="bio-input" id="bioInput" placeholder="Tell everyone about yourself…" maxlength="500"></textarea>
                 <div class="bio-actions"><button class="save-button" id="saveBioButton">Save</button><button class="cancel-button" id="cancelBioButton">Cancel</button></div>
             </div>
         </div>
 
         <div class="profile-section">
-            <h2 class="section-title"><span>ðŸ“Š</span><span>About</span></h2>
+            <h2 class="section-title"><span>📋</span><span>About</span></h2>
             <p style="color:rgba(255,255,255,.7);line-height:1.6;">This profile page will be expanded in future updates with posts, achievements, and more!</p>
         </div>
     </div>
 
     <div class="error-message hidden" id="errorContent">
-        <div class="error-title">ðŸŒŠ</div>
+        <div class="error-title">🌊</div>
         <h2 class="error-text" id="errorText">User not found</h2>
         <a href="/" class="auth-button">Go Home</a>
     </div>
@@ -187,14 +200,14 @@
         </div>
         <div class="modal-message" id="modalMessage"></div>
         <div class="upload-area" id="uploadArea">
-            <div class="upload-icon">ðŸ“·</div>
+            <div class="upload-icon">📷</div>
             <div class="upload-text">Click to upload an image</div>
             <div class="upload-hint">Square images work best (1:1 ratio)</div>
             <input type="file" id="fileInput" class="file-input" accept="image/*">
         </div>
         <div class="preview-container" id="previewContainer">
             <img id="previewImage" class="preview-image" src="" alt="Preview">
-            <div class="upload-hint">Preview â€“ make sure your face is centered</div>
+            <div class="upload-hint">Preview – make sure your face is centered</div>
         </div>
         <div class="modal-actions">
             <button class="upload-button" id="uploadButton" disabled>Upload</button>
@@ -222,6 +235,7 @@ const db = getFirestore(app);
 
 /*  ------------------------  CACHED ELEMENTS  ------------------------  */
 const authButton = document.getElementById('authButton');
+const adminButton = document.getElementById('adminButton');
 const userMenu = document.getElementById('userMenu');
 const userButton = document.getElementById('userButton');
 const dropdown = document.getElementById('dropdown');
@@ -243,6 +257,7 @@ const tooltipJoined = document.getElementById('tooltipJoined');
 
 const profileAvatar = document.getElementById('profileAvatar');
 const profileAvatarImg = document.getElementById('profileAvatarImg');
+const displayNameEl = document.getElementById('displayName');
 const bioDisplay = document.getElementById('bioDisplay');
 const bioEdit = document.getElementById('bioEdit');
 const bioText = document.getElementById('bioText');
@@ -307,13 +322,20 @@ onAuthStateChanged(auth, async user => {
                 navAvatarImg.src = d.avatar;
                 navAvatarImg.style.display = 'block';
             }
+            
+            // Show admin button for Admins and CEOs
+            if (d.rank === 'Admin' || d.rank === 'CEO') {
+                adminButton.classList.remove('hidden');
+            }
         }
     } else {
         authButton.classList.remove('hidden');
+        adminButton.classList.add('hidden');
         userMenu.classList.add('hidden');
     }
 });
 logoutButton.addEventListener('click', () => signOut(auth).then(() => window.location.href = '/'));
+
 userButton.addEventListener('click', e => {
     e.stopPropagation();
     dropdown.classList.toggle('show');
@@ -321,13 +343,36 @@ userButton.addEventListener('click', e => {
 document.addEventListener('click', () => dropdown.classList.remove('show'));
 
 /*  ------------------------  PROFILE LOADER  ------------------------  */
+// Check if we're accessing via username in URL path
+const pathUsername = window.location.pathname.substring(1); // Remove leading slash
 const urlParams = new URLSearchParams(window.location.search);
-const profileUsername = urlParams.get('u');
-if (!profileUsername) {
-    showError('No username provided. Use: profile.html?u=username');
-} else {
-    loadProfile(profileUsername);
+const queryUsername = urlParams.get('u');
+
+let profileUsername = queryUsername || pathUsername;
+
+// Remove .html extension if present
+if (profileUsername.endsWith('.html')) {
+    profileUsername = profileUsername.slice(0, -5);
 }
+
+// If no username provided, check if user is logged in
+if (!profileUsername) {
+    if (authUser) {
+        // Load current user's profile
+        const snap = await getDoc(doc(db, 'users', authUser.uid));
+        if (snap.exists()) {
+            profileUsername = snap.data().username;
+        } else {
+            showError('You need to be logged in to view profiles.');
+            return;
+        }
+    } else {
+        showError('No username provided. Use: /username or profile.html?u=username');
+        return;
+    }
+}
+
+loadProfile(profileUsername);
 
 async function loadProfile(username) {
     try {
@@ -354,7 +399,7 @@ async function loadProfile(username) {
 }
 
 function renderProfile(data) {
-    document.title = `${data.displayName} (@${data.username}) â€“ Lyko Lake`;
+    document.title = `${data.displayName} (@${data.username}) – Lyko Lake`;
     titleName.textContent = data.displayName;
 
     tooltipUsername.textContent = data.username;
@@ -362,7 +407,19 @@ function renderProfile(data) {
     const join = data.createdAt?.toDate ? data.createdAt.toDate() : new Date(data.createdAt);
     tooltipJoined.textContent = join.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
 
-    document.getElementById('displayName').textContent = data.displayName;
+    // Display name with rank badge
+    let displayHTML = data.displayName;
+    if (data.rank) {
+        let rankClass = '';
+        if (data.rank === 'CEO') rankClass = 'rank-ceo';
+        else if (data.rank === 'Admin') rankClass = 'rank-admin';
+        
+        if (rankClass) {
+            displayHTML += ` <span class="profile-rank-badge ${rankClass}">${data.rank}</span>`;
+        }
+    }
+    displayNameEl.innerHTML = displayHTML;
+    
     document.getElementById('username').textContent = `@${data.username}`;
     document.getElementById('uid').textContent = `User #${data.uid}`;
     document.getElementById('userNumber').textContent = `#${data.uid}`;
@@ -408,7 +465,7 @@ function positionTooltip(e) {
     hoverTooltip.style.left = (e.clientX + 15) + 'px';
     hoverTooltip.style.top = (e.clientY + 15) + 'px';
 }
-attachTooltip(document.getElementById('displayName'));
+attachTooltip(displayNameEl);
 attachTooltip(profileAvatar);
 
 /*  ------------------------  BIO EDIT  ------------------------  */
@@ -465,7 +522,7 @@ fileInput.addEventListener('change', e => {
 uploadButton.addEventListener('click', async () => {
     if (!selectedFile) return;
     uploadButton.disabled = true;
-    uploadButton.textContent = 'Uploadingâ€¦';
+    uploadButton.textContent = 'Uploading…';
     try {
         const processed = await processImage(selectedFile);
         await updateDoc(doc(db, 'users', currentUserId), { avatar: processed });
