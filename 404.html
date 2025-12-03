@@ -64,8 +64,7 @@
 
 <script type="module">
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
-import { getAuth, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
-import { getFirestore, doc, getDoc } from 'https://www.gstatic.com/firebase-firestore.js';
+import { getFirestore, doc, getDoc, collection, query, where, getDocs } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
 
 const firebaseConfig = {
     apiKey: "AIzaSyDUBeWvs6kOijqST6FVGirWs2EZ12aAAwU",
@@ -75,32 +74,33 @@ const firebaseConfig = {
     messagingSenderId: "685592614306",
     appId: "1:685592614306:web:b6a8f6f18407f9c0154efb"
 };
+
 const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
 const db = getFirestore(app);
 
-/* ---------- ban check ---------- */
-onAuthStateChanged(auth, async user => {
-    if (!user) return;
-    const ban = await getDoc(doc(db, 'bans', user.uid));
-    if (ban.exists()) {
-        const { until, reason } = ban.data();
-        const now = Date.now();
-        if (!until || now < until.toMillis()) {
-            const time = until
-                ? new Date(until.toMillis()).toLocaleString()
-                : 'permanent';
-            document.body.innerHTML = `
-              <style>body{background:#0a4d4d;color:#fff;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;display:flex;align-items:center;justify-content:center;height:100vh;text-align:center}</style>
-              <div>
-                <h1>🚫 Banned</h1>
-                <p>Sorry, you are banned for reason: <strong>${reason || 'No reason given'}</strong></p>
-                <p>Ban expires: <strong>${time}</strong></p>
-                <a href="/" style="color:#22c5a4">Go Home</a>
-              </div>`;
+// Check if this is a user profile URL
+const path = window.location.pathname;
+const username = path.substring(1).replace(/\/$/, '');
+
+if (username && !path.includes('.html') && username !== '') {
+    // Check if this username exists
+    try {
+        const usernameSnap = await getDoc(doc(db, 'usernames', username.toLowerCase()));
+        if (usernameSnap.exists()) {
+            // Redirect to profile page
+            window.location.href = `/profile.html?u=${username}`;
         }
+    } catch (error) {
+        console.error('Error checking username:', error);
     }
-});
+}
 </script>
+
+<!-- Version Footer -->
+<div style="position:fixed;bottom:10px;left:10px;color:rgba(255,255,255,0.5);font-size:0.8em;z-index:1000">
+    ©2025 Lyko Sokolov - Lyko Lake v1.0.0
+    <!-- Version format: MAJOR.MINOR.PATCH - Increment MAJOR for major features, MINOR for minor features, PATCH for bug fixes -->
+</div>
+
 </body>
 </html>
