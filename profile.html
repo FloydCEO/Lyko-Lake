@@ -102,13 +102,18 @@
         .close-button{background:none;border:none;color:rgba(255,255,255,.7);font-size:1.8em;cursor:pointer;transition:color .3s}
         .close-button:hover{color:#22c5a4}
 
-        .hover-card{position:fixed;background:rgba(10,77,77,.98);border:2px solid rgba(34,197,164,.3);border-radius:12px;padding:15px;min-width:200px;max-width:300px;z-index:1003;display:none;backdrop-filter:blur(10px)}
-        .hover-card-avatar{width:60px;height:60px;border-radius:50%;margin-bottom:10px}
+        .post-modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.8);display:flex;align-items:center;justify-content:center;z-index:2000;backdrop-filter:blur(5px)}
+        .post-modal{background:rgba(10,77,77,.95);border:2px solid rgba(34,197,164,.3);border-radius:20px;padding:30px;max-width:600px;width:90%;max-height:80vh;overflow-y:auto;box-shadow:0 15px 50px rgba(0,0,0,.5);backdrop-filter:blur(10px)}
+        .post-modal-close{position:absolute;top:15px;right:15px;background:none;border:none;color:rgba(255,255,255,.7);font-size:1.5em;cursor:pointer;transition:color .3s}
+        .post-modal-close:hover{color:#22c5a4}
+
+        .hover-card{position:fixed;background:rgba(10,77,77,.98);border:2px solid rgba(34,197,164,.3);border-radius:12px;padding:15px;min-width:200px;max-width:300px;z-index:1003;display:none;backdrop-filter:blur(10px);pointer-events:none}
+        .hover-card-avatar{width:60px;height:60px;border-radius:50%;margin-bottom:10px;object-fit:cover}
         .hover-card-name{font-weight:600;margin-bottom:5px}
         .hover-card-username{color:rgba(255,255,255,.6);margin-bottom:5px}
         .hover-card-rank{font-size:.8em;padding:2px 8px;border-radius:10px;margin-bottom:5px;display:inline-block}
         .hover-card-date{font-size:.8em;color:rgba(255,255,255,.6)}
-
+        
         .error-message{text-align:center;padding:100px 20px}
         .error-title{font-size:5em;margin-bottom:20px}
         .error-text{font-size:1.5em;color:#22c5a4;margin-bottom:30px}
@@ -211,6 +216,13 @@
     <div class="hover-card-date" id="hoverDate"></div>
 </div>
 
+<div class="post-modal-overlay hidden" id="postModalOverlay">
+    <div class="post-modal">
+        <button class="post-modal-close" id="postModalClose">&times;</button>
+        <div id="postModalContent"></div>
+    </div>
+</div>
+
 <script type="module">
 import {initializeApp} from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
 import {getAuth,onAuthStateChanged,signOut} from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
@@ -247,7 +259,7 @@ onAuthStateChanged(auth, async user => {
             document.getElementById('authButton').classList.add('hidden');
             document.getElementById('userMenu').classList.remove('hidden');
             document.getElementById('navDisplayName').textContent = d.displayName;
-            document.getElementById('navProfileLink').href = `https://lillyko.space/profile.html?u=${d.username}`;
+            document.getElementById('navProfileLink').href = `/${d.username}`;
             if (d.avatar) {
                 document.getElementById('navAvatarImg').src = d.avatar;
                 document.getElementById('navAvatarImg').style.display = 'block';
@@ -271,6 +283,304 @@ document.getElementById('userButton').addEventListener('click', e => {
     document.getElementById('dropdown').classList.toggle('show');
 });
 document.addEventListener('click', () => document.getElementById('dropdown').classList.remove('show'));
+
+// Post modal functionality
+const postModalOverlay = document.getElementById('postModalOverlay');
+const postModalClose = document.getElementById('postModalClose');
+
+postModalClose.addEventListener('click', () => {
+    postModalOverlay.classList.add('hidden');
+});
+
+postModalOverlay.addEventListener('click', (e) => {
+    if (e.target === postModalOverlay) {
+        postModalOverlay.classList.add('hidden');
+    }
+});
+
+async function openPostModal(postId) {
+    try {
+        const postSnap = await getDoc(doc(db, 'posts', postId));
+        if (!postSnap.exists()) return;
+
+        const post = postSnap.data();
+        const authorSnap = await getDoc(doc(db, 'users', post.authorId));
+        const author = authorSnap.exists() ? authorSnap.data() : { displayName: 'Unknown', username: 'unknown' };
+
+        let mediaHtml = '';
+        if (post.mediaUrl) {
+            if (post.mediaType === 'video') {
+                mediaHtml = `<div class="post-media"><video controls src="${post.mediaUrl}"></video></div>`;
+            } else {
+                mediaHtml = `<div class="post-media"><img src="${post.mediaUrl}" alt="Post media"></div>`;
+            }
+        }
+
+        const userLikeStatus = await getUserLikeStatus(post.id);
+        const commentCount = await getCommentCount(post.id);
+
+        document.getElementById('postModalContent').innerHTML = `
+            <div class="post-header">
+                <img class="post-avatar" src="${author.avatar || 'https://via.placeholder.com/50'}" alt="${author.displayName}">
+                <div class="post-author">
+                    <div class="post-author-name">${author.displayName}</div>
+                    <div class="post-author-username">@${author.username}</div>
+                </div>
+            </div>
+            <div class="post-content">
+                ${post.content ? `<div class="post-text">${post.content}</div>` : ''}
+                ${mediaHtml}
+            </div>
+            <div class="post-stats">
+                <span>👁️ ${post.views || 0} views</span>
+            </div>
+            <div class="post-actions">
+                <button class="action-button like-button ${userLikeStatus === 'like' ? 'liked' : ''}" data-post-id="${post.id}" data-modal="true">
+                    ❤️ <span>${post.likes || 0}</span>
+                </button>
+                <button class="action-button dislike-button ${userLikeStatus === 'dislike' ? 'disliked' : ''}" data-post-id="${post.id}" data-modal="true">
+                    💩 <span>${post.dislikes || 0}</span>
+                </button>
+                <button class="action-button comment-button" data-post-id="${post.id}" data-modal="true">
+                    💬 <span class="comment-count">${commentCount}</span>
+                </button>
+            </div>
+            <div class="comments-section">
+                <div class="comments-toggle" data-post-id="${post.id}" data-modal="true">Show Comments</div>
+                <div class="comments-list" id="modal-comments-${post.id}"></div>
+                <div class="comment-input-container">
+                    <textarea class="comment-input" placeholder="Add a comment..." data-post-id="${post.id}" data-modal="true"></textarea>
+                    <button class="comment-submit" data-post-id="${post.id}" data-modal="true">Post</button>
+                </div>
+            </div>
+        `;
+
+        postModalOverlay.classList.remove('hidden');
+        
+        // Attach event listeners to modal elements
+        attachModalPostActions();
+    } catch (error) {
+        console.error('Error opening post modal:', error);
+    }
+}
+
+function attachModalPostActions() {
+    // Like buttons in modal
+    document.querySelectorAll('.post-modal .like-button').forEach(btn => {
+        btn.addEventListener('click', async () => {
+            const postId = btn.dataset.postId;
+            await handleLike(postId, 'like', btn);
+            // Refresh modal content
+            await openPostModal(postId);
+        });
+    });
+
+    // Dislike buttons in modal
+    document.querySelectorAll('.post-modal .dislike-button').forEach(btn => {
+        btn.addEventListener('click', async () => {
+            const postId = btn.dataset.postId;
+            await handleLike(postId, 'dislike', btn);
+            // Refresh modal content
+            await openPostModal(postId);
+        });
+    });
+
+    // Comment toggle in modal
+    document.querySelectorAll('.post-modal .comments-toggle').forEach(toggle => {
+        toggle.addEventListener('click', async () => {
+            const postId = toggle.dataset.postId;
+            const commentsList = document.getElementById(`modal-comments-${postId}`);
+            
+            if (commentsList.classList.contains('show')) {
+                commentsList.classList.remove('show');
+                toggle.textContent = 'Show Comments';
+            } else {
+                await loadModalComments(postId);
+                commentsList.classList.add('show');
+                toggle.textContent = 'Hide Comments';
+            }
+        });
+    });
+
+    // Comment submit in modal
+    document.querySelectorAll('.post-modal .comment-submit').forEach(btn => {
+        btn.addEventListener('click', async () => {
+            const postId = btn.dataset.postId;
+            const input = document.querySelector(`.post-modal .comment-input[data-post-id="${postId}"]`);
+            const text = input.value.trim();
+            
+            if (text) {
+                try {
+                    await addDoc(collection(db, 'comments'), {
+                        postId,
+                        authorId: currentUserId,
+                        text,
+                        createdAt: serverTimestamp()
+                    });
+                    
+                    input.value = '';
+                    await loadModalComments(postId);
+                    
+                    // Update comment count
+                    const countSpan = document.querySelector(`.post-modal .comment-button[data-post-id="${postId}"] .comment-count`);
+                    if (countSpan) {
+                        countSpan.textContent = parseInt(countSpan.textContent) + 1;
+                    }
+                } catch (error) {
+                    console.error('Comment error:', error);
+                }
+            }
+        });
+    });
+}
+
+async function loadModalComments(postId) {
+    const commentsList = document.getElementById(`modal-comments-${postId}`);
+    try {
+        const commentsSnap = await getDocs(
+            query(collection(db, 'comments'),
+                  where('postId', '==', postId),
+                  orderBy('createdAt', 'desc'))
+        );
+        
+        if (commentsSnap.empty) {
+            commentsList.innerHTML = '<div style="color:rgba(255,255,255,.5);padding:10px">No comments yet</div>';
+            return;
+        }
+        
+        commentsList.innerHTML = '';
+        for (const commentDoc of commentsSnap.docs) {
+            const comment = commentDoc.data();
+            const authorSnap = await getDoc(doc(db, 'users', comment.authorId));
+            const author = authorSnap.exists() ? authorSnap.data() : { displayName: 'Unknown', avatar: '' };
+            
+            const commentItem = document.createElement('div');
+            commentItem.className = 'comment-item';
+            commentItem.innerHTML = `
+                <div class="comment-header">
+                    <img class="comment-avatar" src="${author.avatar || 'https://via.placeholder.com/30'}" alt="${author.displayName}">
+                    <span class="comment-author">${author.displayName}</span>
+                </div>
+                <div class="comment-text">${comment.text}</div>
+            `;
+            commentsList.appendChild(commentItem);
+        }
+    } catch (error) {
+        console.error('Error loading modal comments:', error);
+        commentsList.innerHTML = '<div style="color:#ff3b30;padding:10px">Error loading comments</div>';
+    }
+}
+
+async function getUserLikeStatus(postId) {
+    if (!authUser) return null;
+    try {
+        const likeSnap = await getDocs(
+            query(collection(db, 'likes'),
+                  where('userId', '==', authUser.uid),
+                  where('postId', '==', postId))
+        );
+        if (!likeSnap.empty) {
+            return likeSnap.docs[0].data().type;
+        }
+        return null;
+    } catch {
+        return null;
+    }
+}
+
+async function getCommentCount(postId) {
+    try {
+        const commentsSnap = await getDocs(
+            query(collection(db, 'comments'), where('postId', '==', postId))
+        );
+        return commentsSnap.size;
+    } catch {
+        return 0;
+    }
+}
+
+async function handleLike(postId, type, button) {
+    try {
+        const likeQuery = query(
+            collection(db, 'likes'),
+            where('userId', '==', authUser.uid),
+            where('postId', '==', postId)
+        );
+        const likeSnap = await getDocs(likeQuery);
+        
+        const postRef = doc(db, 'posts', postId);
+        
+        if (!likeSnap.empty) {
+            const existingLike = likeSnap.docs[0];
+            const existingType = existingLike.data().type;
+            
+            if (existingType === type) {
+                // Remove like/dislike
+                await deleteDoc(existingLike.ref);
+                await updateDoc(postRef, {
+                    [type === 'like' ? 'likes' : 'dislikes']: increment(-1)
+                });
+                
+                button.classList.remove(type === 'like' ? 'liked' : 'disliked');
+                const count = parseInt(button.querySelector('span').textContent);
+                button.querySelector('span').textContent = count - 1;
+            } else {
+                // Switch from like to dislike or vice versa
+                await deleteDoc(existingLike.ref);
+                await addDoc(collection(db, 'likes'), {
+                    userId: authUser.uid,
+                    postId,
+                    type,
+                    createdAt: serverTimestamp()
+                });
+                
+                await updateDoc(postRef, {
+                    [existingType === 'like' ? 'likes' : 'dislikes']: increment(-1),
+                    [type === 'like' ? 'likes' : 'dislikes']: increment(1)
+                });
+                
+                // Update UI
+                const postCard = document.querySelector(`[data-post-id="${postId}"]`);
+                const likeBtn = postCard.querySelector('.like-button');
+                const dislikeBtn = postCard.querySelector('.dislike-button');
+                
+                if (type === 'like') {
+                    likeBtn.classList.add('liked');
+                    dislikeBtn.classList.remove('disliked');
+                    const likeCount = parseInt(likeBtn.querySelector('span').textContent);
+                    const dislikeCount = parseInt(dislikeBtn.querySelector('span').textContent);
+                    likeBtn.querySelector('span').textContent = likeCount + 1;
+                    dislikeBtn.querySelector('span').textContent = dislikeCount - 1;
+                } else {
+                    dislikeBtn.classList.add('disliked');
+                    likeBtn.classList.remove('liked');
+                    const likeCount = parseInt(likeBtn.querySelector('span').textContent);
+                    const dislikeCount = parseInt(dislikeBtn.querySelector('span').textContent);
+                    dislikeBtn.querySelector('span').textContent = dislikeCount + 1;
+                    likeBtn.querySelector('span').textContent = likeCount - 1;
+                }
+            }
+        } else {
+            // Add new like/dislike
+            await addDoc(collection(db, 'likes'), {
+                userId: authUser.uid,
+                postId,
+                type,
+                createdAt: serverTimestamp()
+            });
+            
+            await updateDoc(postRef, {
+                [type === 'like' ? 'likes' : 'dislikes']: increment(1)
+            });
+            
+            button.classList.add(type === 'like' ? 'liked' : 'disliked');
+            const count = parseInt(button.querySelector('span').textContent);
+            button.querySelector('span').textContent = count + 1;
+        }
+    } catch (error) {
+        console.error('Like error:', error);
+    }
+}
 
 // Get username from URL
 function getUsernameFromUrl() {
@@ -396,6 +706,8 @@ async function loadPosts() {
             const post = doc.data();
             const card = document.createElement('div');
             card.className = 'post-card';
+            card.style.cursor = 'pointer';
+            card.addEventListener('click', () => openPostModal(doc.id));
             
             let mediaHtml = '';
             if (post.mediaUrl) {
@@ -563,7 +875,7 @@ function setupHoverCard(element, userData) {
 
     element.addEventListener('mouseleave', () => {
         clearTimeout(hoverTimeout);
-        if (!document.getElementById('hoverCard').contains(document.elementFromPoint(event.clientX, event.clientY))) {
+        if (!hoverCard.contains(document.elementFromPoint(event.clientX, event.clientY))) {
             hideHoverCard();
         }
     });
@@ -584,7 +896,7 @@ function showHoverCard(e, userData) {
     }
 
     hoverName.textContent = userData.displayName;
-    hoverUsername.textContent = `@${userData.username}`;
+    hoverUsername.textContent = `@${userData.username} | User #${userData.uid || 'N/A'}`;
     
     if (userData.rank) {
         hoverRank.textContent = userData.rank;
@@ -641,5 +953,12 @@ if (username) {
     showError('Please provide a username in the URL or log in.');
 }
 </script>
+
+<!-- Version Footer - Please increment version number for major/minor/patch changes -->
+<div style="position:fixed;bottom:10px;left:10px;color:rgba(255,255,255,0.5);font-size:0.8em;z-index:1000;pointer-events:none">
+    ©2025 Lyko Sokolov - Lyko Lake v1.0.0
+    <!-- Version format: MAJOR.MINOR.PATCH - Increment MAJOR for major features, MINOR for minor features, PATCH for bug fixes -->
+</div>
+
 </body>
 </html>
