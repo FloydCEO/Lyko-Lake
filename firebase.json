@@ -12,7 +12,15 @@
         "destination": "/admin.html"
       },
       {
+        "source": "/admin",
+        "destination": "/admin.html"
+      },
+      {
         "source": "/auth.html",
+        "destination": "/auth.html"
+      },
+      {
+        "source": "/auth",
         "destination": "/auth.html"
       },
       {
@@ -20,16 +28,35 @@
         "destination": "/help.html"
       },
       {
+        "source": "/help",
+        "destination": "/help.html"
+      },
+      {
         "source": "/profile.html",
         "destination": "/profile.html"
       },
       {
-        "source": "/:username",
-        "destination": "/profile.html"
+        "source": "/upload.html",
+        "destination": "/upload.html"
       },
       {
+        "source": "/upload",
+        "destination": "/upload.html"
+      },
+      {
+        "source": "/:username",
+        "destination": "/profile.html"
+      }
+    ],
+    "headers": [
+      {
         "source": "**",
-        "destination": "/index.html"
+        "headers": [
+          {
+            "key": "Cache-Control",
+            "value": "no-cache, no-store, must-revalidate"
+          }
+        ]
       }
     ]
   },
