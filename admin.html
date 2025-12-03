@@ -222,7 +222,84 @@ h1{
 .btn.success:hover:not(:disabled){
   background:rgba(52,199,89,0.3);
 }
+.btn.warning{
+  border-color:rgba(255,204,0,0.5);
+  background:rgba(255,204,0,0.2);
+  color:#fc0;
+}
+.btn.warning:hover:not(:disabled){
+  background:rgba(255,204,0,0.3);
+}
 .hidden{display:none!important}
+.modal-overlay{
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,0.7);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  z-index:10000;
+  backdrop-filter:blur(5px);
+}
+.modal{
+  background:rgba(10,77,77,0.95);
+  border:2px solid rgba(34,197,164,0.3);
+  border-radius:20px;
+  padding:30px;
+  max-width:500px;
+  width:90%;
+  box-shadow:0 15px 50px rgba(0,0,0,0.5);
+  backdrop-filter:blur(10px);
+}
+.modal-header{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:20px;
+}
+.modal-title{
+  font-size:1.5em;
+  color:var(--accent);
+}
+.close-button{
+  background:none;
+  border:none;
+  color:rgba(255,255,255,0.7);
+  font-size:1.8em;
+  cursor:pointer;
+  transition:color .3s;
+}
+.close-button:hover{
+  color:var(--accent);
+}
+.form-group{
+  margin-bottom:20px;
+}
+.form-label{
+  display:block;
+  margin-bottom:8px;
+  color:rgba(255,255,255,0.9);
+  font-weight:500;
+}
+.form-input, .form-select, .form-textarea{
+  width:100%;
+  padding:12px;
+  background:rgba(255,255,255,0.05);
+  border:2px solid var(--border);
+  border-radius:10px;
+  color:#fff;
+  font-size:1em;
+  font-family:inherit;
+}
+.form-input:focus, .form-select:focus, .form-textarea:focus{
+  outline:none;
+  border-color:var(--accent);
+  background:rgba(34,197,164,0.1);
+}
+.form-textarea{
+  min-height:100px;
+  resize:vertical;
+}
 </style>
 </head>
 <body>
@@ -271,6 +348,27 @@ h1{
   <div id="logsContainer"></div>
 </div>
 
+<!-- Custom Rank Modal -->
+<div class="modal-overlay hidden" id="customRankModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h2 class="modal-title">Set Custom Rank</h2>
+      <button class="close-button" id="closeCustomRankModal">&times;</button>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Custom Rank Name</label>
+      <input type="text" id="customRankInput" class="form-input" placeholder="e.g., VIP, Contributor, etc." maxlength="20">
+      <div style="font-size:0.8em;color:rgba(255,255,255,0.6);margin-top:5px">
+        This will show as a badge but won't give admin permissions
+      </div>
+    </div>
+    <div style="display:flex;gap:10px">
+      <button class="btn success" id="saveCustomRank">Save</button>
+      <button class="btn" id="cancelCustomRank">Cancel</button>
+    </div>
+  </div>
+</div>
+
 <script type="module">
 import {initializeApp} from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
 import {getAuth,onAuthStateChanged} from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
@@ -293,6 +391,7 @@ let currentAdmin = null;
 let allUsers = [];
 let allReports = [];
 let allLogs = [];
+let currentUserForRank = null;
 
 const errorContainer = document.getElementById('errorContainer');
 const loadingContainer = document.getElementById('loadingContainer');
@@ -313,6 +412,32 @@ document.querySelectorAll('.tab').forEach(tab => {
     tab.classList.add('active');
     document.getElementById(tab.dataset.tab + '-tab').classList.add('active');
   });
+});
+
+// Custom rank modal
+document.getElementById('closeCustomRankModal').addEventListener('click', () => {
+  document.getElementById('customRankModal').classList.add('hidden');
+});
+
+document.getElementById('cancelCustomRank').addEventListener('click', () => {
+  document.getElementById('customRankModal').classList.add('hidden');
+});
+
+document.getElementById('saveCustomRank').addEventListener('click', async () => {
+  const rankName = document.getElementById('customRankInput').value.trim();
+  if (!rankName || !currentUserForRank) return;
+
+  try {
+    await updateDoc(doc(db, 'users', currentUserForRank.userId), {
+      customRank: rankName
+    });
+    
+    await logAction('Custom Rank Set', `Set custom rank "${rankName}" for @${currentUserForRank.username}`, currentUserForRank.userId);
+    document.getElementById('customRankModal').classList.add('hidden');
+    await loadData();
+  } catch (e) {
+    alert('Failed to set custom rank: ' + e.message);
+  }
 });
 
 // Check permissions
@@ -448,9 +573,11 @@ function renderUsers() {
     const isCEO = user.rank === 'CEO';
     const isAdmin = user.rank === 'Admin';
     const isBanned = user.banned;
+    const hasCustomRank = user.customRank;
     
     let badges = '';
     if (isBanned) badges += '<span style="background:#ff3b30;padding:3px 8px;border-radius:12px;font-size:0.7em;font-weight:700">BANNED</span> ';
+    if (hasCustomRank) badges += `<span style="background:#8b4513;padding:3px 8px;border-radius:12px;font-size:0.7em;font-weight:700">${user.customRank}</span> `;
     if (isCEO) badges += '<span style="background:#ff3b30;padding:3px 8px;border-radius:12px;font-size:0.7em;font-weight:700">CEO</span>';
     else if (isAdmin) badges += '<span style="background:#34c759;padding:3px 8px;border-radius:12px;font-size:0.7em;font-weight:700">ADMIN</span>';
     
@@ -492,6 +619,30 @@ function renderUsers() {
       muteBtn.textContent = user.muted ? 'Unmute' : 'Mute';
       muteBtn.onclick = () => muteUser(user);
       actionsDiv.appendChild(muteBtn);
+
+      // Rank management buttons
+      if (currentAdmin.rank === 'CEO') {
+        if (user.rank === 'Admin') {
+          const removeAdminBtn = document.createElement('button');
+          removeAdminBtn.className = 'btn danger';
+          removeAdminBtn.textContent = 'Remove Admin';
+          removeAdminBtn.onclick = () => removeAdmin(user);
+          actionsDiv.appendChild(removeAdminBtn);
+        } else {
+          const makeAdminBtn = document.createElement('button');
+          makeAdminBtn.className = 'btn success';
+          makeAdminBtn.textContent = 'Make Admin';
+          makeAdminBtn.onclick = () => makeAdmin(user);
+          actionsDiv.appendChild(makeAdminBtn);
+        }
+      }
+
+      // Custom rank button
+      const customRankBtn = document.createElement('button');
+      customRankBtn.className = 'btn warning';
+      customRankBtn.textContent = user.customRank ? 'Edit Rank' : 'Set Rank';
+      customRankBtn.onclick = () => openCustomRankModal(user);
+      actionsDiv.appendChild(customRankBtn);
     }
     
     grid.appendChild(card);
@@ -615,6 +766,36 @@ async function muteUser(user) {
   } catch (e) {
     alert('Failed to ' + action + ' user: ' + e.message);
   }
+}
+
+async function makeAdmin(user) {
+  if (!confirm(`Make @${user.username} an admin?`)) return;
+  
+  try {
+    await updateDoc(doc(db, 'users', user.userId), { rank: 'Admin' });
+    await logAction('Admin Added', `Made @${user.username} an admin`, user.userId);
+    await loadData();
+  } catch (e) {
+    alert('Failed to make admin: ' + e.message);
+  }
+}
+
+async function removeAdmin(user) {
+  if (!confirm(`Remove admin privileges from @${user.username}?`)) return;
+  
+  try {
+    await updateDoc(doc(db, 'users', user.userId), { rank: null });
+    await logAction('Admin Removed', `Removed admin privileges from @${user.username}`, user.userId);
+    await loadData();
+  } catch (e) {
+    alert('Failed to remove admin: ' + e.message);
+  }
+}
+
+function openCustomRankModal(user) {
+  currentUserForRank = user;
+  document.getElementById('customRankInput').value = user.customRank || '';
+  document.getElementById('customRankModal').classList.remove('hidden');
 }
 
 window.viewPost = async function(postId) {
