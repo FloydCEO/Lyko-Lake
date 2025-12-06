@@ -1,32 +1,62 @@
 rules_version = '2';
-
 service firebase.storage {
   match /b/{bucket}/o {
     
-    // Profile avatars
-    match /avatars/{userId}/{fileName} {
-      allow read: if true;
-      allow write: if request.auth != null && 
-                   request.auth.uid == userId &&
-                   request.resource.size < 5 * 1024 * 1024 &&
-                   request.resource.contentType.matches('image/.*');
-      allow delete: if request.auth != null && request.auth.uid == userId;
+    // Helper function to check if user is authenticated
+    function isSignedIn() {
+      return request.auth != null;
     }
     
-    // Post media (images and videos)
+    // Helper function to check if user is verified
+    function isVerified() {
+      return isSignedIn() && request.auth.token.email_verified == true;
+    }
+    
+    // Helper function to check file size (max 100MB)
+    function isValidSize() {
+      return request.resource.size <= 100 * 1024 * 1024;
+    }
+    
+    // Helper function to check if file is an image
+    function isImage() {
+      return request.resource.contentType.matches('image/.*');
+    }
+    
+    // Helper function to check if file is a video
+    function isVideo() {
+      return request.resource.contentType.matches('video/.*');
+    }
+    
+    // Helper function to check if file is image or video
+    function isMediaFile() {
+      return isImage() || isVideo();
+    }
+    
+    // Avatar uploads
+    match /avatars/{fileName} {
+      allow read: if true;
+      allow write: if isVerified() && 
+                      isImage() && 
+                      request.resource.size <= 5 * 1024 * 1024 &&
+                      fileName.matches('.*' + request.auth.uid + '.*');
+    }
+    
+    // Post media uploads
     match /posts/{fileName} {
       allow read: if true;
-      allow write: if request.auth != null &&
-                   request.resource.size < 100 * 1024 * 1024 &&
-                   (request.resource.contentType.matches('image/.*') || 
-                    request.resource.contentType.matches('video/.*'));
-      allow delete: if request.auth != null;
+      allow write: if isVerified() && 
+                      isMediaFile() && 
+                      isValidSize();
+      allow delete: if isVerified();
     }
     
-    // Allow all authenticated users to write (backup rule)
-    match /{allPaths=**} {
-      allow read: if true;
-      allow write: if request.auth != null;
+    // Temporary uploads (for processing)
+    match /temp/{userId}/{fileName} {
+      allow read: if isSignedIn() && request.auth.uid == userId;
+      allow write: if isSignedIn() && 
+                      request.auth.uid == userId && 
+                      isValidSize();
+      allow delete: if isSignedIn() && request.auth.uid == userId;
     }
   }
 }
