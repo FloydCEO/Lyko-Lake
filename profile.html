@@ -4,11 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Profile – Lyko Lake</title>
-
-    <!-- Google AdSense -->
-    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2140641372307321" crossorigin="anonymous"></script>
-
-
     <style>
         *{margin:0;padding:0;box-sizing:border-box}
         body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Oxygen,Ubuntu,Cantarell,"Helvetica Neue",sans-serif;
@@ -231,7 +226,7 @@
 <script type="module">
 import {initializeApp} from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
 import {getAuth,onAuthStateChanged,signOut} from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
-import {getFirestore,collection,getDocs,doc,getDoc,updateDoc,query,where,addDoc,deleteDoc,serverTimestamp} from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+import {getFirestore,collection,getDocs,doc,getDoc,updateDoc,query,where,addDoc,deleteDoc,serverTimestamp,orderBy} from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
 import {getStorage,ref,uploadBytes,getDownloadURL} from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js';
 
 const firebaseConfig = {
@@ -418,7 +413,7 @@ function attachModalPostActions() {
                 try {
                     await addDoc(collection(db, 'comments'), {
                         postId,
-                        authorId: currentUserId,
+                        authorId: authUser.uid,
                         text,
                         createdAt: serverTimestamp()
                     });
@@ -514,6 +509,9 @@ async function handleLike(postId, type, button) {
         const likeSnap = await getDocs(likeQuery);
         
         const postRef = doc(db, 'posts', postId);
+        const postCard = document.querySelector(`[data-post-id="${postId}"]`);
+        const likeBtn = postCard.querySelector('.like-button');
+        const dislikeBtn = postCard.querySelector('.dislike-button');
         
         if (!likeSnap.empty) {
             const existingLike = likeSnap.docs[0];
@@ -543,11 +541,6 @@ async function handleLike(postId, type, button) {
                     [existingType === 'like' ? 'likes' : 'dislikes']: increment(-1),
                     [type === 'like' ? 'likes' : 'dislikes']: increment(1)
                 });
-                
-                // Update UI
-                const postCard = document.querySelector(`[data-post-id="${postId}"]`);
-                const likeBtn = postCard.querySelector('.like-button');
-                const dislikeBtn = postCard.querySelector('.dislike-button');
                 
                 if (type === 'like') {
                     likeBtn.classList.add('liked');
@@ -873,7 +866,15 @@ function setupHoverCard(element, userData) {
     element.addEventListener('mouseenter', (e) => {
         currentHoverElement = element;
         clearTimeout(hoverTimeout);
-        hoverTimeout = setTimeout(() => {
+        hoverTimeout = setTimeout(async () => {
+            if (!userData.rank && userData.userId) {
+                const userSnap = await getDoc(doc(db, 'users', userData.userId));
+                if (userSnap.exists()) {
+                    const fullData = userSnap.data();
+                    userData = { ...userData, ...fullData };
+                }
+            }
+            
             showHoverCard(e, userData);
         }, 500);
     });
