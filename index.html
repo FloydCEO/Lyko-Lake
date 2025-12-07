@@ -655,6 +655,487 @@
             }
         }
 
+        async function getUserLikeStatus(postId) {
+            if (!currentUser) return null;
+            try {
+                const likeSnap = await getDocs(
+                    query(collection(db, 'likes'),
+                          where('userId', '==', currentUser.userId),
+                          where('postId', '==', postId))
+                );
+                if (!likeSnap.empty) {
+                    return likeSnap.docs[0].data().type;
+                }
+                return null;
+            } catch {
+                return null;
+            }
+        }
+
+        async function getCommentCount(postId) {
+            try {
+                const commentsSnap = await getDocs(
+                    query(collection(db, 'comments'), where('postId', '==', postId))
+                );
+                return commentsSnap.size;
+            } catch {
+                return 0;
+            }
+        }
+
+        async function checkIfFollowing(authorId) {
+            if (!currentUser) return false;
+            try {
+                const followSnap = await getDocs(
+                    query(collection(db, 'follows'), 
+                          where('followerId', '==', currentUser.userId),
+                          where('followingId', '==', authorId))
+                );
+                return !followSnap.empty;
+            } catch {
+                return false;
+            }
+        }
+
+        function updateCarouselControls() {
+            document.getElementById('postCounter').textContent = `${currentPostIndex + 1} / ${currentPosts.length}`;
+            document.getElementById('prevButton').disabled = currentPostIndex === 0;
+            document.getElementById('nextButton').disabled = currentPostIndex === currentPosts.length - 1;
+        }
+
+        document.getElementById('prevButton').addEventListener('click', async () => {
+            if (currentPostIndex > 0) {
+                document.querySelectorAll('.post-card')[currentPostIndex].classList.remove('active');
+                currentPostIndex--;
+                document.querySelectorAll('.post-card')[currentPostIndex].classList.add('active');
+                updateCarouselControls();
+                await trackView(currentPosts[currentPostIndex].id);
+            }
+        });
+
+        document.getElementById('nextButton').addEventListener('click', async () => {
+            if (currentPostIndex < currentPosts.length - 1) {
+                document.querySelectorAll('.post-card')[currentPostIndex].classList.remove('active');
+                currentPostIndex++;
+                document.querySelectorAll('.post-card')[currentPostIndex].classList.add('active');
+                updateCarouselControls();
+                await trackView(currentPosts[currentPostIndex].id);
+            }
+        });
+
+        async function trackView(postId) {
+            if (!currentUser || viewedPosts.has(postId)) return;
+            
+            try {
+                const viewDocId = `${currentUser.userId}_${postId}`;
+                const viewRef = doc(db, 'postViews', viewDocId);
+                const viewSnap = await getDoc(viewRef);
+                
+                if (!viewSnap.exists()) {
+                    await setDoc(viewRef, {
+                        userId: currentUser.userId,
+                        postId: postId,
+                        viewedAt: serverTimestamp()
+                    });
+                    
+                    await updateDoc(doc(db, 'posts', postId), {
+                        views: increment(1)
+                    });
+                    
+                    viewedPosts.add(postId);
+                    
+                    // Update view count in UI
+                    const postCard = document.querySelector(`[data-post-id="${postId}"]`);
+                    if (postCard) {
+                        const viewsSpan = postCard.querySelector('.post-stats span');
+                        if (viewsSpan) {
+                            const currentViews = parseInt(viewsSpan.textContent.match(/\d+/)[0]);
+                            viewsSpan.textContent = `👁️ ${currentViews + 1} views`;
+                        }
+                    }
+                }
+            } catch (error) {
+                console.error('Error tracking view:', error);
+            }
+        }
+
+        async function handleLike(postId, type, button) {
+            try {
+                const likeQuery = query(
+                    collection(db, 'likes'),
+                    where('userId', '==', currentUser.userId),
+                    where('postId', '==', postId)
+                );
+                const likeSnap = await getDocs(likeQuery);
+                
+                const postRef = doc(db, 'posts', postId);
+                const postCard = document.querySelector(`[data-post-id="${postId}"]`);
+                const likeBtn = postCard.querySelector('.like-button');
+                const dislikeBtn = postCard.querySelector('.dislike-button');
+                
+                if (!likeSnap.empty) {
+                    const existingLike = likeSnap.docs[0];
+                    const existingType = existingLike.data().type;
+                    
+                    if (existingType === type) {
+                        // Remove like/dislike
+                        await deleteDoc(existingLike.ref);
+                        await updateDoc(postRef, {
+                            [type === 'like' ? 'likes' : 'dislikes']: increment(-1)
+                        });
+                        
+                        button.classList.remove(type === 'like' ? 'liked' : 'disliked');
+                        const count = parseInt(button.querySelector('span').textContent);
+                        button.querySelector('span').textContent = count - 1;
+                    } else {
+                        // Switch from like to dislike or vice versa
+                        await deleteDoc(existingLike.ref);
+                        await addDoc(collection(db, 'likes'), {
+                            userId: currentUser.userId,
+                            postId,
+                            type,
+                            createdAt: serverTimestamp()
+                        });
+                        
+                        await updateDoc(postRef, {
+                            [existingType === 'like' ? 'likes' : 'dislikes']: increment(-1),
+                            [type === 'like' ? 'likes' : 'dislikes']: increment(1)
+                        });
+                        
+                        if (type === 'like') {
+                            likeBtn.classList.add('liked');
+                            dislikeBtn.classList.remove('disliked');
+                            const likeCount = parseInt(likeBtn.querySelector('span').textContent);
+                            const dislikeCount = parseInt(dislikeBtn.querySelector('span').textContent);
+                            likeBtn.querySelector('span').textContent = likeCount + 1;
+                            dislikeBtn.querySelector('span').textContent = dislikeCount - 1;
+                        } else {
+                            dislikeBtn.classList.add('disliked');
+                            likeBtn.classList.remove('liked');
+                            const likeCount = parseInt(likeBtn.querySelector('span').textContent);
+                            const dislikeCount = parseInt(dislikeBtn.querySelector('span').textContent);
+                            dislikeBtn.querySelector('span').textContent = dislikeCount + 1;
+                            likeBtn.querySelector('span').textContent = likeCount - 1;
+                        }
+                    }
+                } else {
+                    // Add new like/dislike
+                    await addDoc(collection(db, 'likes'), {
+                        userId: currentUser.userId,
+                        postId,
+                        type,
+                        createdAt: serverTimestamp()
+                    });
+                    
+                    await updateDoc(postRef, {
+                        [type === 'like' ? 'likes' : 'dislikes']: increment(1)
+                    });
+                    
+                    button.classList.add(type === 'like' ? 'liked' : 'disliked');
+                    const count = parseInt(button.querySelector('span').textContent);
+                    button.querySelector('span').textContent = count + 1;
+                }
+            } catch (error) {
+                console.error('Like error:', error);
+            }
+        }
+
+        async function loadComments(postId) {
+            const commentsList = document.getElementById(`comments-${postId}`);
+            try {
+                const commentsSnap = await getDocs(
+                    query(collection(db, 'comments'),
+                          where('postId', '==', postId),
+                          orderBy('createdAt', 'desc'))
+                );
+                
+                if (commentsSnap.empty) {
+                    commentsList.innerHTML = '<div style="color:rgba(255,255,255,.5);padding:10px">No comments yet</div>';
+                    return;
+                }
+                
+                commentsList.innerHTML = '';
+                for (const commentDoc of commentsSnap.docs) {
+                    const comment = commentDoc.data();
+                    const authorSnap = await getDoc(doc(db, 'users', comment.authorId));
+                    const author = authorSnap.exists() ? authorSnap.data() : { displayName: 'Unknown', avatar: '' };
+                    
+                    const commentItem = document.createElement('div');
+                    commentItem.className = 'comment-item';
+                    commentItem.innerHTML = `
+                        <div class="comment-header">
+                            <img class="comment-avatar" src="${author.avatar || 'https://via.placeholder.com/30'}" alt="${author.displayName}">
+                            <span class="comment-author">${author.displayName}</span>
+                        </div>
+                        <div class="comment-text">${comment.text}</div>
+                    `;
+                    commentsList.appendChild(commentItem);
+                }
+            } catch (error) {
+                console.error('Error loading comments:', error);
+                commentsList.innerHTML = '<div style="color:#ff3b30;padding:10px">Error loading comments</div>';
+            }
+        }
+
+        // Post loading and carousel
+        async function loadPosts() {
+            try {
+                const postsSnap = await getDocs(collection(db, 'posts'));
+                const allPosts = [];
+                postsSnap.forEach(doc => {
+                    allPosts.push({ id: doc.id, ...doc.data() });
+                });
+
+                // Sort by newest first
+                currentPosts = allPosts.sort((a, b) => {
+                    const dateA = a.createdAt?.toMillis() || 0;
+                    const dateB = b.createdAt?.toMillis() || 0;
+                    return dateB - dateA;
+                }).slice(0, 10);
+                
+                if (currentPosts.length === 0) {
+                    document.getElementById('postsContainer').innerHTML = '<div class="no-posts">No posts yet. Be the first to upload!</div>';
+                    return;
+                }
+
+                await renderPosts();
+            } catch (error) {
+                console.error('Error loading posts:', error);
+                document.getElementById('postsContainer').innerHTML = '<div class="no-posts">Error loading posts</div>';
+            }
+        }
+
+        async function renderPosts() {
+            const container = document.getElementById('postsContainer');
+            container.innerHTML = '';
+
+            for (let i = 0; i < currentPosts.length; i++) {
+                const post = currentPosts[i];
+                const authorSnap = await getDoc(doc(db, 'users', post.authorId));
+                const author = authorSnap.exists() ? authorSnap.data() : { displayName: 'Unknown', username: 'unknown' };
+
+                const postCard = document.createElement('div');
+                postCard.className = `post-card ${i === 0 ? 'active' : ''}`;
+                postCard.dataset.postId = post.id;
+                
+                let mediaHtml = '';
+                if (post.mediaUrl) {
+                    if (post.mediaType === 'video') {
+                        mediaHtml = `<div class="post-media"><video controls src="${post.mediaUrl}"></video></div>`;
+                    } else {
+                        mediaHtml = `<div class="post-media"><img src="${post.mediaUrl}" alt="Post media"></div>`;
+                    }
+                }
+
+                const isFollowing = await checkIfFollowing(post.authorId);
+                const followBtnText = isFollowing ? 'Following' : 'Follow';
+                const followBtnClass = isFollowing ? 'following' : '';
+
+                const userLikeStatus = await getUserLikeStatus(post.id);
+
+                // Format post date
+                const postDate = post.createdAt?.toDate() || new Date();
+                const dateStr = formatPostDate(postDate);
+
+                postCard.innerHTML = `
+                    <div class="post-header">
+                        <img class="post-avatar" src="${author.avatar || 'https://via.placeholder.com/50'}" alt="${author.displayName}" data-user-id="${post.authorId}">
+                        <div class="post-author" data-user-id="${post.authorId}">
+                            <div class="post-author-name">${author.displayName}</div>
+                            <div class="post-author-username">@${author.username}</div>
+                            <div class="post-date">${dateStr}</div>
+                        </div>
+                        ${post.authorId !== currentUser.userId ? `<button class="follow-button ${followBtnClass}" data-author-id="${post.authorId}">${followBtnText}</button>` : ''}
+                    </div>
+                    <div class="post-content" style="cursor:pointer" data-post-id="${post.id}">
+                        ${post.content ? `<div class="post-text">${post.content}</div>` : ''}
+                        ${mediaHtml}
+                    </div>
+                    <div class="post-stats">
+                        <span>👁️ ${post.views || 0} views</span>
+                    </div>
+                    <div class="post-actions">
+                        <button class="action-button like-button ${userLikeStatus === 'like' ? 'liked' : ''}" data-post-id="${post.id}">
+                            ❤️ <span>${post.likes || 0}</span>
+                        </button>
+                        <button class="action-button dislike-button ${userLikeStatus === 'dislike' ? 'disliked' : ''}" data-post-id="${post.id}">
+                            💩 <span>${post.dislikes || 0}</span>
+                        </button>
+                        <button class="action-button comment-button" data-post-id="${post.id}">
+                            💬 <span class="comment-count">${await getCommentCount(post.id)}</span>
+                        </button>
+                        <button class="action-button report-button" data-post-id="${post.id}">
+                            🚩 Report
+                        </button>
+                    </div>
+                    <div class="comments-section">
+                        <div class="comments-toggle" data-post-id="${post.id}">Show Comments</div>
+                        <div class="comments-list" id="comments-${post.id}"></div>
+                        <div class="comment-input-container">
+                            <textarea class="comment-input" placeholder="Add a comment..." data-post-id="${post.id}"></textarea>
+                            <button class="comment-submit" data-post-id="${post.id}">Post</button>
+                        </div>
+                    </div>
+                `;
+                
+                container.appendChild(postCard);
+
+                // Setup hover cards for avatar and author
+                setupHoverCard(postCard.querySelector('.post-avatar'), { ...author, userId: post.authorId });
+                setupHoverCard(postCard.querySelector('.post-author'), { ...author, userId: post.authorId });
+
+                // Add click event to post content to open modal
+                postCard.querySelector('.post-content').addEventListener('click', () => {
+                    openPostModal(post.id);
+                });
+
+                // Track view when post becomes active
+                if (i === 0) {
+                    await trackView(post.id);
+                }
+            }
+
+            updateCarouselControls();
+            attachPostActions();
+        }
+
+        function formatPostDate(date) {
+            const now = new Date();
+            const diff = now - date;
+            const minutes = Math.floor(diff / 60000);
+            const hours = Math.floor(diff / 3600000);
+            const days = Math.floor(diff / 86400000);
+
+            if (minutes < 1) return 'Just now';
+            if (minutes < 60) return `${minutes}m ago`;
+            if (hours < 24) return `${hours}h ago`;
+            if (days < 7) return `${days}d ago`;
+            
+            return date.toLocaleDateString();
+        }
+
+        function attachPostActions() {
+            // Follow buttons
+            document.querySelectorAll('.follow-button').forEach(btn => {
+                btn.addEventListener('click', async () => {
+                    const authorId = btn.dataset.authorId;
+                    const isFollowing = btn.classList.contains('following');
+                    
+                    try {
+                        if (isFollowing) {
+                            const followSnap = await getDocs(
+                                query(collection(db, 'follows'),
+                                      where('followerId', '==', currentUser.userId),
+                                      where('followingId', '==', authorId))
+                            );
+                            followSnap.forEach(async (doc) => {
+                                await deleteDoc(doc.ref);
+                            });
+                            btn.classList.remove('following');
+                            btn.textContent = 'Follow';
+                        } else {
+                            await addDoc(collection(db, 'follows'), {
+                                followerId: currentUser.userId,
+                                followingId: authorId,
+                                createdAt: serverTimestamp()
+                            });
+                            btn.classList.add('following');
+                            btn.textContent = 'Following';
+                        }
+                    } catch (error) {
+                        console.error('Follow error:', error);
+                    }
+                });
+            });
+
+            // Like buttons
+            document.querySelectorAll('.like-button').forEach(btn => {
+                btn.addEventListener('click', async () => {
+                    const postId = btn.dataset.postId;
+                    await handleLike(postId, 'like', btn);
+                });
+            });
+
+            // Dislike buttons
+            document.querySelectorAll('.dislike-button').forEach(btn => {
+                btn.addEventListener('click', async () => {
+                    const postId = btn.dataset.postId;
+                    await handleLike(postId, 'dislike', btn);
+                });
+            });
+
+            // Comment toggle
+            document.querySelectorAll('.comments-toggle').forEach(toggle => {
+                toggle.addEventListener('click', async () => {
+                    const postId = toggle.dataset.postId;
+                    const commentsList = document.getElementById(`comments-${postId}`);
+                    
+                    if (commentsList.classList.contains('show')) {
+                        commentsList.classList.remove('show');
+                        toggle.textContent = 'Show Comments';
+                    } else {
+                        await loadComments(postId);
+                        commentsList.classList.add('show');
+                        toggle.textContent = 'Hide Comments';
+                    }
+                });
+            });
+
+            // Comment submit
+            document.querySelectorAll('.comment-submit').forEach(btn => {
+                btn.addEventListener('click', async () => {
+                    const postId = btn.dataset.postId;
+                    const input = document.querySelector(`.comment-input[data-post-id="${postId}"]`);
+                    const text = input.value.trim();
+                    
+                    if (text) {
+                        try {
+                            await addDoc(collection(db, 'comments'), {
+                                postId,
+                                authorId: currentUser.userId,
+                                text,
+                                createdAt: serverTimestamp()
+                            });
+                            
+                            input.value = '';
+                            await loadComments(postId);
+                            
+                            // Update comment count
+                            const countSpan = document.querySelector(`.comment-button[data-post-id="${postId}"] .comment-count`);
+                            if (countSpan) {
+                                countSpan.textContent = parseInt(countSpan.textContent) + 1;
+                            }
+                        } catch (error) {
+                            console.error('Comment error:', error);
+                        }
+                    }
+                });
+            });
+
+            // Report buttons
+            document.querySelectorAll('.report-button').forEach(btn => {
+                btn.addEventListener('click', async () => {
+                    const postId = btn.dataset.postId;
+                    const reason = prompt('Please describe why you are reporting this post:');
+                    if (reason) {
+                        try {
+                            await addDoc(collection(db, 'reports'), {
+                                postId,
+                                reportedBy: currentUser.userId,
+                                reason,
+                                createdAt: serverTimestamp(),
+                                status: 'pending'
+                            });
+                            alert('Report submitted. Thank you.');
+                        } catch (error) {
+                            console.error('Report error:', error);
+                            alert('Failed to submit report.');
+                        }
+                    }
+                });
+            });
+        }
+
         onAuthStateChanged(auth, async user => {
             if (user && user.emailVerified) {
                 const snap = await getDoc(doc(db, 'users', user.uid));
@@ -843,487 +1324,6 @@
                 }
             } catch (error) {
                 console.error('Error loading notification count:', error);
-            }
-        }
-
-        // Post loading and carousel
-        async function loadPosts() {
-            try {
-                const postsSnap = await getDocs(collection(db, 'posts'));
-                const allPosts = [];
-                postsSnap.forEach(doc => {
-                    allPosts.push({ id: doc.id, ...doc.data() });
-                });
-
-                // Sort by newest first
-                currentPosts = allPosts.sort((a, b) => {
-                    const dateA = a.createdAt?.toMillis() || 0;
-                    const dateB = b.createdAt?.toMillis() || 0;
-                    return dateB - dateA;
-                }).slice(0, 10);
-                
-                if (currentPosts.length === 0) {
-                    document.getElementById('postsContainer').innerHTML = '<div class="no-posts">No posts yet. Be the first to upload!</div>';
-                    return;
-                }
-
-                await renderPosts();
-            } catch (error) {
-                console.error('Error loading posts:', error);
-                document.getElementById('postsContainer').innerHTML = '<div class="no-posts">Error loading posts</div>';
-            }
-        }
-
-        async function renderPosts() {
-            const container = document.getElementById('postsContainer');
-            container.innerHTML = '';
-
-            for (let i = 0; i < currentPosts.length; i++) {
-                const post = currentPosts[i];
-                const authorSnap = await getDoc(doc(db, 'users', post.authorId));
-                const author = authorSnap.exists() ? authorSnap.data() : { displayName: 'Unknown', username: 'unknown' };
-
-                const postCard = document.createElement('div');
-                postCard.className = `post-card ${i === 0 ? 'active' : ''}`;
-                postCard.dataset.postId = post.id;
-                
-                let mediaHtml = '';
-                if (post.mediaUrl) {
-                    if (post.mediaType === 'video') {
-                        mediaHtml = `<div class="post-media"><video controls src="${post.mediaUrl}"></video></div>`;
-                    } else {
-                        mediaHtml = `<div class="post-media"><img src="${post.mediaUrl}" alt="Post media"></div>`;
-                    }
-                }
-
-                const isFollowing = await checkIfFollowing(post.authorId);
-                const followBtnText = isFollowing ? 'Following' : 'Follow';
-                const followBtnClass = isFollowing ? 'following' : '';
-
-                const userLikeStatus = await getUserLikeStatus(post.id);
-
-                // Format post date
-                const postDate = post.createdAt?.toDate() || new Date();
-                const dateStr = formatPostDate(postDate);
-
-                postCard.innerHTML = `
-                    <div class="post-header">
-                        <img class="post-avatar" src="${author.avatar || 'https://via.placeholder.com/50'}" alt="${author.displayName}" data-user-id="${post.authorId}">
-                        <div class="post-author" data-user-id="${post.authorId}">
-                            <div class="post-author-name">${author.displayName}</div>
-                            <div class="post-author-username">@${author.username}</div>
-                            <div class="post-date">${dateStr}</div>
-                        </div>
-                        ${post.authorId !== currentUser.userId ? `<button class="follow-button ${followBtnClass}" data-author-id="${post.authorId}">${followBtnText}</button>` : ''}
-                    </div>
-                    <div class="post-content" style="cursor:pointer" data-post-id="${post.id}">
-                        ${post.content ? `<div class="post-text">${post.content}</div>` : ''}
-                        ${mediaHtml}
-                    </div>
-                    <div class="post-stats">
-                        <span>👁️ ${post.views || 0} views</span>
-                    </div>
-                    <div class="post-actions">
-                        <button class="action-button like-button ${userLikeStatus === 'like' ? 'liked' : ''}" data-post-id="${post.id}">
-                            ❤️ <span>${post.likes || 0}</span>
-                        </button>
-                        <button class="action-button dislike-button ${userLikeStatus === 'dislike' ? 'disliked' : ''}" data-post-id="${post.id}">
-                            💩 <span>${post.dislikes || 0}</span>
-                        </button>
-                        <button class="action-button comment-button" data-post-id="${post.id}">
-                            💬 <span class="comment-count">${await getCommentCount(post.id)}</span>
-                        </button>
-                        <button class="action-button report-button" data-post-id="${post.id}">
-                            🚩 Report
-                        </button>
-                    </div>
-                    <div class="comments-section">
-                        <div class="comments-toggle" data-post-id="${post.id}">Show Comments</div>
-                        <div class="comments-list" id="comments-${post.id}"></div>
-                        <div class="comment-input-container">
-                            <textarea class="comment-input" placeholder="Add a comment..." data-post-id="${post.id}"></textarea>
-                            <button class="comment-submit" data-post-id="${post.id}">Post</button>
-                        </div>
-                    </div>
-                `;
-                
-                container.appendChild(postCard);
-
-                // Setup hover cards for avatar and author
-                setupHoverCard(postCard.querySelector('.post-avatar'), { ...author, userId: post.authorId });
-                setupHoverCard(postCard.querySelector('.post-author'), { ...author, userId: post.authorId });
-
-                // Add click event to post content to open modal
-                postCard.querySelector('.post-content').addEventListener('click', () => {
-                    openPostModal(post.id);
-                });
-
-                // Track view when post becomes active
-                if (i === 0) {
-                    await trackView(post.id);
-                }
-            }
-
-            updateCarouselControls();
-            attachPostActions();
-        }
-
-        function formatPostDate(date) {
-            const now = new Date();
-            const diff = now - date;
-            const minutes = Math.floor(diff / 60000);
-            const hours = Math.floor(diff / 3600000);
-            const days = Math.floor(diff / 86400000);
-
-            if (minutes < 1) return 'Just now';
-            if (minutes < 60) return `${minutes}m ago`;
-            if (hours < 24) return `${hours}h ago`;
-            if (days < 7) return `${days}d ago`;
-            
-            return date.toLocaleDateString();
-        }
-
-        async function trackView(postId) {
-            if (!currentUser || viewedPosts.has(postId)) return;
-            
-            try {
-                const viewDocId = `${currentUser.userId}_${postId}`;
-                const viewRef = doc(db, 'postViews', viewDocId);
-                const viewSnap = await getDoc(viewRef);
-                
-                if (!viewSnap.exists()) {
-                    await setDoc(viewRef, {
-                        userId: currentUser.userId,
-                        postId: postId,
-                        viewedAt: serverTimestamp()
-                    });
-                    
-                    await updateDoc(doc(db, 'posts', postId), {
-                        views: increment(1)
-                    });
-                    
-                    viewedPosts.add(postId);
-                    
-                    // Update view count in UI
-                    const postCard = document.querySelector(`[data-post-id="${postId}"]`);
-                    if (postCard) {
-                        const viewsSpan = postCard.querySelector('.post-stats span');
-                        if (viewsSpan) {
-                            const currentViews = parseInt(viewsSpan.textContent.match(/\d+/)[0]);
-                            viewsSpan.textContent = `👁️ ${currentViews + 1} views`;
-                        }
-                    }
-                }
-            } catch (error) {
-                console.error('Error tracking view:', error);
-            }
-        }
-
-        async function getUserLikeStatus(postId) {
-            if (!currentUser) return null;
-            try {
-                const likeSnap = await getDocs(
-                    query(collection(db, 'likes'),
-                          where('userId', '==', currentUser.userId),
-                          where('postId', '==', postId))
-                );
-                if (!likeSnap.empty) {
-                    return likeSnap.docs[0].data().type;
-                }
-                return null;
-            } catch {
-                return null;
-            }
-        }
-
-        async function getCommentCount(postId) {
-            try {
-                const commentsSnap = await getDocs(
-                    query(collection(db, 'comments'), where('postId', '==', postId))
-                );
-                return commentsSnap.size;
-            } catch {
-                return 0;
-            }
-        }
-
-        async function checkIfFollowing(authorId) {
-            if (!currentUser) return false;
-            try {
-                const followSnap = await getDocs(
-                    query(collection(db, 'follows'), 
-                          where('followerId', '==', currentUser.userId),
-                          where('followingId', '==', authorId))
-                );
-                return !followSnap.empty;
-            } catch {
-                return false;
-            }
-        }
-
-        function updateCarouselControls() {
-            document.getElementById('postCounter').textContent = `${currentPostIndex + 1} / ${currentPosts.length}`;
-            document.getElementById('prevButton').disabled = currentPostIndex === 0;
-            document.getElementById('nextButton').disabled = currentPostIndex === currentPosts.length - 1;
-        }
-
-        document.getElementById('prevButton').addEventListener('click', async () => {
-            if (currentPostIndex > 0) {
-                document.querySelectorAll('.post-card')[currentPostIndex].classList.remove('active');
-                currentPostIndex--;
-                document.querySelectorAll('.post-card')[currentPostIndex].classList.add('active');
-                updateCarouselControls();
-                await trackView(currentPosts[currentPostIndex].id);
-            }
-        });
-
-        document.getElementById('nextButton').addEventListener('click', async () => {
-            if (currentPostIndex < currentPosts.length - 1) {
-                document.querySelectorAll('.post-card')[currentPostIndex].classList.remove('active');
-                currentPostIndex++;
-                document.querySelectorAll('.post-card')[currentPostIndex].classList.add('active');
-                updateCarouselControls();
-                await trackView(currentPosts[currentPostIndex].id);
-            }
-        });
-
-        function attachPostActions() {
-            // Follow buttons
-            document.querySelectorAll('.follow-button').forEach(btn => {
-                btn.addEventListener('click', async () => {
-                    const authorId = btn.dataset.authorId;
-                    const isFollowing = btn.classList.contains('following');
-                    
-                    try {
-                        if (isFollowing) {
-                            const followSnap = await getDocs(
-                                query(collection(db, 'follows'),
-                                      where('followerId', '==', currentUser.userId),
-                                      where('followingId', '==', authorId))
-                            );
-                            followSnap.forEach(async (doc) => {
-                                await deleteDoc(doc.ref);
-                            });
-                            btn.classList.remove('following');
-                            btn.textContent = 'Follow';
-                        } else {
-                            await addDoc(collection(db, 'follows'), {
-                                followerId: currentUser.userId,
-                                followingId: authorId,
-                                createdAt: serverTimestamp()
-                            });
-                            btn.classList.add('following');
-                            btn.textContent = 'Following';
-                        }
-                    } catch (error) {
-                        console.error('Follow error:', error);
-                    }
-                });
-            });
-
-            // Like buttons
-            document.querySelectorAll('.like-button').forEach(btn => {
-                btn.addEventListener('click', async () => {
-                    const postId = btn.dataset.postId;
-                    await handleLike(postId, 'like', btn);
-                });
-            });
-
-            // Dislike buttons
-            document.querySelectorAll('.dislike-button').forEach(btn => {
-                btn.addEventListener('click', async () => {
-                    const postId = btn.dataset.postId;
-                    await handleLike(postId, 'dislike', btn);
-                });
-            });
-
-            // Comment toggle
-            document.querySelectorAll('.comments-toggle').forEach(toggle => {
-                toggle.addEventListener('click', async () => {
-                    const postId = toggle.dataset.postId;
-                    const commentsList = document.getElementById(`comments-${postId}`);
-                    
-                    if (commentsList.classList.contains('show')) {
-                        commentsList.classList.remove('show');
-                        toggle.textContent = 'Show Comments';
-                    } else {
-                        await loadComments(postId);
-                        commentsList.classList.add('show');
-                        toggle.textContent = 'Hide Comments';
-                    }
-                });
-            });
-
-            // Comment submit
-            document.querySelectorAll('.comment-submit').forEach(btn => {
-                btn.addEventListener('click', async () => {
-                    const postId = btn.dataset.postId;
-                    const input = document.querySelector(`.comment-input[data-post-id="${postId}"]`);
-                    const text = input.value.trim();
-                    
-                    if (text) {
-                        try {
-                            await addDoc(collection(db, 'comments'), {
-                                postId,
-                                authorId: currentUser.userId,
-                                text,
-                                createdAt: serverTimestamp()
-                            });
-                            
-                            input.value = '';
-                            await loadComments(postId);
-                            
-                            // Update comment count
-                            const countSpan = document.querySelector(`.comment-button[data-post-id="${postId}"] .comment-count`);
-                            if (countSpan) {
-                                countSpan.textContent = parseInt(countSpan.textContent) + 1;
-                            }
-                        } catch (error) {
-                            console.error('Comment error:', error);
-                        }
-                    }
-                });
-            });
-
-            // Report buttons
-            document.querySelectorAll('.report-button').forEach(btn => {
-                btn.addEventListener('click', async () => {
-                    const postId = btn.dataset.postId;
-                    const reason = prompt('Please describe why you are reporting this post:');
-                    if (reason) {
-                        try {
-                            await addDoc(collection(db, 'reports'), {
-                                postId,
-                                reportedBy: currentUser.userId,
-                                reason,
-                                createdAt: serverTimestamp(),
-                                status: 'pending'
-                            });
-                            alert('Report submitted. Thank you.');
-                        } catch (error) {
-                            console.error('Report error:', error);
-                            alert('Failed to submit report.');
-                        }
-                    }
-                });
-            });
-        }
-
-        async function handleLike(postId, type, button) {
-            try {
-                const likeQuery = query(
-                    collection(db, 'likes'),
-                    where('userId', '==', currentUser.userId),
-                    where('postId', '==', postId)
-                );
-                const likeSnap = await getDocs(likeQuery);
-                
-                const postRef = doc(db, 'posts', postId);
-                const postCard = document.querySelector(`[data-post-id="${postId}"]`);
-                const likeBtn = postCard.querySelector('.like-button');
-                const dislikeBtn = postCard.querySelector('.dislike-button');
-                
-                if (!likeSnap.empty) {
-                    const existingLike = likeSnap.docs[0];
-                    const existingType = existingLike.data().type;
-                    
-                    if (existingType === type) {
-                        // Remove like/dislike
-                        await deleteDoc(existingLike.ref);
-                        await updateDoc(postRef, {
-                            [type === 'like' ? 'likes' : 'dislikes']: increment(-1)
-                        });
-                        
-                        button.classList.remove(type === 'like' ? 'liked' : 'disliked');
-                        const count = parseInt(button.querySelector('span').textContent);
-                        button.querySelector('span').textContent = count - 1;
-                    } else {
-                        // Switch from like to dislike or vice versa
-                        await deleteDoc(existingLike.ref);
-                        await addDoc(collection(db, 'likes'), {
-                            userId: currentUser.userId,
-                            postId,
-                            type,
-                            createdAt: serverTimestamp()
-                        });
-                        
-                        await updateDoc(postRef, {
-                            [existingType === 'like' ? 'likes' : 'dislikes']: increment(-1),
-                            [type === 'like' ? 'likes' : 'dislikes']: increment(1)
-                        });
-                        
-                        if (type === 'like') {
-                            likeBtn.classList.add('liked');
-                            dislikeBtn.classList.remove('disliked');
-                            const likeCount = parseInt(likeBtn.querySelector('span').textContent);
-                            const dislikeCount = parseInt(dislikeBtn.querySelector('span').textContent);
-                            likeBtn.querySelector('span').textContent = likeCount + 1;
-                            dislikeBtn.querySelector('span').textContent = dislikeCount - 1;
-                        } else {
-                            dislikeBtn.classList.add('disliked');
-                            likeBtn.classList.remove('liked');
-                            const likeCount = parseInt(likeBtn.querySelector('span').textContent);
-                            const dislikeCount = parseInt(dislikeBtn.querySelector('span').textContent);
-                            dislikeBtn.querySelector('span').textContent = dislikeCount + 1;
-                            likeBtn.querySelector('span').textContent = likeCount - 1;
-                        }
-                    }
-                } else {
-                    // Add new like/dislike
-                    await addDoc(collection(db, 'likes'), {
-                        userId: currentUser.userId,
-                        postId,
-                        type,
-                        createdAt: serverTimestamp()
-                    });
-                    
-                    await updateDoc(postRef, {
-                        [type === 'like' ? 'likes' : 'dislikes']: increment(1)
-                    });
-                    
-                    button.classList.add(type === 'like' ? 'liked' : 'disliked');
-                    const count = parseInt(button.querySelector('span').textContent);
-                    button.querySelector('span').textContent = count + 1;
-                }
-            } catch (error) {
-                console.error('Like error:', error);
-            }
-        }
-
-        async function loadComments(postId) {
-            const commentsList = document.getElementById(`comments-${postId}`);
-            try {
-                const commentsSnap = await getDocs(
-                    query(collection(db, 'comments'),
-                          where('postId', '==', postId),
-                          orderBy('createdAt', 'desc'))
-                );
-                
-                if (commentsSnap.empty) {
-                    commentsList.innerHTML = '<div style="color:rgba(255,255,255,.5);padding:10px">No comments yet</div>';
-                    return;
-                }
-                
-                commentsList.innerHTML = '';
-                for (const commentDoc of commentsSnap.docs) {
-                    const comment = commentDoc.data();
-                    const authorSnap = await getDoc(doc(db, 'users', comment.authorId));
-                    const author = authorSnap.exists() ? authorSnap.data() : { displayName: 'Unknown', avatar: '' };
-                    
-                    const commentItem = document.createElement('div');
-                    commentItem.className = 'comment-item';
-                    commentItem.innerHTML = `
-                        <div class="comment-header">
-                            <img class="comment-avatar" src="${author.avatar || 'https://via.placeholder.com/30'}" alt="${author.displayName}">
-                            <span class="comment-author">${author.displayName}</span>
-                        </div>
-                        <div class="comment-text">${comment.text}</div>
-                    `;
-                    commentsList.appendChild(commentItem);
-                }
-            } catch (error) {
-                console.error('Error loading comments:', error);
-                commentsList.innerHTML = '<div style="color:#ff3b30;padding:10px">Error loading comments</div>';
             }
         }
     </script>
