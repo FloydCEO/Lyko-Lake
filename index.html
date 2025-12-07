@@ -4,67 +4,65 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Lyko Lake - Home</title>
-
-    <!-- Google AdSense -->
-    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2140641372307321" crossorigin="anonymous"></script>
-
-
     <style>
         *{margin:0;padding:0;box-sizing:border-box}
-        body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Oxygen,Ubuntu,Cantarell,sans-serif;
-             background:linear-gradient(135deg,#0a4d4d 0%,#1a6b6b 50%,#0f3d3d 100%);color:#fff;min-height:100vh}
+        body{
+            font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Oxygen,Ubuntu,Cantarell,sans-serif;
+            background:radial-gradient(ellipse at bottom,#1a3d2e 0%,#0d2818 50%,#06140f 100%);
+            color:#e0f2e9;min-height:100vh;
+            background-attachment:fixed;
+        }
         .hidden{display:none!important}
-        nav{background:rgba(10,77,77,.95);backdrop-filter:blur(10px);padding:20px 40px;display:flex;justify-content:space-between;align-items:center;
-            position:sticky;top:0;z-index:1000;box-shadow:0 4px 20px rgba(0,0,0,.3);border-bottom:2px solid rgba(34,197,164,.3)}
-        .logo{font-size:1.8em;font-weight:bold;color:#22c5a4;text-decoration:none;display:flex;align-items:center;gap:10px;transition:transform .3s ease}
+        nav{
+            background:rgba(13,40,24,.85);backdrop-filter:blur(10px);
+            padding:20px 40px;display:flex;justify-content:space-between;align-items:center;
+            position:sticky;top:0;z-index:1000;
+            box-shadow:0 4px 20px rgba(0,0,0,.4);
+            border-bottom:2px solid rgba(88,166,100,.4);
+        }
+        .logo{font-size:1.8em;font-weight:bold;color:#88d8a3;text-decoration:none;display:flex;align-items:center;gap:10px;transition:transform .3s ease}
         .logo:hover{transform:scale(1.05)}
         .nav-center{flex:1;display:flex;justify-content:center;max-width:500px;margin:0 20px}
-        .search-bar{width:100%;display:flex;gap:10px;background:rgba(255,255,255,.05);border:2px solid rgba(34,197,164,.3);border-radius:10px;padding:8px 15px}
-        .search-bar input{flex:1;background:none;border:none;color:#fff;font-size:1em;outline:none}
-        .search-bar input::placeholder{color:rgba(255,255,255,.5)}
-        .search-results{position:absolute;top:100%;left:0;right:0;background:rgba(10,77,77,.98);border:2px solid rgba(34,197,164,.3);border-radius:10px;margin-top:5px;max-height:300px;overflow-y:auto;display:none;z-index:1001}
+        .search-bar{width:100%;display:flex;gap:10px;background:rgba(13,40,24,.5);border:2px solid rgba(88,166,100,.4);border-radius:10px;padding:8px 15px}
+        .search-bar input{flex:1;background:none;border:none;color:#e0f2e9;font-size:1em;outline:none}
+        .search-bar input::placeholder{color:rgba(224,242,233,.5)}
+        .search-results{position:absolute;top:100%;left:0;right:0;background:rgba(13,40,24,.98);border:2px solid rgba(88,166,100,.4);border-radius:10px;margin-top:5px;max-height:300px;overflow-y:auto;display:none;z-index:1001}
         .search-results.show{display:block}
-        .search-result-item{padding:12px 15px;cursor:pointer;border-bottom:1px solid rgba(34,197,164,.1);display:flex;align-items:center;gap:10px}
-        .search-result-item:hover{background:rgba(34,197,164,.2)}
+        .search-result-item{padding:12px 15px;cursor:pointer;border-bottom:1px solid rgba(88,166,100,.2);display:flex;align-items:center;gap:10px}
+        .search-result-item:hover{background:rgba(88,166,100,.2)}
         .search-result-item img{width:40px;height:40px;border-radius:50%;object-fit:cover}
         .nav-right{display:flex;gap:15px;align-items:center}
-        .notification-bell{position:relative;background:rgba(34,197,164,.2);border:2px solid #22c5a4;color:#fff;padding:10px;border-radius:50%;cursor:pointer;font-size:1.2em;transition:all .3s}
-        .notification-bell:hover{background:rgba(34,197,164,.3)}
-        .notification-badge{position:absolute;top:-5px;right:-5px;background:#ff3b30;border-radius:50%;width:20px;height:20px;display:flex;align-items:center;justify-content:center;font-size:.7em;font-weight:bold}
+        .notification-bell{position:relative;background:rgba(88,166,100,.2);border:2px solid #88d8a3;color:#e0f2e9;padding:10px;border-radius:50%;cursor:pointer;font-size:1.2em;transition:all .3s}
+        .notification-bell:hover{background:rgba(88,166,100,.3)}
+        .notification-badge{position:absolute;top:-5px;right:-5px;background:#ff6b6b;border-radius:50%;width:20px;height:20px;display:flex;align-items:center;justify-content:center;font-size:.7em;font-weight:bold}
         .notification-bell.has-new{animation:wiggle 0.5s ease-in-out infinite}
-        .auth-button{background:rgba(34,197,164,.2);border:2px solid #22c5a4;color:#fff;padding:10px 30px;font-size:1em;border-radius:8px;text-decoration:none;
-                    transition:all .3s ease;font-weight:600}
-        .auth-button:hover{background:#22c5a4;color:#0a4d4d;transform:translateY(-2px);box-shadow:0 5px 15px rgba(34,197,164,.4)}
-        .upload-button{background:rgba(52,199,89,.2);border:2px solid #34c759;color:#fff;padding:10px 30px;font-size:1em;border-radius:8px;cursor:pointer;
-                      transition:all .3s ease;font-weight:600}
-        .upload-button:hover{background:#34c759;color:#0a4d4d;transform:translateY(-2px)}
-        .admin-button{background:rgba(255,59,48,.2);border:2px solid #ff3b30;color:#fff;padding:10px 30px;font-size:1em;border-radius:8px;text-decoration:none;
-                     transition:all .3s ease;font-weight:600}
-        .admin-button:hover{background:#ff3b30;color:#fff;transform:translateY(-2px);box-shadow:0 5px 15px rgba(255,59,48,.4)}
+        .auth-button{background:rgba(88,166,100,.2);border:2px solid #88d8a3;color:#e0f2e9;padding:10px 30px;font-size:1em;border-radius:8px;text-decoration:none;font-weight:600;transition:all .3s ease}
+        .auth-button:hover{background:#88d8a3;color:#0d2818;transform:translateY(-2px);box-shadow:0 5px 15px rgba(88,166,100,.4)}
+        .upload-button{background:rgba(138,201,149,.2);border:2px solid #8ac995;color:#e0f2e9;padding:10px 30px;font-size:1em;border-radius:8px;cursor:pointer;font-weight:600;transition:all .3s ease}
+        .upload-button:hover{background:#8ac995;color:#0d2818;transform:translateY(-2px)}
+        .admin-button{background:rgba(255,107,107,.2);border:2px solid #ff6b6b;color:#e0f2e9;padding:10px 30px;font-size:1em;border-radius:8px;text-decoration:none;font-weight:600;transition:all .3s ease}
+        .admin-button:hover{background:#ff6b6b;color:#fff;transform:translateY(-2px);box-shadow:0 5px 15px rgba(255,107,107,.4)}
         .user-menu{position:relative}
-        .user-button{background:rgba(34,197,164,.2);border:2px solid #22c5a4;color:#fff;padding:10px 20px;font-size:1em;border-radius:8px;cursor:pointer;
-                    transition:all .3s ease;font-weight:600;display:flex;align-items:center;gap:10px}
-        .user-button:hover{background:rgba(34,197,164,.3);transform:translateY(-2px)}
-        .user-avatar{width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,#22c5a4 0%,#0a8f7a 100%);display:flex;align-items:center;justify-content:center;font-size:1.2em;overflow:hidden}
+        .user-button{background:rgba(88,166,100,.2);border:2px solid #88d8a3;color:#e0f2e9;padding:10px 20px;font-size:1em;border-radius:8px;cursor:pointer;font-weight:600;display:flex;align-items:center;gap:10px;transition:all .3s ease}
+        .user-button:hover{background:rgba(88,166,100,.3);transform:translateY(-2px)}
+        .user-avatar{width:30px;height:30px;border-radius:50%;background:radial-gradient(circle,#88d8a3 0%,#5a9e6f 100%);display:flex;align-items:center;justify-content:center;font-size:1.2em;overflow:hidden}
         .user-avatar img{width:100%;height:100%;object-fit:cover}
-        .dropdown{position:absolute;top:calc(100% + 10px);right:0;background:rgba(10,77,77,.98);border:2px solid rgba(34,197,164,.3);border-radius:12px;
-                 min-width:200px;opacity:0;visibility:hidden;transform:translateY(-10px);transition:all .3s ease;box-shadow:0 10px 30px rgba(0,0,0,.5);backdrop-filter:blur(10px)}
+        .dropdown{position:absolute;top:calc(100% + 10px);right:0;background:rgba(13,40,24,.98);border:2px solid rgba(88,166,100,.4);border-radius:12px;min-width:200px;opacity:0;visibility:hidden;transform:translateY(-10px);transition:all .3s ease;box-shadow:0 10px 30px rgba(0,0,0,.5);backdrop-filter:blur(10px)}
         .dropdown.show{opacity:1;visibility:visible;transform:translateY(0)}
-        .dropdown-item{padding:15px 20px;color:rgba(255,255,255,.9);text-decoration:none;display:flex;align-items:center;gap:12px;cursor:pointer;
-                      border-bottom:1px solid rgba(34,197,164,.1)}
+        .dropdown-item{padding:15px 20px;color:rgba(224,242,233,.9);text-decoration:none;display:flex;align-items:center;gap:12px;cursor:pointer;border-bottom:1px solid rgba(88,166,100,.2)}
         .dropdown-item:last-child{border-bottom:none}
-        .dropdown-item:hover{background:rgba(34,197,164,.2);color:#22c5a4}
-        .dropdown-item.logout{color:#ff3b30}
-        .dropdown-item.logout:hover{background:rgba(255,59,48,.2)}
+        .dropdown-item:hover{background:rgba(88,166,100,.2);color:#88d8a3}
+        .dropdown-item.logout{color:#ff6b6b}
+        .dropdown-item.logout:hover{background:rgba(255,107,107,.2)}
         .page-container{max-width:1200px;margin:0 auto;padding:60px 40px;min-height:calc(100vh - 80px)}
         .welcome-section{text-align:center;padding:60px 20px}
-        .welcome-title{font-size:4em;margin-bottom:20px;background:linear-gradient(135deg,#22c5a4 0%,#4dd4b8 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
-        .welcome-subtitle{font-size:1.5em;color:rgba(255,255,255,.8);margin-bottom:20px;line-height:1.6}
+        .welcome-title{font-size:4em;margin-bottom:20px;background:linear-gradient(135deg,#88d8a3 0%,#5a9e6f 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+        .welcome-subtitle{font-size:1.5em;color:rgba(224,242,233,.8);margin-bottom:20px;line-height:1.6}
         .feed-container{max-width:600px;margin:40px auto}
-        .post-carousel{position:relative;background:rgba(255,255,255,.05);border:2px solid rgba(34,197,164,.3);border-radius:15px;padding:30px;backdrop-filter:blur(10px);min-height:400px}
+        .post-carousel{position:relative;background:rgba(13,40,24,.5);border:2px solid rgba(88,166,100,.4);border-radius:15px;padding:30px;backdrop-filter:blur(10px);min-height:400px}
         .carousel-controls{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}
-        .carousel-button{background:rgba(34,197,164,.2);border:2px solid #22c5a4;color:#22c5a4;padding:10px 20px;border-radius:8px;cursor:pointer;font-weight:600;transition:all .3s}
-        .carousel-button:hover:not(:disabled){background:#22c5a4;color:#0a4d4d}
+        .carousel-button{background:rgba(88,166,100,.2);border:2px solid #88d8a3;color:#88d8a3;padding:10px 20px;border-radius:8px;cursor:pointer;font-weight:600;transition:all .3s}
+        .carousel-button:hover:not(:disabled){background:#88d8a3;color:#0d2818}
         .carousel-button:disabled{opacity:.3;cursor:not-allowed}
         .post-card{display:none}
         .post-card.active{display:block}
@@ -72,56 +70,56 @@
         .post-avatar{width:50px;height:50px;border-radius:50%;object-fit:cover;cursor:pointer}
         .post-author{flex:1;cursor:pointer}
         .post-author-name{font-size:1.2em;font-weight:600;margin-bottom:3px}
-        .post-author-username{color:rgba(255,255,255,.6);font-size:.9em}
-        .post-date{color:rgba(255,255,255,.5);font-size:.8em}
-        .follow-button{background:rgba(34,197,164,.2);border:2px solid #22c5a4;color:#22c5a4;padding:6px 16px;border-radius:6px;cursor:pointer;font-size:.9em;font-weight:600;transition:all .3s}
-        .follow-button:hover{background:#22c5a4;color:#0a4d4d}
-        .follow-button.following{background:#34c759;border-color:#34c759;color:#fff}
-        .post-content{margin:20px 0}
-        .post-text{color:rgba(255,255,255,.9);line-height:1.6;margin-bottom:15px;white-space:pre-wrap;word-wrap:break-word}
-        .post-media{width:100%;max-height:400px;border-radius:10px;margin-bottom:15px}
+        .post-author-username{color:rgba(224,242,233,.6);font-size:.9em}
+        .post-date{color:rgba(224,242,233,.5);font-size:.8em}
+        .follow-button{background:rgba(88,166,100,.2);border:2px solid #88d8a3;color:#88d8a3;padding:6px 16px;border-radius:6px;cursor:pointer;font-size:.9em;font-weight:600;transition:all .3s}
+        .follow-button:hover{background:#88d8a3;color:#0d2818}
+        .follow-button.following{background:#5a9e6f;border-color:#5a9e6f;color:#e0f2e9}
+        .post-content{margin:20px 0;cursor:pointer}
+        .post-text{color:rgba(224,242,233,.9);line-height:1.6;margin-bottom:15px;white-space:pre-wrap;word-wrap:break-word}
+        .post-media{width:100%;max-height:400px;border-radius:10px;margin-bottom:15px;overflow:hidden}
         .post-media img,.post-media video{width:100%;max-height:400px;object-fit:contain;border-radius:10px}
-        .post-stats{display:flex;gap:20px;margin-bottom:15px;color:rgba(255,255,255,.6)}
-        .post-actions{display:flex;gap:20px;padding-top:15px;border-top:1px solid rgba(34,197,164,.2)}
-        .action-button{background:none;border:none;color:rgba(255,255,255,.7);cursor:pointer;display:flex;align-items:center;gap:8px;font-size:1.1em;transition:all .3s;padding:8px 12px;border-radius:6px}
-        .action-button:hover{background:rgba(255,255,255,.1)}
-        .action-button.liked{color:#ff3b30}
-        .action-button.disliked{color:#8b4513}
-        .comments-section{margin-top:20px;border-top:2px solid rgba(34,197,164,.2);padding-top:20px}
-        .comments-toggle{color:#22c5a4;cursor:pointer;font-weight:600;margin-bottom:15px;display:inline-block}
+        .post-stats{display:flex;gap:20px;margin-bottom:15px;color:rgba(224,242,233,.6)}
+        .post-actions{display:flex;gap:20px;padding-top:15px;border-top:1px solid rgba(88,166,100,.2)}
+        .action-button{background:none;border:none;color:rgba(224,242,233,.7);cursor:pointer;display:flex;align-items:center;gap:8px;font-size:1.1em;transition:all .3s;padding:8px 12px;border-radius:6px}
+        .action-button:hover{background:rgba(88,166,100,.1)}
+        .action-button.liked{color:#ff6b6b}
+        .action-button.disliked{color:#8b7355}
+        .comments-section{margin-top:20px;border-top:2px solid rgba(88,166,100,.2);padding-top:20px}
+        .comments-toggle{color:#88d8a3;cursor:pointer;font-weight:600;margin-bottom:15px;display:inline-block}
         .comments-toggle:hover{text-decoration:underline}
         .comments-list{display:none;margin-bottom:15px}
         .comments-list.show{display:block}
-        .comment-item{background:rgba(255,255,255,.03);border-left:3px solid rgba(34,197,164,.3);padding:12px;margin-bottom:10px;border-radius:5px}
+        .comment-item{background:rgba(13,40,24,.3);border-left:3px solid rgba(88,166,100,.4);padding:12px;margin-bottom:10px;border-radius:5px}
         .comment-header{display:flex;align-items:center;gap:10px;margin-bottom:8px}
         .comment-avatar{width:30px;height:30px;border-radius:50%;object-fit:cover}
         .comment-author{font-weight:600;font-size:.9em}
-        .comment-text{color:rgba(255,255,255,.8);line-height:1.5;font-size:.95em}
+        .comment-text{color:rgba(224,242,233,.8);line-height:1.5;font-size:.95em}
         .comment-input-container{display:flex;gap:10px;margin-top:15px}
-        .comment-input{flex:1;background:rgba(255,255,255,.05);border:2px solid rgba(34,197,164,.3);border-radius:8px;padding:10px;color:#fff;font-size:.95em;resize:none;min-height:40px}
-        .comment-input:focus{outline:none;border-color:#22c5a4}
-        .comment-submit{background:rgba(34,197,164,.2);border:2px solid #22c5a4;color:#22c5a4;padding:8px 16px;border-radius:8px;cursor:pointer;font-weight:600;transition:all .3s}
-        .comment-submit:hover{background:#22c5a4;color:#0a4d4d}
-        .no-posts{text-align:center;padding:60px 20px;color:rgba(255,255,255,.6);font-size:1.2em}
-        .loading{text-align:center;padding:40px;color:rgba(255,255,255,.6)}
-        .notification-dropdown{position:absolute;top:calc(100% + 10px);right:0;background:rgba(10,77,77,.98);border:2px solid rgba(34,197,164,.3);border-radius:12px;min-width:300px;max-width:400px;max-height:500px;overflow-y:auto;display:none;z-index:1002;backdrop-filter:blur(10px)}
+        .comment-input{flex:1;background:rgba(13,40,24,.3);border:2px solid rgba(88,166,100,.4);border-radius:8px;padding:10px;color:#e0f2e9;font-size:.95em;resize:none;min-height:40px}
+        .comment-input:focus{outline:none;border-color:#88d8a3}
+        .comment-submit{background:rgba(88,166,100,.2);border:2px solid #88d8a3;color:#88d8a3;padding:8px 16px;border-radius:8px;cursor:pointer;font-weight:600;transition:all .3s}
+        .comment-submit:hover{background:#88d8a3;color:#0d2818}
+        .no-posts{text-align:center;padding:60px 20px;color:rgba(224,242,233,.6);font-size:1.2em}
+        .loading{text-align:center;padding:40px;color:rgba(224,242,233,.6)}
+        .notification-dropdown{position:absolute;top:calc(100% + 10px);right:0;background:rgba(13,40,24,.98);border:2px solid rgba(88,166,100,.4);border-radius:12px;min-width:300px;max-width:400px;max-height:500px;overflow-y:auto;display:none;z-index:1002;backdrop-filter:blur(10px)}
         .notification-dropdown.show{display:block}
-        .notification-item{padding:15px;border-bottom:1px solid rgba(34,197,164,.1);cursor:pointer;transition:background .3s}
-        .notification-item:hover{background:rgba(34,197,164,.1)}
-        .notification-item.unread{background:rgba(34,197,164,.2)}
-        .notification-time{font-size:.8em;color:rgba(255,255,255,.6);margin-top:5px}
-        .notification-empty{padding:30px;text-align:center;color:rgba(255,255,255,.5)}
-        .hover-card{position:fixed;background:rgba(10,77,77,.98);border:2px solid rgba(34,197,164,.3);border-radius:12px;padding:15px;min-width:200px;max-width:300px;z-index:1003;display:none;backdrop-filter:blur(10px);pointer-events:none}
+        .notification-item{padding:15px;border-bottom:1px solid rgba(88,166,100,.2);cursor:pointer;transition:background .3s}
+        .notification-item:hover{background:rgba(88,166,100,.1)}
+        .notification-item.unread{background:rgba(88,166,100,.2)}
+        .notification-time{font-size:.8em;color:rgba(224,242,233,.6);margin-top:5px}
+        .notification-empty{padding:30px;text-align:center;color:rgba(224,242,233,.5)}
+        .hover-card{position:fixed;background:rgba(13,40,24,.98);border:2px solid rgba(88,166,100,.4);border-radius:12px;padding:15px;min-width:200px;max-width:300px;z-index:1003;display:none;backdrop-filter:blur(10px);pointer-events:none}
         .hover-card-avatar{width:60px;height:60px;border-radius:50%;margin-bottom:10px;object-fit:cover}
         .hover-card-name{font-weight:600;margin-bottom:5px}
-        .hover-card-username{color:rgba(255,255,255,.6);margin-bottom:5px}
+        .hover-card-username{color:rgba(224,242,233,.6);margin-bottom:5px}
         .hover-card-rank{font-size:.8em;padding:2px 8px;border-radius:10px;margin-bottom:5px;display:inline-block}
-        .hover-card-date{font-size:.8em;color:rgba(255,255,255,.6)}
-        .post-modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.8);display:flex;align-items:center;justify-content:center;z-index:2000;backdrop-filter:blur(5px)}
-        .post-modal{background:rgba(10,77,77,.95);border:2px solid rgba(34,197,164,.3);border-radius:20px;padding:30px;max-width:600px;width:90%;max-height:80vh;overflow-y:auto;box-shadow:0 15px 50px rgba(0,0,0,.5);backdrop-filter:blur(10px)}
-        .post-modal-close{position:absolute;top:15px;right:15px;background:none;border:none;color:rgba(255,255,255,.7);font-size:1.5em;cursor:pointer;transition:color .3s}
-        .post-modal-close:hover{color:#22c5a4}
-        .version-footer{position:fixed;bottom:10px;left:10px;color:rgba(255,255,255,0.5);font-size:0.8em;z-index:1000;pointer-events:none}
+        .hover-card-date{font-size:.8em;color:rgba(224,242,233,.6)}
+        .post-modal-overlay{position:fixed;inset:0;background:rgba(6,20,15,.9);display:flex;align-items:center;justify-content:center;z-index:2000;backdrop-filter:blur(5px)}
+        .post-modal{background:rgba(13,40,24,.95);border:2px solid rgba(88,166,100,.4);border-radius:20px;padding:30px;max-width:600px;width:90%;max-height:80vh;overflow-y:auto;box-shadow:0 15px 50px rgba(0,0,0,.5);backdrop-filter:blur(10px)}
+        .post-modal-close{position:absolute;top:15px;right:15px;background:none;border:none;color:rgba(224,242,233,.7);font-size:1.5em;cursor:pointer;transition:color .3s}
+        .post-modal-close:hover{color:#88d8a3}
+        .version-footer{position:fixed;bottom:10px;left:10px;color:rgba(224,242,233,0.5);font-size:0.8em;z-index:1000;pointer-events:none}
         @keyframes fadeIn{from{opacity:0;transform:translateY(30px)}to{opacity:1;transform:translateY(0)}}
         @keyframes wiggle{0%,100%{transform:rotate(0deg)}25%{transform:rotate(-5deg)}75%{transform:rotate(5deg)}}
         @media(max-width:768px){nav{padding:20px;flex-wrap:wrap}.nav-center{order:3;width:100%;margin-top:15px}.welcome-title{font-size:2.5em}}
@@ -137,14 +135,11 @@
             </div>
         </div>
         <div class="nav-right">
-            <button class="notification-bell hidden" id="notificationBell">
-                🔔
-                <span class="notification-badge hidden" id="notificationBadge">0</span>
-            </button>
+            <button class="notification-bell hidden" id="notificationBell">🔔<span class="notification-badge hidden" id="notificationBadge">0</span></button>
             <div class="notification-dropdown hidden" id="notificationDropdown"></div>
             <button class="upload-button hidden" id="uploadButton">Upload</button>
             <a href="/auth.html" class="auth-button" id="authButton">Sign Up / Login</a>
-            <a href="/admin" class="admin-button hidden" id="adminButton">Admin</a>
+            <a href="/admin.html" class="admin-button hidden" id="adminButton">Admin</a>
             <div class="user-menu hidden" id="userMenu">
                 <button class="user-button" id="userButton">
                     <div class="user-avatar" id="navUserAvatar"><img id="navAvatarImg" src="" alt="Avatar" style="display:none"></div>
@@ -152,7 +147,7 @@
                 </button>
                 <div class="dropdown" id="dropdown">
                     <a class="dropdown-item" id="profileLink"><span>👤</span><span>Profile</span></a>
-                    <a href="/help" class="dropdown-item"><span>❓</span><span>Help</span></a>
+                    <a href="/help.html" class="dropdown-item"><span>❓</span><span>Help</span></a>
                     <div class="dropdown-item logout" id="logoutButton"><span>🚪</span><span>Log Out</span></div>
                 </div>
             </div>
@@ -163,23 +158,20 @@
         <div class="welcome-section">
             <h1 class="welcome-title">Welcome to Lyko Lake</h1>
             <p class="welcome-subtitle">An open creative space for adults.</p>
-            <p style="color:rgba(255,255,255,.7);max-width:700px;margin:20px auto;line-height:1.6">
+            <p style="color:rgba(224,242,233,.7);max-width:700px;margin:20px auto;line-height:1.6">
                 Lyko Lake is an open creative space. We allow strong language and adult topics 
-    <strong>as long as they respect others and remain legal</strong>. 
-    Content that promotes hate, violence, or non-consensual sexual material is removed.
+                <strong>as long as they respect others and remain legal</strong>. 
+                Content that promotes hate, violence, or non-consensual sexual material is removed.
             </p>
         </div>
-
         <div class="feed-container hidden" id="feedContainer">
             <div class="post-carousel">
                 <div class="carousel-controls">
                     <button class="carousel-button" id="prevButton" disabled>← Previous</button>
-                    <span id="postCounter" style="color:rgba(255,255,255,.7)">0 / 0</span>
+                    <span id="postCounter" style="color:rgba(224,242,233,.7)">0 / 0</span>
                     <button class="carousel-button" id="nextButton" disabled>Next →</button>
                 </div>
-                <div id="postsContainer">
-                    <div class="loading">Loading posts...</div>
-                </div>
+                <div id="postsContainer"><div class="loading">Loading posts...</div></div>
             </div>
         </div>
     </div>
@@ -216,11 +208,9 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
 
-        let currentUser = null;
-        let currentPosts = [];
-        let currentPostIndex = 0;
-        let viewedPosts = new Set();
+        let currentUser = null, currentPosts = [], currentPostIndex = 0, viewedPosts = new Set();
 
+        /* ---------- nav / auth ---------- */
         const authButton = document.getElementById('authButton');
         const adminButton = document.getElementById('adminButton');
         const uploadButton = document.getElementById('uploadButton');
@@ -243,55 +233,30 @@
         const postModalOverlay = document.getElementById('postModalOverlay');
         const postModalClose = document.getElementById('postModalClose');
 
-        // Navigation
-        userButton.addEventListener('click', e => {
-            e.stopPropagation();
-            dropdown.classList.toggle('show');
-        });
+        userButton.addEventListener('click', e => { e.stopPropagation(); dropdown.classList.toggle('show'); });
         document.addEventListener('click', () => dropdown.classList.remove('show'));
-        logoutButton.addEventListener('click', async () => {
-            await signOut(auth);
-            window.location.reload();
-        });
-        uploadButton.addEventListener('click', () => {
-            window.location.href = '/upload';
-        });
-        postModalClose.addEventListener('click', () => {
-            postModalOverlay.classList.add('hidden');
-        });
-        postModalOverlay.addEventListener('click', (e) => {
-            if (e.target === postModalOverlay) {
-                postModalOverlay.classList.add('hidden');
-            }
-        });
+        logoutButton.addEventListener('click', async () => { await signOut(auth); window.location.reload(); });
+        uploadButton.addEventListener('click', () => { window.location.href = '/upload'; });
+        postModalClose.addEventListener('click', () => postModalOverlay.classList.add('hidden'));
+        postModalOverlay.addEventListener('click', e => { if (e.target === postModalOverlay) postModalOverlay.classList.add('hidden'); });
 
-        // Search functionality
+        /* ---------- search ---------- */
         let searchTimeout;
         searchInput.addEventListener('input', async () => {
             clearTimeout(searchTimeout);
-            const query = searchInput.value.trim().toLowerCase();
-            
-            if (query.length < 2) {
-                searchResults.classList.remove('show');
-                return;
-            }
-
+            const queryText = searchInput.value.trim().toLowerCase();
+            if (queryText.length < 2) { searchResults.classList.remove('show'); return; }
             searchTimeout = setTimeout(async () => {
                 try {
                     const usersSnap = await getDocs(collection(db, 'users'));
                     const matches = [];
                     usersSnap.forEach(doc => {
                         const user = doc.data();
-                        if (user.username.toLowerCase().includes(query) || 
-                            user.displayName.toLowerCase().includes(query)) {
-                            matches.push(user);
-                        }
+                        if (user.username.toLowerCase().includes(queryText) || user.displayName.toLowerCase().includes(queryText)) matches.push(user);
                     });
-
                     searchResults.innerHTML = '';
-                    if (matches.length === 0) {
-                        searchResults.innerHTML = '<div style="padding:15px;color:rgba(255,255,255,.5)">No users found</div>';
-                    } else {
+                    if (matches.length === 0) searchResults.innerHTML = '<div style="padding:15px;color:rgba(224,242,233,.5)">No users found</div>';
+                    else {
                         matches.slice(0, 5).forEach(user => {
                             const item = document.createElement('div');
                             item.className = 'search-result-item';
@@ -299,86 +264,47 @@
                                 <img src="${user.avatar || 'https://via.placeholder.com/40'}" alt="${user.displayName}">
                                 <div>
                                     <div style="font-weight:600">${user.displayName}</div>
-                                    <div style="font-size:.9em;color:rgba(255,255,255,.6)">@${user.username}</div>
+                                    <div style="font-size:.9em;color:rgba(224,242,233,.6)">@${user.username}</div>
                                 </div>
                             `;
-                            item.addEventListener('click', () => {
-                                window.location.href = `/${user.username}`;
-                            });
+                            item.addEventListener('click', () => { window.location.href = `/${user.username}`; });
                             searchResults.appendChild(item);
                         });
                     }
                     searchResults.classList.add('show');
-                } catch (error) {
-                    console.error('Search error:', error);
-                }
+                } catch (error) { console.error('Search error:', error); }
             }, 300);
         });
+        document.addEventListener('click', e => { if (!searchResults.contains(e.target) && e.target !== searchInput) searchResults.classList.remove('show'); });
 
-        document.addEventListener('click', (e) => {
-            if (!searchResults.contains(e.target) && e.target !== searchInput) {
-                searchResults.classList.remove('show');
-            }
-        });
-
-        // Notification system
+        /* ---------- notifications ---------- */
         notificationBell.addEventListener('click', async () => {
             notificationDropdown.classList.toggle('show');
-            if (notificationDropdown.classList.contains('show')) {
-                await loadNotifications();
-            }
+            if (notificationDropdown.classList.contains('show')) await loadNotifications();
         });
-
-        document.addEventListener('click', (e) => {
-            if (!notificationBell.contains(e.target) && !notificationDropdown.contains(e.target)) {
-                notificationDropdown.classList.remove('show');
-            }
-        });
+        document.addEventListener('click', e => { if (!notificationBell.contains(e.target) && !notificationDropdown.contains(e.target)) notificationDropdown.classList.remove('show'); });
 
         async function loadNotifications() {
             if (!currentUser) return;
             try {
-                const notifSnap = await getDocs(
-                    query(collection(db, 'notifications'), 
-                          where('userId', '==', currentUser.userId),
-                          orderBy('createdAt', 'desc'),
-                          limit(20))
-                );
-                
+                const notifSnap = await getDocs(query(collection(db, 'notifications'), where('userId', '==', currentUser.userId), orderBy('createdAt', 'desc'), limit(20)));
                 notificationDropdown.innerHTML = '';
-                if (notifSnap.empty) {
-                    notificationDropdown.innerHTML = '<div class="notification-empty">Follow More People To Get More Updates</div>';
-                    return;
-                }
-
+                if (notifSnap.empty) { notificationDropdown.innerHTML = '<div class="notification-empty">Follow More People To Get More Updates</div>'; return; }
                 let unreadCount = 0;
                 notifSnap.forEach(doc => {
                     const notif = doc.data();
                     if (!notif.read) unreadCount++;
-                    
                     const item = document.createElement('div');
                     item.className = `notification-item ${notif.read ? '' : 'unread'}`;
-                    item.innerHTML = `
-                        <div>${notif.message}</div>
-                        <div class="notification-time">${notif.createdAt?.toDate().toLocaleString() || 'Unknown time'}</div>
-                    `;
-                    
+                    item.innerHTML = `<div>${notif.message}</div><div class="notification-time">${notif.createdAt?.toDate().toLocaleString() || 'Unknown time'}</div>`;
                     item.addEventListener('click', async () => {
-                        if (!notif.read) {
-                            await updateDoc(doc(db, 'notifications', doc.id), { read: true });
-                        }
-                        if (notif.postId) {
-                            await openPostModal(notif.postId);
-                        } else if (notif.link) {
-                            window.location.href = notif.link;
-                        }
+                        if (!notif.read) await updateDoc(doc.ref, { read: true });
+                        if (notif.postId) await openPostModal(notif.postId);
+                        else if (notif.link) window.location.href = notif.link;
                         notificationDropdown.classList.remove('show');
                     });
-                    
                     notificationDropdown.appendChild(item);
                 });
-
-                // Update badge
                 if (unreadCount > 0) {
                     notificationBadge.textContent = unreadCount;
                     notificationBadge.classList.remove('hidden');
@@ -388,116 +314,84 @@
                     notificationBell.classList.remove('has-new');
                 }
             } catch (error) {
-                console.error('Error loading notifications:', error);
-                notificationDropdown.innerHTML = '<div style="padding:20px;text-align:center;color:#ff3b30">Error loading notifications</div>';
+                console.error('loadNotifications error:', error);
+                notificationDropdown.innerHTML = '<div style="padding:20px;text-align:center;color:#ff6b6b">Error loading notifications</div>';
             }
         }
 
-        // Hover card functionality
-        let hoverTimeout;
-        let currentHoverElement = null;
-
+        /* ---------- hover card ---------- */
+        let hoverTimeout, currentHoverElement = null;
         function setupHoverCard(element, userData) {
-            element.addEventListener('mouseenter', (e) => {
+            element.addEventListener('mouseenter', e => {
                 currentHoverElement = element;
                 clearTimeout(hoverTimeout);
                 hoverTimeout = setTimeout(async () => {
                     if (!userData.rank && userData.userId) {
                         const userSnap = await getDoc(doc(db, 'users', userData.userId));
-                        if (userSnap.exists()) {
-                            const fullData = userSnap.data();
-                            userData = { ...userData, ...fullData };
-                        }
+                        if (userSnap.exists()) userData = { ...userData, ...userSnap.data() };
                     }
-                    
                     showHoverCard(e, userData);
                 }, 500);
             });
-
             element.addEventListener('mouseleave', () => {
                 clearTimeout(hoverTimeout);
-                if (!hoverCard.contains(document.elementFromPoint(event.clientX, event.clientY))) {
-                    hideHoverCard();
-                }
+                if (!hoverCard.contains(document.elementFromPoint(event.clientX, event.clientY))) hideHoverCard();
             });
         }
-
         function showHoverCard(e, userData) {
             const hoverAvatar = document.getElementById('hoverAvatar');
             const hoverName = document.getElementById('hoverName');
             const hoverUsername = document.getElementById('hoverUsername');
             const hoverRank = document.getElementById('hoverRank');
             const hoverDate = document.getElementById('hoverDate');
-
             if (userData.avatar) {
                 hoverAvatar.src = userData.avatar;
                 hoverAvatar.style.display = 'block';
             } else {
                 hoverAvatar.style.display = 'none';
             }
-
             hoverName.textContent = userData.displayName;
             hoverUsername.textContent = `@${userData.username} | User #${userData.uid || 'N/A'}`;
-            
             if (userData.rank) {
                 hoverRank.textContent = userData.rank;
                 hoverRank.className = `hover-card-rank ${userData.rank.toLowerCase()}`;
-                if (userData.rank === 'CEO') {
-                    hoverRank.style.background = '#ff3b30';
-                    hoverRank.style.color = '#fff';
-                } else if (userData.rank === 'Admin') {
-                    hoverRank.style.background = '#34c759';
-                    hoverRank.style.color = '#fff';
-                }
+                hoverRank.style.background = userData.rank === 'CEO' ? '#ff6b6b' : '#88d8a3';
+                hoverRank.style.color = '#fff';
                 hoverRank.classList.remove('hidden');
             } else {
                 hoverRank.classList.add('hidden');
             }
-
-            if (userData.createdAt) {
-                hoverDate.textContent = `Joined ${userData.createdAt.toDate().toLocaleDateString()}`;
-            } else {
-                hoverDate.textContent = '';
-            }
-
+            hoverDate.textContent = userData.createdAt ? `Joined ${userData.createdAt.toDate().toLocaleDateString()}` : '';
             hoverCard.style.left = e.clientX + 10 + 'px';
             hoverCard.style.top = e.clientY + 10 + 'px';
             hoverCard.classList.remove('hidden');
         }
-
         function hideHoverCard() {
             hoverCard.classList.add('hidden');
         }
-
-        document.addEventListener('mousemove', (e) => {
+        document.addEventListener('mousemove', e => {
             if (hoverCard.classList.contains('show')) {
                 const rect = hoverCard.getBoundingClientRect();
-                if (e.clientX < rect.left || e.clientX > rect.right || 
-                    e.clientY < rect.top || e.clientY > rect.bottom) {
-                    if (!currentHoverElement?.contains(e.target)) {
-                        hideHoverCard();
-                    }
+                if (e.clientX < rect.left || e.clientX > rect.right || e.clientY < rect.top || e.clientY > rect.bottom) {
+                    if (!currentHoverElement?.contains(e.target)) hideHoverCard();
                 }
             }
         });
 
-        // Post modal functionality
+        /* ---------- post modal ---------- */
         async function openPostModal(postId) {
             try {
                 const postSnap = await getDoc(doc(db, 'posts', postId));
                 if (!postSnap.exists()) return;
-
                 const post = postSnap.data();
                 const authorSnap = await getDoc(doc(db, 'users', post.authorId));
                 const author = authorSnap.exists() ? authorSnap.data() : { displayName: 'Unknown', username: 'unknown' };
 
                 let mediaHtml = '';
                 if (post.mediaUrl) {
-                    if (post.mediaType === 'video') {
-                        mediaHtml = `<div class="post-media"><video controls src="${post.mediaUrl}"></video></div>`;
-                    } else {
-                        mediaHtml = `<div class="post-media"><img src="${post.mediaUrl}" alt="Post media"></div>`;
-                    }
+                    mediaHtml = post.mediaType === 'video'
+                        ? `<div class="post-media"><video controls src="${post.mediaUrl}"></video></div>`
+                        : `<div class="post-media"><img src="${post.mediaUrl}" alt="Post media"></div>`;
                 }
 
                 const userLikeStatus = await getUserLikeStatus(post.id);
@@ -515,19 +409,11 @@
                         ${post.content ? `<div class="post-text">${post.content}</div>` : ''}
                         ${mediaHtml}
                     </div>
-                    <div class="post-stats">
-                        <span>👁️ ${post.views || 0} views</span>
-                    </div>
+                    <div class="post-stats"><span>👁️ ${post.views || 0} views</span></div>
                     <div class="post-actions">
-                        <button class="action-button like-button ${userLikeStatus === 'like' ? 'liked' : ''}" data-post-id="${post.id}" data-modal="true">
-                            ❤️ <span>${post.likes || 0}</span>
-                        </button>
-                        <button class="action-button dislike-button ${userLikeStatus === 'dislike' ? 'disliked' : ''}" data-post-id="${post.id}" data-modal="true">
-                            💩 <span>${post.dislikes || 0}</span>
-                        </button>
-                        <button class="action-button comment-button" data-post-id="${post.id}" data-modal="true">
-                            💬 <span class="comment-count">${commentCount}</span>
-                        </button>
+                        <button class="action-button like-button ${userLikeStatus === 'like' ? 'liked' : ''}" data-post-id="${post.id}" data-modal="true">❤️ <span>${post.likes || 0}</span></button>
+                        <button class="action-button dislike-button ${userLikeStatus === 'dislike' ? 'disliked' : ''}" data-post-id="${post.id}" data-modal="true">💩 <span>${post.dislikes || 0}</span></button>
+                        <button class="action-button comment-button" data-post-id="${post.id}" data-modal="true">💬 <span class="comment-count">${commentCount}</span></button>
                     </div>
                     <div class="comments-section">
                         <div class="comments-toggle" data-post-id="${post.id}" data-modal="true">Show Comments</div>
@@ -538,171 +424,184 @@
                         </div>
                     </div>
                 `;
-
                 postModalOverlay.classList.remove('hidden');
-                
-                // Attach event listeners to modal elements
                 attachModalPostActions();
             } catch (error) {
-                console.error('Error opening post modal:', error);
+                console.error('openPostModal error:', error);
             }
         }
 
         function attachModalPostActions() {
-            // Like buttons in modal
             document.querySelectorAll('.post-modal .like-button').forEach(btn => {
                 btn.addEventListener('click', async () => {
                     const postId = btn.dataset.postId;
                     await handleLike(postId, 'like', btn);
-                    // Refresh modal content
                     await openPostModal(postId);
                 });
             });
-
-            // Dislike buttons in modal
             document.querySelectorAll('.post-modal .dislike-button').forEach(btn => {
                 btn.addEventListener('click', async () => {
                     const postId = btn.dataset.postId;
                     await handleLike(postId, 'dislike', btn);
-                    // Refresh modal content
                     await openPostModal(postId);
                 });
             });
-
-            // Comment toggle in modal
             document.querySelectorAll('.post-modal .comments-toggle').forEach(toggle => {
                 toggle.addEventListener('click', async () => {
                     const postId = toggle.dataset.postId;
-                    const commentsList = document.getElementById(`modal-comments-${postId}`);
-                    
-                    if (commentsList.classList.contains('show')) {
-                        commentsList.classList.remove('show');
+                    const list = document.getElementById(`modal-comments-${postId}`);
+                    if (list.classList.contains('show')) {
+                        list.classList.remove('show');
                         toggle.textContent = 'Show Comments';
                     } else {
                         await loadModalComments(postId);
-                        commentsList.classList.add('show');
+                        list.classList.add('show');
                         toggle.textContent = 'Hide Comments';
                     }
                 });
             });
-
-            // Comment submit in modal
             document.querySelectorAll('.post-modal .comment-submit').forEach(btn => {
                 btn.addEventListener('click', async () => {
                     const postId = btn.dataset.postId;
                     const input = document.querySelector(`.post-modal .comment-input[data-post-id="${postId}"]`);
                     const text = input.value.trim();
-                    
-                    if (text) {
-                        try {
-                            await addDoc(collection(db, 'comments'), {
-                                postId,
-                                authorId: currentUser.userId,
-                                text,
-                                createdAt: serverTimestamp()
-                            });
-                            
-                            input.value = '';
-                            await loadModalComments(postId);
-                            
-                            // Update comment count
-                            const countSpan = document.querySelector(`.post-modal .comment-button[data-post-id="${postId}"] .comment-count`);
-                            if (countSpan) {
-                                countSpan.textContent = parseInt(countSpan.textContent) + 1;
-                            }
-                        } catch (error) {
-                            console.error('Comment error:', error);
-                        }
+                    if (!text) return;
+                    try {
+                        await addDoc(collection(db, 'comments'), { postId, authorId: currentUser.userId, text, createdAt: serverTimestamp() });
+                        input.value = '';
+                        await loadModalComments(postId);
+                        const countSpan = document.querySelector(`.post-modal .comment-button[data-post-id="${postId}"] .comment-count`);
+                        if (countSpan) countSpan.textContent = parseInt(countSpan.textContent) + 1;
+                    } catch (error) {
+                        console.error('comment submit error:', error);
                     }
                 });
             });
         }
 
         async function loadModalComments(postId) {
-            const commentsList = document.getElementById(`modal-comments-${postId}`);
+            const list = document.getElementById(`modal-comments-${postId}`);
             try {
-                const commentsSnap = await getDocs(
-                    query(collection(db, 'comments'),
-                          where('postId', '==', postId),
-                          orderBy('createdAt', 'desc'))
-                );
-                
-                if (commentsSnap.empty) {
-                    commentsList.innerHTML = '<div style="color:rgba(255,255,255,.5);padding:10px">No comments yet</div>';
+                const snap = await getDocs(query(collection(db, 'comments'), where('postId', '==', postId), orderBy('createdAt', 'desc')));
+                if (snap.empty) {
+                    list.innerHTML = '<div style="color:rgba(224,242,233,.5);padding:10px">No comments yet</div>';
                     return;
                 }
-                
-                commentsList.innerHTML = '';
-                for (const commentDoc of commentsSnap.docs) {
-                    const comment = commentDoc.data();
-                    const authorSnap = await getDoc(doc(db, 'users', comment.authorId));
+                list.innerHTML = '';
+                for (const docSnap of snap.docs) {
+                    const c = docSnap.data();
+                    const authorSnap = await getDoc(doc(db, 'users', c.authorId));
                     const author = authorSnap.exists() ? authorSnap.data() : { displayName: 'Unknown', avatar: '' };
-                    
-                    const commentItem = document.createElement('div');
-                    commentItem.className = 'comment-item';
-                    commentItem.innerHTML = `
+                    const item = document.createElement('div');
+                    item.className = 'comment-item';
+                    item.innerHTML = `
                         <div class="comment-header">
                             <img class="comment-avatar" src="${author.avatar || 'https://via.placeholder.com/30'}" alt="${author.displayName}">
                             <span class="comment-author">${author.displayName}</span>
                         </div>
-                        <div class="comment-text">${comment.text}</div>
+                        <div class="comment-text">${c.text}</div>
                     `;
-                    commentsList.appendChild(commentItem);
+                    list.appendChild(item);
                 }
             } catch (error) {
-                console.error('Error loading modal comments:', error);
-                commentsList.innerHTML = '<div style="color:#ff3b30;padding:10px">Error loading comments</div>';
+                console.error('loadModalComments error:', error);
+                list.innerHTML = '<div style="color:#ff6b6b;padding:10px">Error loading comments</div>';
             }
         }
 
         async function getUserLikeStatus(postId) {
             if (!currentUser) return null;
-            try {
-                const likeSnap = await getDocs(
-                    query(collection(db, 'likes'),
-                          where('userId', '==', currentUser.userId),
-                          where('postId', '==', postId))
-                );
-                if (!likeSnap.empty) {
-                    return likeSnap.docs[0].data().type;
-                }
-                return null;
-            } catch {
-                return null;
-            }
+            const snap = await getDocs(query(collection(db, 'likes'), where('userId', '==', currentUser.userId), where('postId', '==', postId)));
+            return snap.empty ? null : snap.docs[0].data().type;
         }
 
         async function getCommentCount(postId) {
+            const snap = await getDocs(query(collection(db, 'comments'), where('postId', '==', postId)));
+            return snap.size;
+        }
+
+        async function handleLike(postId, type, button) {
             try {
-                const commentsSnap = await getDocs(
-                    query(collection(db, 'comments'), where('postId', '==', postId))
-                );
-                return commentsSnap.size;
-            } catch {
-                return 0;
+                const likeSnap = await getDocs(query(collection(db, 'likes'), where('userId', '==', currentUser.userId), where('postId', '==', postId)));
+                const postRef = doc(db, 'posts', postId);
+                const postCard = document.querySelector(`[data-post-id="${postId}"]`);
+                const likeBtn = postCard.querySelector('.like-button');
+                const dislikeBtn = postCard.querySelector('.dislike-button');
+
+                if (!likeSnap.empty) {
+                    const existing = likeSnap.docs[0];
+                    const existingType = existing.data().type;
+                    if (existingType === type) {
+                        await deleteDoc(existing.ref);
+                        await updateDoc(postRef, { [type === 'like' ? 'likes' : 'dislikes']: increment(-1) });
+                        button.classList.remove(type === 'like' ? 'liked' : 'disliked');
+                        const count = parseInt(button.querySelector('span').textContent);
+                        button.querySelector('span').textContent = count - 1;
+                    } else {
+                        await deleteDoc(existing.ref);
+                        await addDoc(collection(db, 'likes'), { userId: currentUser.userId, postId, type, createdAt: serverTimestamp() });
+                        await updateDoc(postRef, {
+                            [existingType === 'like' ? 'likes' : 'dislikes']: increment(-1),
+                            [type === 'like' ? 'likes' : 'dislikes']: increment(1)
+                        });
+                        if (type === 'like') {
+                            likeBtn.classList.add('liked'); dislikeBtn.classList.remove('disliked');
+                            likeBtn.querySelector('span').textContent = parseInt(likeBtn.querySelector('span').textContent) + 1;
+                            dislikeBtn.querySelector('span').textContent = parseInt(dislikeBtn.querySelector('span').textContent) - 1;
+                        } else {
+                            dislikeBtn.classList.add('disliked'); likeBtn.classList.remove('liked');
+                            dislikeBtn.querySelector('span').textContent = parseInt(dislikeBtn.querySelector('span').textContent) + 1;
+                            likeBtn.querySelector('span').textContent = parseInt(likeBtn.querySelector('span').textContent) - 1;
+                        }
+                    }
+                } else {
+                    await addDoc(collection(db, 'likes'), { userId: currentUser.userId, postId, type, createdAt: serverTimestamp() });
+                    await updateDoc(postRef, { [type === 'like' ? 'likes' : 'dislikes']: increment(1) });
+                    button.classList.add(type === 'like' ? 'liked' : 'disliked');
+                    const count = parseInt(button.querySelector('span').textContent);
+                    button.querySelector('span').textContent = count + 1;
+                }
+            } catch (error) {
+                console.error('handleLike error:', error);
             }
         }
 
-        async function checkIfFollowing(authorId) {
-            if (!currentUser) return false;
+        async function loadComments(postId) {
+            const list = document.getElementById(`comments-${postId}`);
             try {
-                const followSnap = await getDocs(
-                    query(collection(db, 'follows'), 
-                          where('followerId', '==', currentUser.userId),
-                          where('followingId', '==', authorId))
-                );
-                return !followSnap.empty;
-            } catch {
-                return false;
+                const snap = await getDocs(query(collection(db, 'comments'), where('postId', '==', postId), orderBy('createdAt', 'desc')));
+                if (snap.empty) {
+                    list.innerHTML = '<div style="color:rgba(224,242,233,.5);padding:10px">No comments yet</div>';
+                    return;
+                }
+                list.innerHTML = '';
+                for (const docSnap of snap.docs) {
+                    const c = docSnap.data();
+                    const authorSnap = await getDoc(doc(db, 'users', c.authorId));
+                    const author = authorSnap.exists() ? authorSnap.data() : { displayName: 'Unknown', avatar: '' };
+                    const item = document.createElement('div');
+                    item.className = 'comment-item';
+                    item.innerHTML = `
+                        <div class="comment-header">
+                            <img class="comment-avatar" src="${author.avatar || 'https://via.placeholder.com/30'}" alt="${author.displayName}">
+                            <span class="comment-author">${author.displayName}</span>
+                        </div>
+                        <div class="comment-text">${c.text}</div>
+                    `;
+                    list.appendChild(item);
+                }
+            } catch (error) {
+                console.error('loadComments error:', error);
+                list.innerHTML = '<div style="color:#ff6b6b;padding:10px">Error loading comments</div>';
             }
         }
 
+        /* ---------- post carousel ---------- */
         function updateCarouselControls() {
             document.getElementById('postCounter').textContent = `${currentPostIndex + 1} / ${currentPosts.length}`;
             document.getElementById('prevButton').disabled = currentPostIndex === 0;
             document.getElementById('nextButton').disabled = currentPostIndex === currentPosts.length - 1;
         }
-
         document.getElementById('prevButton').addEventListener('click', async () => {
             if (currentPostIndex > 0) {
                 document.querySelectorAll('.post-card')[currentPostIndex].classList.remove('active');
@@ -712,7 +611,6 @@
                 await trackView(currentPosts[currentPostIndex].id);
             }
         });
-
         document.getElementById('nextButton').addEventListener('click', async () => {
             if (currentPostIndex < currentPosts.length - 1) {
                 document.querySelectorAll('.post-card')[currentPostIndex].classList.remove('active');
@@ -725,26 +623,14 @@
 
         async function trackView(postId) {
             if (!currentUser || viewedPosts.has(postId)) return;
-            
             try {
                 const viewDocId = `${currentUser.userId}_${postId}`;
                 const viewRef = doc(db, 'postViews', viewDocId);
                 const viewSnap = await getDoc(viewRef);
-                
                 if (!viewSnap.exists()) {
-                    await setDoc(viewRef, {
-                        userId: currentUser.userId,
-                        postId: postId,
-                        viewedAt: serverTimestamp()
-                    });
-                    
-                    await updateDoc(doc(db, 'posts', postId), {
-                        views: increment(1)
-                    });
-                    
+                    await setDoc(viewRef, { userId: currentUser.userId, postId: postId, viewedAt: serverTimestamp() });
+                    await updateDoc(doc(db, 'posts', postId), { views: increment(1) });
                     viewedPosts.add(postId);
-                    
-                    // Update view count in UI
                     const postCard = document.querySelector(`[data-post-id="${postId}"]`);
                     if (postCard) {
                         const viewsSpan = postCard.querySelector('.post-stats span');
@@ -755,152 +641,28 @@
                     }
                 }
             } catch (error) {
-                console.error('Error tracking view:', error);
+                console.error('trackView error:', error);
             }
         }
 
-        async function handleLike(postId, type, button) {
-            try {
-                const likeQuery = query(
-                    collection(db, 'likes'),
-                    where('userId', '==', currentUser.userId),
-                    where('postId', '==', postId)
-                );
-                const likeSnap = await getDocs(likeQuery);
-                
-                const postRef = doc(db, 'posts', postId);
-                const postCard = document.querySelector(`[data-post-id="${postId}"]`);
-                const likeBtn = postCard.querySelector('.like-button');
-                const dislikeBtn = postCard.querySelector('.dislike-button');
-                
-                if (!likeSnap.empty) {
-                    const existingLike = likeSnap.docs[0];
-                    const existingType = existingLike.data().type;
-                    
-                    if (existingType === type) {
-                        // Remove like/dislike
-                        await deleteDoc(existingLike.ref);
-                        await updateDoc(postRef, {
-                            [type === 'like' ? 'likes' : 'dislikes']: increment(-1)
-                        });
-                        
-                        button.classList.remove(type === 'like' ? 'liked' : 'disliked');
-                        const count = parseInt(button.querySelector('span').textContent);
-                        button.querySelector('span').textContent = count - 1;
-                    } else {
-                        // Switch from like to dislike or vice versa
-                        await deleteDoc(existingLike.ref);
-                        await addDoc(collection(db, 'likes'), {
-                            userId: currentUser.userId,
-                            postId,
-                            type,
-                            createdAt: serverTimestamp()
-                        });
-                        
-                        await updateDoc(postRef, {
-                            [existingType === 'like' ? 'likes' : 'dislikes']: increment(-1),
-                            [type === 'like' ? 'likes' : 'dislikes']: increment(1)
-                        });
-                        
-                        if (type === 'like') {
-                            likeBtn.classList.add('liked');
-                            dislikeBtn.classList.remove('disliked');
-                            const likeCount = parseInt(likeBtn.querySelector('span').textContent);
-                            const dislikeCount = parseInt(dislikeBtn.querySelector('span').textContent);
-                            likeBtn.querySelector('span').textContent = likeCount + 1;
-                            dislikeBtn.querySelector('span').textContent = dislikeCount - 1;
-                        } else {
-                            dislikeBtn.classList.add('disliked');
-                            likeBtn.classList.remove('liked');
-                            const likeCount = parseInt(likeBtn.querySelector('span').textContent);
-                            const dislikeCount = parseInt(dislikeBtn.querySelector('span').textContent);
-                            dislikeBtn.querySelector('span').textContent = dislikeCount + 1;
-                            likeBtn.querySelector('span').textContent = likeCount - 1;
-                        }
-                    }
-                } else {
-                    // Add new like/dislike
-                    await addDoc(collection(db, 'likes'), {
-                        userId: currentUser.userId,
-                        postId,
-                        type,
-                        createdAt: serverTimestamp()
-                    });
-                    
-                    await updateDoc(postRef, {
-                        [type === 'like' ? 'likes' : 'dislikes']: increment(1)
-                    });
-                    
-                    button.classList.add(type === 'like' ? 'liked' : 'disliked');
-                    const count = parseInt(button.querySelector('span').textContent);
-                    button.querySelector('span').textContent = count + 1;
-                }
-            } catch (error) {
-                console.error('Like error:', error);
-            }
-        }
-
-        async function loadComments(postId) {
-            const commentsList = document.getElementById(`comments-${postId}`);
-            try {
-                const commentsSnap = await getDocs(
-                    query(collection(db, 'comments'),
-                          where('postId', '==', postId),
-                          orderBy('createdAt', 'desc'))
-                );
-                
-                if (commentsSnap.empty) {
-                    commentsList.innerHTML = '<div style="color:rgba(255,255,255,.5);padding:10px">No comments yet</div>';
-                    return;
-                }
-                
-                commentsList.innerHTML = '';
-                for (const commentDoc of commentsSnap.docs) {
-                    const comment = commentDoc.data();
-                    const authorSnap = await getDoc(doc(db, 'users', comment.authorId));
-                    const author = authorSnap.exists() ? authorSnap.data() : { displayName: 'Unknown', avatar: '' };
-                    
-                    const commentItem = document.createElement('div');
-                    commentItem.className = 'comment-item';
-                    commentItem.innerHTML = `
-                        <div class="comment-header">
-                            <img class="comment-avatar" src="${author.avatar || 'https://via.placeholder.com/30'}" alt="${author.displayName}">
-                            <span class="comment-author">${author.displayName}</span>
-                        </div>
-                        <div class="comment-text">${comment.text}</div>
-                    `;
-                    commentsList.appendChild(commentItem);
-                }
-            } catch (error) {
-                console.error('Error loading comments:', error);
-                commentsList.innerHTML = '<div style="color:#ff3b30;padding:10px">Error loading comments</div>';
-            }
-        }
-
-        // Post loading and carousel
+        /* ---------- post loading ---------- */
         async function loadPosts() {
             try {
                 const postsSnap = await getDocs(collection(db, 'posts'));
                 const allPosts = [];
-                postsSnap.forEach(doc => {
-                    allPosts.push({ id: doc.id, ...doc.data() });
-                });
-
-                // Sort by newest first
+                postsSnap.forEach(doc => allPosts.push({ id: doc.id, ...doc.data() }));
                 currentPosts = allPosts.sort((a, b) => {
                     const dateA = a.createdAt?.toMillis() || 0;
                     const dateB = b.createdAt?.toMillis() || 0;
                     return dateB - dateA;
                 }).slice(0, 10);
-                
                 if (currentPosts.length === 0) {
                     document.getElementById('postsContainer').innerHTML = '<div class="no-posts">No posts yet. Be the first to upload!</div>';
                     return;
                 }
-
                 await renderPosts();
             } catch (error) {
-                console.error('Error loading posts:', error);
+                console.error('loadPosts error:', error);
                 document.getElementById('postsContainer').innerHTML = '<div class="no-posts">Error loading posts</div>';
             }
         }
@@ -908,35 +670,26 @@
         async function renderPosts() {
             const container = document.getElementById('postsContainer');
             container.innerHTML = '';
-
             for (let i = 0; i < currentPosts.length; i++) {
                 const post = currentPosts[i];
                 const authorSnap = await getDoc(doc(db, 'users', post.authorId));
                 const author = authorSnap.exists() ? authorSnap.data() : { displayName: 'Unknown', username: 'unknown' };
-
                 const postCard = document.createElement('div');
                 postCard.className = `post-card ${i === 0 ? 'active' : ''}`;
                 postCard.dataset.postId = post.id;
-                
                 let mediaHtml = '';
                 if (post.mediaUrl) {
-                    if (post.mediaType === 'video') {
-                        mediaHtml = `<div class="post-media"><video controls src="${post.mediaUrl}"></video></div>`;
-                    } else {
-                        mediaHtml = `<div class="post-media"><img src="${post.mediaUrl}" alt="Post media"></div>`;
-                    }
+                    mediaHtml = post.mediaType === 'video'
+                        ? `<div class="post-media"><video controls src="${post.mediaUrl}"></video></div>`
+                        : `<div class="post-media"><img src="${post.mediaUrl}" alt="Post media"></div>`;
                 }
-
                 const isFollowing = await checkIfFollowing(post.authorId);
                 const followBtnText = isFollowing ? 'Following' : 'Follow';
                 const followBtnClass = isFollowing ? 'following' : '';
-
                 const userLikeStatus = await getUserLikeStatus(post.id);
-
-                // Format post date
+                const commentCount = await getCommentCount(post.id);
                 const postDate = post.createdAt?.toDate() || new Date();
                 const dateStr = formatPostDate(postDate);
-
                 postCard.innerHTML = `
                     <div class="post-header">
                         <img class="post-avatar" src="${author.avatar || 'https://via.placeholder.com/50'}" alt="${author.displayName}" data-user-id="${post.authorId}">
@@ -947,26 +700,16 @@
                         </div>
                         ${post.authorId !== currentUser.userId ? `<button class="follow-button ${followBtnClass}" data-author-id="${post.authorId}">${followBtnText}</button>` : ''}
                     </div>
-                    <div class="post-content" style="cursor:pointer" data-post-id="${post.id}">
+                    <div class="post-content" data-post-id="${post.id}">
                         ${post.content ? `<div class="post-text">${post.content}</div>` : ''}
                         ${mediaHtml}
                     </div>
-                    <div class="post-stats">
-                        <span>👁️ ${post.views || 0} views</span>
-                    </div>
+                    <div class="post-stats"><span>👁️ ${post.views || 0} views</span></div>
                     <div class="post-actions">
-                        <button class="action-button like-button ${userLikeStatus === 'like' ? 'liked' : ''}" data-post-id="${post.id}">
-                            ❤️ <span>${post.likes || 0}</span>
-                        </button>
-                        <button class="action-button dislike-button ${userLikeStatus === 'dislike' ? 'disliked' : ''}" data-post-id="${post.id}">
-                            💩 <span>${post.dislikes || 0}</span>
-                        </button>
-                        <button class="action-button comment-button" data-post-id="${post.id}">
-                            💬 <span class="comment-count">${await getCommentCount(post.id)}</span>
-                        </button>
-                        <button class="action-button report-button" data-post-id="${post.id}">
-                            🚩 Report
-                        </button>
+                        <button class="action-button like-button ${userLikeStatus === 'like' ? 'liked' : ''}" data-post-id="${post.id}">❤️ <span>${post.likes || 0}</span></button>
+                        <button class="action-button dislike-button ${userLikeStatus === 'dislike' ? 'disliked' : ''}" data-post-id="${post.id}">💩 <span>${post.dislikes || 0}</span></button>
+                        <button class="action-button comment-button" data-post-id="${post.id}">💬 <span class="comment-count">${commentCount}</span></button>
+                        <button class="action-button report-button" data-post-id="${post.id}">🚩 Report</button>
                     </div>
                     <div class="comments-section">
                         <div class="comments-toggle" data-post-id="${post.id}">Show Comments</div>
@@ -977,24 +720,12 @@
                         </div>
                     </div>
                 `;
-                
                 container.appendChild(postCard);
-
-                // Setup hover cards for avatar and author
                 setupHoverCard(postCard.querySelector('.post-avatar'), { ...author, userId: post.authorId });
                 setupHoverCard(postCard.querySelector('.post-author'), { ...author, userId: post.authorId });
-
-                // Add click event to post content to open modal
-                postCard.querySelector('.post-content').addEventListener('click', () => {
-                    openPostModal(post.id);
-                });
-
-                // Track view when post becomes active
-                if (i === 0) {
-                    await trackView(post.id);
-                }
+                postCard.querySelector('.post-content').addEventListener('click', () => openPostModal(post.id));
+                if (i === 0) await trackView(post.id);
             }
-
             updateCarouselControls();
             attachPostActions();
         }
@@ -1005,127 +736,78 @@
             const minutes = Math.floor(diff / 60000);
             const hours = Math.floor(diff / 3600000);
             const days = Math.floor(diff / 86400000);
-
             if (minutes < 1) return 'Just now';
             if (minutes < 60) return `${minutes}m ago`;
             if (hours < 24) return `${hours}h ago`;
             if (days < 7) return `${days}d ago`;
-            
             return date.toLocaleDateString();
         }
 
         function attachPostActions() {
-            // Follow buttons
             document.querySelectorAll('.follow-button').forEach(btn => {
                 btn.addEventListener('click', async () => {
                     const authorId = btn.dataset.authorId;
                     const isFollowing = btn.classList.contains('following');
-                    
                     try {
                         if (isFollowing) {
-                            const followSnap = await getDocs(
-                                query(collection(db, 'follows'),
-                                      where('followerId', '==', currentUser.userId),
-                                      where('followingId', '==', authorId))
-                            );
-                            followSnap.forEach(async (doc) => {
-                                await deleteDoc(doc.ref);
-                            });
-                            btn.classList.remove('following');
-                            btn.textContent = 'Follow';
+                            const snap = await getDocs(query(collection(db, 'follows'), where('followerId', '==', currentUser.userId), where('followingId', '==', authorId)));
+                            snap.forEach(async d => await deleteDoc(d.ref));
+                            btn.classList.remove('following'); btn.textContent = 'Follow';
                         } else {
-                            await addDoc(collection(db, 'follows'), {
-                                followerId: currentUser.userId,
-                                followingId: authorId,
-                                createdAt: serverTimestamp()
-                            });
-                            btn.classList.add('following');
-                            btn.textContent = 'Following';
+                            await addDoc(collection(db, 'follows'), { followerId: currentUser.userId, followingId: authorId, createdAt: serverTimestamp() });
+                            btn.classList.add('following'); btn.textContent = 'Following';
                         }
-                    } catch (error) {
-                        console.error('Follow error:', error);
-                    }
+                    } catch (error) { console.error('Follow error:', error); }
                 });
             });
-
-            // Like buttons
             document.querySelectorAll('.like-button').forEach(btn => {
                 btn.addEventListener('click', async () => {
                     const postId = btn.dataset.postId;
                     await handleLike(postId, 'like', btn);
                 });
             });
-
-            // Dislike buttons
             document.querySelectorAll('.dislike-button').forEach(btn => {
                 btn.addEventListener('click', async () => {
                     const postId = btn.dataset.postId;
                     await handleLike(postId, 'dislike', btn);
                 });
             });
-
-            // Comment toggle
             document.querySelectorAll('.comments-toggle').forEach(toggle => {
                 toggle.addEventListener('click', async () => {
                     const postId = toggle.dataset.postId;
-                    const commentsList = document.getElementById(`comments-${postId}`);
-                    
-                    if (commentsList.classList.contains('show')) {
-                        commentsList.classList.remove('show');
+                    const list = document.getElementById(`comments-${postId}`);
+                    if (list.classList.contains('show')) {
+                        list.classList.remove('show');
                         toggle.textContent = 'Show Comments';
                     } else {
                         await loadComments(postId);
-                        commentsList.classList.add('show');
+                        list.classList.add('show');
                         toggle.textContent = 'Hide Comments';
                     }
                 });
             });
-
-            // Comment submit
             document.querySelectorAll('.comment-submit').forEach(btn => {
                 btn.addEventListener('click', async () => {
                     const postId = btn.dataset.postId;
                     const input = document.querySelector(`.comment-input[data-post-id="${postId}"]`);
                     const text = input.value.trim();
-                    
-                    if (text) {
-                        try {
-                            await addDoc(collection(db, 'comments'), {
-                                postId,
-                                authorId: currentUser.userId,
-                                text,
-                                createdAt: serverTimestamp()
-                            });
-                            
-                            input.value = '';
-                            await loadComments(postId);
-                            
-                            // Update comment count
-                            const countSpan = document.querySelector(`.comment-button[data-post-id="${postId}"] .comment-count`);
-                            if (countSpan) {
-                                countSpan.textContent = parseInt(countSpan.textContent) + 1;
-                            }
-                        } catch (error) {
-                            console.error('Comment error:', error);
-                        }
-                    }
+                    if (!text) return;
+                    try {
+                        await addDoc(collection(db, 'comments'), { postId, authorId: currentUser.userId, text, createdAt: serverTimestamp() });
+                        input.value = '';
+                        await loadComments(postId);
+                        const countSpan = document.querySelector(`.comment-button[data-post-id="${postId}"] .comment-count`);
+                        if (countSpan) countSpan.textContent = parseInt(countSpan.textContent) + 1;
+                    } catch (error) { console.error('Comment error:', error); }
                 });
             });
-
-            // Report buttons
             document.querySelectorAll('.report-button').forEach(btn => {
                 btn.addEventListener('click', async () => {
                     const postId = btn.dataset.postId;
                     const reason = prompt('Please describe why you are reporting this post:');
                     if (reason) {
                         try {
-                            await addDoc(collection(db, 'reports'), {
-                                postId,
-                                reportedBy: currentUser.userId,
-                                reason,
-                                createdAt: serverTimestamp(),
-                                status: 'pending'
-                            });
+                            await addDoc(collection(db, 'reports'), { postId, reportedBy: currentUser.userId, reason, createdAt: serverTimestamp(), status: 'pending' });
                             alert('Report submitted. Thank you.');
                         } catch (error) {
                             console.error('Report error:', error);
@@ -1136,6 +818,104 @@
             });
         }
 
+        async function checkForNewPosts() {
+            if (!currentUser) return;
+            try {
+                const followingSnap = await getDocs(query(collection(db, 'follows'), where('followerId', '==', currentUser.userId)));
+                const followingIds = [];
+                followingSnap.forEach(doc => followingIds.push(doc.data().followingId));
+                if (followingIds.length === 0) return;
+                const yesterday = new Date();
+                yesterday.setDate(yesterday.getDate() - 1);
+                const postsSnap = await getDocs(query(collection(db, 'posts'), where('authorId', 'in', followingIds), where('createdAt', '>', Timestamp.fromDate(yesterday))));
+                const newPosts = [];
+                postsSnap.forEach(doc => {
+                    const notifKey = `notified_${doc.id}`;
+                    if (!localStorage.getItem(notifKey)) {
+                        newPosts.push({ id: doc.id, ...doc.data() });
+                        localStorage.setItem(notifKey, 'true');
+                    }
+                });
+                if (newPosts.length > 0) {
+                    for (const post of newPosts) {
+                        const authorSnap = await getDoc(doc(db, 'users', post.authorId));
+                        const author = authorSnap.data();
+                        await addDoc(collection(db, 'notifications'), {
+                            userId: currentUser.userId,
+                            message: `${author.displayName} posted new content`,
+                            postId: post.id,
+                            type: 'new_post',
+                            read: false,
+                            createdAt: serverTimestamp()
+                        });
+                    }
+                    await loadNotificationCount();
+                }
+            } catch (error) {
+                console.error('checkForNewPosts error:', error);
+            }
+        }
+
+        async function checkForNewComments() {
+            if (!currentUser) return;
+            try {
+                const userPostsSnap = await getDocs(query(collection(db, 'posts'), where('authorId', '==', currentUser.userId)));
+                const userPostIds = [];
+                userPostsSnap.forEach(doc => userPostIds.push(doc.id));
+                if (userPostIds.length === 0) return;
+                const yesterday = new Date();
+                yesterday.setDate(yesterday.getDate() - 1);
+                const commentsSnap = await getDocs(query(collection(db, 'comments'), where('postId', 'in', userPostIds), where('createdAt', '>', Timestamp.fromDate(yesterday))));
+                const newComments = [];
+                commentsSnap.forEach(doc => {
+                    const comment = doc.data();
+                    if (comment.authorId !== currentUser.userId) {
+                        const notifKey = `comment_notified_${doc.id}`;
+                        if (!localStorage.getItem(notifKey)) {
+                            newComments.push({ id: doc.id, ...comment });
+                            localStorage.setItem(notifKey, 'true');
+                        }
+                    }
+                });
+                if (newComments.length > 0) {
+                    for (const comment of newComments) {
+                        const authorSnap = await getDoc(doc(db, 'users', comment.authorId));
+                        const author = authorSnap.data();
+                        await addDoc(collection(db, 'notifications'), {
+                            userId: currentUser.userId,
+                            message: `${author.displayName} commented on your post`,
+                            postId: comment.postId,
+                            type: 'new_comment',
+                            read: false,
+                            createdAt: serverTimestamp()
+                        });
+                    }
+                    await loadNotificationCount();
+                }
+            } catch (error) {
+                console.error('checkForNewComments error:', error);
+            }
+        }
+
+        async function loadNotificationCount() {
+            if (!currentUser) return;
+            try {
+                const snap = await getDocs(query(collection(db, 'notifications'), where('userId', '==', currentUser.userId), where('read', '==', false)));
+                const count = snap.size;
+                if (count > 0) {
+                    notificationBadge.textContent = count;
+                    notificationBadge.classList.remove('hidden');
+                    notificationBell.classList.add('has-new');
+                } else {
+                    notificationBadge.classList.add('hidden');
+                    notificationBell.classList.remove('has-new');
+                }
+            } catch (error) {
+                console.error('loadNotificationCount error:', error);
+            }
+        }
+
+        /* ---------- auth state ---------- */
         onAuthStateChanged(auth, async user => {
             if (user && user.emailVerified) {
                 const snap = await getDoc(doc(db, 'users', user.uid));
@@ -1147,22 +927,19 @@
                     notificationBell.classList.remove('hidden');
                     navSearch.classList.remove('hidden');
                     feedContainer.classList.remove('hidden');
-                    
                     userDisplayName.textContent = currentUser.displayName;
                     profileLink.href = `/${currentUser.username}`;
-                    
                     if (currentUser.avatar) {
                         navAvatarImg.src = currentUser.avatar;
                         navAvatarImg.style.display = 'block';
                     }
-                    
                     if (currentUser.rank === 'Admin' || currentUser.rank === 'CEO' || currentUser.customRank) {
                         adminButton.classList.remove('hidden');
                     }
-
                     await loadNotifications();
                     await loadPosts();
                     await checkForNewPosts();
+                    await checkForNewComments();
                 }
             } else {
                 authButton.classList.remove('hidden');
@@ -1174,164 +951,7 @@
                 feedContainer.classList.add('hidden');
             }
         });
-
-        // Check for new posts from followed users
-        async function checkForNewPosts() {
-            if (!currentUser) return;
-            
-            try {
-                const followingSnap = await getDocs(
-                    query(collection(db, 'follows'), where('followerId', '==', currentUser.userId))
-                );
-                
-                const followingIds = [];
-                followingSnap.forEach(doc => {
-                    followingIds.push(doc.data().followingId);
-                });
-
-                if (followingIds.length === 0) return;
-
-                // Check for posts from followed users in the last 24 hours
-                const yesterday = new Date();
-                yesterday.setDate(yesterday.getDate() - 1);
-
-                const postsSnap = await getDocs(
-                    query(
-                        collection(db, 'posts'),
-                        where('authorId', 'in', followingIds),
-                        where('createdAt', '>', Timestamp.fromDate(yesterday))
-                    )
-                );
-
-                const newPosts = [];
-                postsSnap.forEach(doc => {
-                    const post = doc.data();
-                    // Check if we already showed this notification
-                    const notifKey = `notified_${doc.id}`;
-                    if (!localStorage.getItem(notifKey)) {
-                        newPosts.push({ id: doc.id, ...post });
-                        localStorage.setItem(notifKey, 'true');
-                    }
-                });
-
-                if (newPosts.length > 0) {
-                    // Create notifications
-                    for (const post of newPosts) {
-                        const authorSnap = await getDoc(doc(db, 'users', post.authorId));
-                        const author = authorSnap.data();
-                        
-                        await addDoc(collection(db, 'notifications'), {
-                            userId: currentUser.userId,
-                            message: `${author.displayName} posted new content`,
-                            postId: post.id,
-                            type: 'new_post',
-                            read: false,
-                            createdAt: serverTimestamp()
-                        });
-                    }
-                    
-                    // Update notification badge
-                    await loadNotificationCount();
-                }
-            } catch (error) {
-                console.error('Error checking for new posts:', error);
-            }
-        }
-
-        // Check for comments on user's posts
-        async function checkForNewComments() {
-            if (!currentUser) return;
-
-            try {
-                // Get user's posts
-                const userPostsSnap = await getDocs(
-                    query(collection(db, 'posts'), where('authorId', '==', currentUser.userId))
-                );
-
-                const userPostIds = [];
-                userPostsSnap.forEach(doc => {
-                    userPostIds.push(doc.id);
-                });
-
-                if (userPostIds.length === 0) return;
-
-                // Check for recent comments on user's posts
-                const yesterday = new Date();
-                yesterday.setDate(yesterday.getDate() - 1);
-
-                const commentsSnap = await getDocs(
-                    query(
-                        collection(db, 'comments'),
-                        where('postId', 'in', userPostIds),
-                        where('createdAt', '>', Timestamp.fromDate(yesterday))
-                    )
-                );
-
-                const newComments = [];
-                commentsSnap.forEach(doc => {
-                    const comment = doc.data();
-                    // Don't notify about user's own comments
-                    if (comment.authorId !== currentUser.userId) {
-                        const notifKey = `comment_notified_${doc.id}`;
-                        if (!localStorage.getItem(notifKey)) {
-                            newComments.push({ id: doc.id, ...comment });
-                            localStorage.setItem(notifKey, 'true');
-                        }
-                    }
-                });
-
-                if (newComments.length > 0) {
-                    // Create notifications
-                    for (const comment of newComments) {
-                        const authorSnap = await getDoc(doc(db, 'users', comment.authorId));
-                        const author = authorSnap.data();
-                        
-                        await addDoc(collection(db, 'notifications'), {
-                            userId: currentUser.userId,
-                            message: `${author.displayName} commented on your post`,
-                            postId: comment.postId,
-                            type: 'new_comment',
-                            read: false,
-                            createdAt: serverTimestamp()
-                        });
-                    }
-                    
-                    // Update notification badge
-                    await loadNotificationCount();
-                }
-            } catch (error) {
-                console.error('Error checking for new comments:', error);
-            }
-        }
-
-        async function loadNotificationCount() {
-            if (!currentUser) return;
-            try {
-                const notifSnap = await getDocs(
-                    query(collection(db, 'notifications'), 
-                          where('userId', '==', currentUser.userId),
-                          where('read', '==', false))
-                );
-                
-                const count = notifSnap.size;
-                if (count > 0) {
-                    notificationBadge.textContent = count;
-                    notificationBadge.classList.remove('hidden');
-                    notificationBell.classList.add('has-new');
-                } else {
-                    notificationBadge.classList.add('hidden');
-                    notificationBell.classList.remove('has-new');
-                }
-            } catch (error) {
-                console.error('Error loading notification count:', error);
-            }
-        }
     </script>
-
-    <!-- Version Footer - Please increment version number for major/minor/patch changes -->
-    <div class="version-footer">
-        ©2025 Lyko Sokolov - Lyko Lake v1.0.0
-        <!-- Version format: MAJOR.MINOR.PATCH - Increment MAJOR for major features, MINOR for minor features, PATCH for bug fixes -->
-    </div>
+    <div class="version-footer">©2025 Lyko Sokolov - Lyko Lake v1.1.0</div>
 </body>
 </html>
