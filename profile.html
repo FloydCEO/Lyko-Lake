@@ -13,7 +13,6 @@
             background-attachment:fixed;
         }
         .hidden{display:none !important}
-
         nav{
             background:rgba(13,40,24,.85);backdrop-filter:blur(10px);
             padding:20px 40px;display:flex;justify-content:space-between;align-items:center;
@@ -22,761 +21,120 @@
             border-bottom:2px solid rgba(88,166,100,.4);
         }
         .logo{font-size:1.8em;font-weight:bold;color:#88d8a3;text-decoration:none;display:flex;align-items:center;gap:10px}
-        .nav-right{display:flex;gap:15px;align-items:center}
-        .auth-button,.admin-button{background:rgba(88,166,100,.2);border:2px solid #88d8a3;color:#e0f2e9;padding:10px 30px;border-radius:8px;text-decoration:none;font-weight:600;transition:all .3s ease}
-        .admin-button{background:rgba(255,107,107,.2);border-color:#ff6b6b}
-        .auth-button:hover{background:#88d8a3;color:#0d2818;transform:translateY(-2px)}
-        .admin-button:hover{background:#ff6b6b;color:#fff;transform:translateY(-2px)}
-
-        .user-menu{position:relative}
-        .user-button{background:rgba(88,166,100,.2);border:2px solid #88d8a3;color:#e0f2e9;padding:10px 20px;border-radius:8px;cursor:pointer;font-weight:600;
-                    display:flex;align-items:center;gap:10px;transition:all .3s ease}
-        .user-avatar{width:30px;height:30px;border-radius:50%;background:radial-gradient(circle,#88d8a3 0%,#5a9e6f 100%);overflow:hidden}
-        .user-avatar img{width:100%;height:100%;object-fit:cover}
-        .dropdown{position:absolute;top:calc(100% + 10px);right:0;background:rgba(13,40,24,.98);border:2px solid rgba(88,166,100,.4);
-                 border-radius:12px;min-width:200px;opacity:0;visibility:hidden;transform:translateY(-10px);transition:all .3s ease;
-                 box-shadow:0 10px 30px rgba(0,0,0,.5);backdrop-filter:blur(10px)}
-        .dropdown.show{opacity:1;visibility:visible;transform:translateY(0)}
-        .dropdown-item{padding:15px 20px;color:rgba(224,242,233,.9);text-decoration:none;display:flex;align-items:center;gap:12px;cursor:pointer;
-                      border-bottom:1px solid rgba(88,166,100,.2)}
-        .dropdown-item:last-child{border-bottom:none}
-        .dropdown-item:hover{background:rgba(88,166,100,.2);color:#88d8a3}
-        .dropdown-item.logout{color:#ff6b6b}
-        .dropdown-item.logout:hover{background:rgba(255,107,107,.2)}
-
-        .container{max-width:900px;margin:0 auto;padding:40px 20px}
-        .loading{text-align:center;padding:100px 20px;font-size:1.2em;color:rgba(224,242,233,.7)}
-        .page-title{text-align:center;margin-bottom:40px}
-        .page-title h1{font-size:4em;font-weight:bold;background:linear-gradient(135deg,#88d8a3 0%,#5a9e6f 100%);-webkit-background-clip:text;
-                      -webkit-text-fill-color:transparent;background-clip:text;display:inline-block}
-
-        .profile-header{background:rgba(13,40,24,.5);border:2px solid rgba(88,166,100,.4);border-radius:20px;padding:40px;
-                       margin-bottom:30px;backdrop-filter:blur(10px);text-align:center;position:relative}
-        .profile-avatar{width:150px;height:150px;border-radius:50%;background:radial-gradient(circle,#88d8a3 0%,#5a9e6f 100%);
-                       margin:0 auto 20px;box-shadow:0 10px 30px rgba(88,166,100,.4);overflow:hidden;position:relative;
-                       font-size:4em;display:flex;align-items:center;justify-content:center;transition:transform .3s ease}
-        .profile-avatar img{width:100%;height:100%;object-fit:cover}
-        .profile-avatar.editable{cursor:pointer}
-        .profile-avatar.editable:hover{transform:scale(1.05)}
-        .profile-avatar.editable::after{content:"📷";position:absolute;inset:0;background:rgba(13,40,24,.8);
-                                       display:flex;align-items:center;justify-content:center;font-size:1.5em;
-                                       opacity:0;transition:opacity .3s}
-        .profile-avatar.editable:hover::after{opacity:1}
-
-        .profile-display-name{font-size:2.5em;font-weight:bold;margin-bottom:10px;display:flex;align-items:center;justify-content:center;gap:10px;flex-wrap:wrap}
-        .profile-rank-badge{display:inline-block;padding:4px 12px;border-radius:12px;font-size:.7em;font-weight:700;text-transform:uppercase}
-        .rank-ceo{background:#ff6b6b;box-shadow:0 0 10px #ff6b6b;animation:pulse 2s infinite}
-        .rank-admin{background:#88d8a3}
-        @keyframes pulse{0%,100%{opacity:1}50%{opacity:.7}}
-        .profile-username{font-size:1.3em;color:rgba(224,242,233,.6);margin-bottom:15px}
-        .profile-uid{display:inline-block;background:rgba(88,166,100,.2);border:2px solid rgba(88,166,100,.5);color:#88d8a3;
-                    padding:8px 20px;border-radius:20px;font-weight:600;font-size:1.1em}
-        .follow-button{background:rgba(88,166,100,.2);border:2px solid #88d8a3;color:#88d8a3;padding:10px 30px;border-radius:8px;
-                      cursor:pointer;font-weight:600;font-size:1.1em;margin-top:15px;transition:all .3s}
-        .follow-button:hover{background:#88d8a3;color:#0d2818}
-        .follow-button.following{background:#5a9e6f;border-color:#5a9e6f;color:#e0f2e9}
-        
-        .profile-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:20px;margin-bottom:30px}
-        .stat-card{background:rgba(13,40,24,.5);border:2px solid rgba(88,166,100,.4);border-radius:15px;padding:25px;backdrop-filter:blur(10px);text-align:center}
-        .stat-label{color:rgba(224,242,233,.6);font-size:.9em;margin-bottom:8px;text-transform:uppercase;letter-spacing:1px}
-        .stat-value{font-size:2em;font-weight:bold;color:#88d8a3}
-        
-        .profile-section{background:rgba(13,40,24,.5);border:2px solid rgba(88,166,100,.4);border-radius:15px;padding:30px;
-                        backdrop-filter:blur(10px);margin-bottom:20px}
-        .section-title{font-size:1.5em;color:#88d8a3;margin-bottom:20px;display:flex;align-items:center;gap:10px}
-        .bio-text{color:rgba(224,242,233,.8);line-height:1.6;margin-bottom:15px;padding:15px;border-radius:10px;transition:background .3s}
-        .bio-text.editable:hover{background:rgba(88,166,100,.1);cursor:pointer}
-        .bio-placeholder{color:rgba(224,242,233,.5);font-style:italic}
-        .bio-input{width:100%;min-height:100px;padding:12px;background:rgba(13,40,24,.3);border:2px solid rgba(88,166,100,.4);
-                  border-radius:10px;color:#e0f2e9;font-size:1em;font-family:inherit;resize:vertical;margin-bottom:15px}
-        .bio-input:focus{outline:none;border-color:#88d8a3;background:rgba(88,166,100,.1)}
-        .bio-actions{display:flex;gap:10px}
-        .save-button{background:rgba(88,166,100,.2);border:2px solid #88d8a3;color:#88d8a3;padding:8px 16px;border-radius:8px;
-                   cursor:pointer;font-weight:600;transition:all .3s ease}
-        .save-button:hover{background:#88d8a3;color:#0d2818}
-        .cancel-button{background:rgba(224,242,233,.1);border:2px solid rgba(224,242,233,.3);color:rgba(224,242,233,.7);
-                     padding:8px 16px;border-radius:8px;cursor:pointer;font-weight:600;transition:all .3s ease}
-        .cancel-button:hover{background:rgba(224,242,233,.2)}
-
-        .posts-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:20px}
-        .post-card{background:rgba(13,40,24,.5);border:2px solid rgba(88,166,100,.4);border-radius:15px;padding:20px;
-                  cursor:pointer;transition:all .3s}
-        .post-card:hover{transform:translateY(-5px);box-shadow:0 10px 30px rgba(0,0,0,.4)}
-        .post-media{width:100%;height:200px;object-fit:cover;border-radius:10px;margin-bottom:15px}
-        .post-content{color:rgba(224,242,233,.8);line-height:1.5;margin-bottom:12px;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
-        .post-meta{display:flex;justify-content:space-between;color:rgba(224,242,233,.5);font-size:.9em}
-
-        .modal-overlay{position:fixed;inset:0;background:rgba(6,20,15,.8);display:flex;align-items:center;justify-content:center;
-                      z-index:10000;backdrop-filter:blur(5px)}
-        .modal{background:rgba(13,40,24,.95);border:2px solid rgba(88,166,100,.4);border-radius:20px;padding:30px;
-              max-width:500px;width:90%;box-shadow:0 15px 50px rgba(0,0,0,.5);backdrop-filter:blur(10px)}
-        .modal-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}
-        .modal-title{font-size:1.5em;color:#88d8a3}
-        .close-button{background:none;border:none;color:rgba(224,242,233,.7);font-size:1.8em;cursor:pointer;transition:color .3s}
-        .close-button:hover{color:#88d8a3}
-
-        .post-modal-overlay{position:fixed;inset:0;background:rgba(6,20,15,.9);display:flex;align-items:center;justify-content:center;z-index:2000;backdrop-filter:blur(5px)}
-        .post-modal{background:rgba(13,40,24,.95);border:2px solid rgba(88,166,100,.4);border-radius:20px;padding:30px;max-width:600px;width:90%;max-height:80vh;overflow-y:auto;box-shadow:0 15px 50px rgba(0,0,0,.5);backdrop-filter:blur(10px)}
-        .post-modal-close{position:absolute;top:15px;right:15px;background:none;border:none;color:rgba(224,242,233,.7);font-size:1.5em;cursor:pointer;transition:color .3s}
-        .post-modal-close:hover{color:#88d8a3}
-
-        .hover-card{position:fixed;background:rgba(13,40,24,.98);border:2px solid rgba(88,166,100,.4);border-radius:12px;padding:15px;min-width:200px;max-width:300px;z-index:1003;display:none;backdrop-filter:blur(10px);pointer-events:none}
-        .hover-card-avatar{width:60px;height:60px;border-radius:50%;margin-bottom:10px;object-fit:cover}
-        .hover-card-name{font-weight:600;margin-bottom:5px}
-        .hover-card-username{color:rgba(224,242,233,.6);margin-bottom:5px}
-        .hover-card-rank{font-size:.8em;padding:2px 8px;border-radius:10px;margin-bottom:5px;display:inline-block}
-        .hover-card-date{font-size:.8em;color:rgba(224,242,233,.6)}
-        
-        .error-message{text-align:center;padding:100px 20px}
-        .error-title{font-size:5em;margin-bottom:20px}
-        .error-text{font-size:1.5em;color:#88d8a3;margin-bottom:30px}
-        
-        @media(max-width:768px){.profile-header{padding:30px 20px}.page-title h1{font-size:2.5em}.profile-display-name{font-size:2em}.profile-avatar{width:120px;height:120px;font-size:3em}}
+        .container{max-width:800px;margin:60px auto;padding:20px}
+        .profile-header{text-align:center;margin-bottom:40px}
+        .profile-name{font-size:2.5em;color:#88d8a3}
+        .profile-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:20px}
+        .stat-card{background:rgba(13,40,24,.5);padding:20px;border-radius:10px;border:2px solid #88d8a3;text-align:center}
+        .character-preview{width:200px;height:300px;margin:20px auto;background:#fff;border-radius:10px;overflow:hidden} /* Placeholder SVG container */
+        .beta-tag{color:#ffcc00;font-size:0.8em}
     </style>
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+        import { getAuth } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
+        import { getFirestore, doc, getDoc } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDUBeWvs6kOijqST6FVGirWs2EZ12aAAwU",
+            authDomain: "lyko-lake.firebaseapp.com",
+            projectId: "lyko-lake",
+            storageBucket: "lyko-lake.firebasestorage.app",
+            messagingSenderId: "685592614306",
+            appId: "1:685592614306:web:b6a8f6f18407f9c0154efb"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        function getUsernameFromUrl() {
+            const params = new URLSearchParams(window.location.search);
+            return params.get('u');
+        }
+
+        async function loadProfile(username) {
+            try {
+                const usernameSnap = await getDoc(doc(db, 'usernames', username.toLowerCase()));
+                if (!usernameSnap.exists()) throw new Error('User not found');
+                const userId = usernameSnap.data().userId;
+                const userSnap = await getDoc(doc(db, 'users', userId));
+                if (!userSnap.exists()) throw new Error('Profile not found');
+                const userData = userSnap.data();
+
+                document.getElementById('profileName').textContent = userData.username || 'Unknown';
+                document.getElementById('level').textContent = userData.level || 1;
+                document.getElementById('money').textContent = `$${userData.money || 0}`;
+                document.getElementById('properties').innerHTML = userData.properties?.join('<br>') || 'None';
+
+                // Character preview (simple SVG placeholder)
+                const char = userData.character || {hair: 'black', eyes: 'brown', skin: 'light', clothes: 'casual'};
+                const svg = `
+                    <svg width="200" height="300">
+                        <rect x="50" y="50" width="100" height="150" fill="${char.skin === 'light' ? '#ffdab9' : '#cd853f'}"/> <!-- Body -->
+                        <circle cx="100" cy="30" r="30" fill="${char.hair}"/> <!-- Hair/Head -->
+                        <circle cx="80" cy="30" r="5" fill="${char.eyes}"/> <!-- Eyes -->
+                        <circle cx="120" cy="30" r="5" fill="${char.eyes}"/>
+                        <rect x="50" y="200" width="100" height="100" fill="${char.clothes === 'casual' ? '#add8e6' : '#ff0000'}"/> <!-- Clothes -->
+                    </svg>`;
+                document.getElementById('characterPreview').innerHTML = svg;
+
+                if (userData.avatar) {
+                    document.getElementById('characterPreview').innerHTML = `<img src="${userData.avatar}" style="width:200px;height:300px;object-fit:cover;">`;
+                }
+
+                document.getElementById('loading').classList.add('hidden');
+                document.getElementById('profileContent').classList.remove('hidden');
+            } catch (error) {
+                showError(error.message);
+            }
+        }
+
+        function showError(msg) {
+            document.getElementById('errorText').textContent = msg;
+            document.getElementById('loading').classList.add('hidden');
+            document.getElementById('errorContent').classList.remove('hidden');
+        }
+
+        const username = getUsernameFromUrl();
+        if (username) {
+            loadProfile(username);
+        } else {
+            showError('Please provide a username in the URL.');
+        }
+    </script>
 </head>
 <body>
-
-<nav>
-    <a href="/" class="logo">🌊 Lyko Lake</a>
-    <div class="nav-right">
-        <a href="/auth.html" class="auth-button hidden" id="authButton">Sign Up / Login</a>
-        <a href="/admin.html" class="admin-button hidden" id="adminButton">Admin</a>
-
-        <div class="user-menu hidden" id="userMenu">
-            <button class="user-button" id="userButton">
-                <div class="user-avatar"><img id="navAvatarImg" src="" alt="A" onerror="this.style.display='none'"></div>
-                <span id="navDisplayName">Loading…</span>
-            </button>
-            <div class="dropdown" id="dropdown">
-                <a class="dropdown-item" id="navProfileLink"><span>👤</span><span>Profile</span></a>
-                <a href="/help.html" class="dropdown-item"><span>❓</span><span>Help</span></a>
-                <div class="dropdown-item logout" id="logoutButton"><span>🚪</span><span>Log Out</span></div>
+    <nav>
+        <a href="/" class="logo">Lyko Lake <span class="beta-tag">BETA</span></a>
+    </nav>
+    <div class="container">
+        <div id="loading">Loading profile...</div>
+        <div id="profileContent" class="hidden">
+            <div class="profile-header">
+                <h1 class="profile-name" id="profileName"></h1>
+                <div id="characterPreview" class="character-preview"></div>
             </div>
-        </div>
-    </div>
-</nav>
-
-<div class="container">
-    <div class="loading" id="loading">Loading profile…</div>
-
-    <div class="hidden" id="profileContent">
-        <div class="page-title">
-            <h1 id="titleName">Loading…</h1>
-        </div>
-
-        <div class="profile-header">
-            <div class="profile-avatar" id="profileAvatar"><img id="profileAvatarImg" src="" alt="Profile" onerror="this.style.display='none'"></div>
-            <h2 class="profile-display-name" id="displayName">Loading…</h2>
-            <div class="profile-username" id="username">@loading</div>
-            <div class="profile-uid" id="uid">User #0</div>
-            <button class="follow-button hidden" id="followButton">Follow</button>
-        </div>
-
-        <div class="profile-stats">
-            <div class="stat-card"><div class="stat-label">Posts</div><div class="stat-value" id="postsCount">0</div></div>
-            <div class="stat-card"><div class="stat-label">Followers</div><div class="stat-value" id="followersCount">0</div></div>
-            <div class="stat-card"><div class="stat-label">Following</div><div class="stat-value" id="followingCount">0</div></div>
-        </div>
-
-        <div class="profile-section">
-            <h2 class="section-title"><span>📝</span><span>Bio</span></h2>
-            <div id="bioDisplay"><p class="bio-text" id="bioText">This user hasn't written a bio yet.</p></div>
-            <div class="hidden" id="bioEdit">
-                <textarea class="bio-input" id="bioInput" placeholder="Tell everyone about yourself…" maxlength="500"></textarea>
-                <div class="bio-actions"><button class="save-button" id="saveBioButton">Save</button><button class="cancel-button" id="cancelBioButton">Cancel</button></div>
-            </div>
-        </div>
-
-        <div class="profile-section">
-            <h2 class="section-title"><span>📰</span><span>Posts</span></h2>
-            <div id="postsGrid" class="posts-grid">
-                <div class="loading">Loading posts...</div>
-            </div>
-        </div>
-    </div>
-
-    <div class="error-message hidden" id="errorContent">
-        <div class="error-title">🌊</div>
-        <h2 class="error-text" id="errorText">User not found</h2>
-        <a href="/" class="auth-button">Go Home</a>
-    </div>
-</div>
-
-<div class="modal-overlay hidden" id="uploadModal">
-    <div class="modal">
-        <div class="modal-header">
-            <h2 class="modal-title">Change Profile Picture</h2>
-            <button class="close-button" id="closeModal">&times;</button>
-        </div>
-        <div style="text-align:center">
-            <input type="file" id="avatarInput" accept="image/*" style="display:none">
-            <button id="selectAvatar" style="background:rgba(88,166,100,.2);border:2px solid #88d8a3;color:#88d8a3;padding:10px 20px;border-radius:8px;cursor:pointer;font-weight:600">Select Image</button>
-            <div id="avatarPreview" style="margin-top:20px;display:none">
-                <img id="previewImg" style="max-width:200px;max-height:200px;border-radius:50%;margin-bottom:10px">
-                <br>
-                <button id="uploadAvatar" style="background:rgba(88,166,100,.2);border:2px solid #88d8a3;color:#88d8a3;padding:8px 16px;border-radius:8px;cursor:pointer;font-weight:600;margin-right:10px">Upload</button>
-                <button id="cancelAvatar" style="background:rgba(224,242,233,.1);border:2px solid rgba(224,242,233,.3);color:rgba(224,242,233,.7);padding:8px 16px;border-radius:8px;cursor:pointer;font-weight:600">Cancel</button>
-            </div>
-        </div>
-    </div>
-</div>
-
-<div class="hover-card hidden" id="hoverCard">
-    <img class="hover-card-avatar" id="hoverAvatar" src="" alt="">
-    <div class="hover-card-name" id="hoverName"></div>
-    <div class="hover-card-username" id="hoverUsername"></div>
-    <div class="hover-card-rank hidden" id="hoverRank"></div>
-    <div class="hover-card-date" id="hoverDate"></div>
-</div>
-
-<div class="post-modal-overlay hidden" id="postModalOverlay">
-    <div class="post-modal">
-        <button class="post-modal-close" id="postModalClose">&times;</button>
-        <div id="postModalContent"></div>
-    </div>
-</div>
-
-<script type="module">
-import {initializeApp} from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
-import {getAuth,onAuthStateChanged,signOut} from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
-import {getFirestore,collection,getDocs,doc,getDoc,updateDoc,query,where,addDoc,deleteDoc,serverTimestamp,orderBy,increment} from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
-import {getStorage,ref,uploadBytes,getDownloadURL} from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js';
-
-const firebaseConfig = {
-    apiKey: "AIzaSyDUBeWvs6kOijqST6FVGirWs2EZ12aAAwU",
-    authDomain: "lyko-lake.firebaseapp.com",
-    projectId: "lyko-lake",
-    storageBucket: "lyko-lake.firebasestorage.app",
-    messagingSenderId: "685592614306",
-    appId: "1:685592614306:web:b6a8f6f18407f9c0154efb"
-};
-
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const db = getFirestore(app);
-const storage = getStorage(app);
-
-let currentUserId = null, currentUsername = null, isOwnProfile = false, authUser = null, profileUserId = null;
-
-/* ---------- nav / auth ---------- */
-onAuthStateChanged(auth, async user => {
-    authUser = user;
-    if (user && user.emailVerified) {
-        const snap = await getDoc(doc(db, 'users', user.uid));
-        if (snap.exists()) {
-            const d = snap.data();
-            document.getElementById('authButton').classList.add('hidden');
-            document.getElementById('userMenu').classList.remove('hidden');
-            document.getElementById('navDisplayName').textContent = d.displayName;
-            document.getElementById('navProfileLink').href = `/${d.username}`;
-            if (d.avatar) {
-                document.getElementById('navAvatarImg').src = d.avatar;
-                document.getElementById('navAvatarImg').style.display = 'block';
-            }
-            if (d.rank === 'Admin' || d.rank === 'CEO') {
-                document.getElementById('adminButton').classList.remove('hidden');
-            }
-        }
-    } else {
-        document.getElementById('authButton').classList.remove('hidden');
-        document.getElementById('userMenu').classList.add('hidden');
-    }
-});
-
-document.getElementById('logoutButton').addEventListener('click', () => signOut(auth).then(() => window.location.href = '/'));
-document.getElementById('userButton').addEventListener('click', e => {
-    e.stopPropagation();
-    document.getElementById('dropdown').classList.toggle('show');
-});
-document.addEventListener('click', () => document.getElementById('dropdown').classList.remove('show'));
-
-/* ---------- modal post stuff ---------- */
-const postModalOverlay = document.getElementById('postModalOverlay');
-const postModalClose = document.getElementById('postModalClose');
-postModalClose.addEventListener('click', () => postModalOverlay.classList.add('hidden'));
-postModalOverlay.addEventListener('click', e => { if (e.target === postModalOverlay) postModalOverlay.classList.add('hidden'); });
-
-async function openPostModal(postId) {
-    try {
-        const postSnap = await getDoc(doc(db, 'posts', postId));
-        if (!postSnap.exists()) return;
-        const post = postSnap.data();
-        const authorSnap = await getDoc(doc(db, 'users', post.authorId));
-        const author = authorSnap.exists() ? authorSnap.data() : { displayName: 'Unknown', username: 'unknown' };
-
-        let mediaHtml = '';
-        if (post.mediaUrl) {
-            mediaHtml = post.mediaType === 'video'
-                ? `<div class="post-media"><video controls src="${post.mediaUrl}"></video></div>`
-                : `<div class="post-media"><img src="${post.mediaUrl}" alt="Post media"></div>`;
-        }
-
-        const userLikeStatus = await getUserLikeStatus(post.id);
-        const commentCount = await getCommentCount(post.id);
-
-        document.getElementById('postModalContent').innerHTML = `
-            <div class="post-header">
-                <img class="post-avatar" src="${author.avatar || 'https://via.placeholder.com/50'}" alt="${author.displayName}">
-                <div class="post-author">
-                    <div class="post-author-name">${author.displayName}</div>
-                    <div class="post-author-username">@${author.username}</div>
+            <div class="profile-stats">
+                <div class="stat-card">
+                    <h2>Level</h2>
+                    <p id="level">1</p>
+                </div>
+                <div class="stat-card">
+                    <h2>Money</h2>
+                    <p id="money">$0</p>
+                </div>
+                <div class="stat-card">
+                    <h2>Properties</h2>
+                    <p id="properties">None</p>
                 </div>
             </div>
-            <div class="post-content">
-                ${post.content ? `<div class="post-text">${post.content}</div>` : ''}
-                ${mediaHtml}
-            </div>
-            <div class="post-stats"><span>👁️ ${post.views || 0} views</span></div>
-            <div class="post-actions">
-                <button class="action-button like-button ${userLikeStatus === 'like' ? 'liked' : ''}" data-post-id="${post.id}" data-modal="true">❤️ <span>${post.likes || 0}</span></button>
-                <button class="action-button dislike-button ${userLikeStatus === 'dislike' ? 'disliked' : ''}" data-post-id="${post.id}" data-modal="true">💩 <span>${post.dislikes || 0}</span></button>
-                <button class="action-button comment-button" data-post-id="${post.id}" data-modal="true">💬 <span class="comment-count">${commentCount}</span></button>
-            </div>
-            <div class="comments-section">
-                <div class="comments-toggle" data-post-id="${post.id}" data-modal="true">Show Comments</div>
-                <div class="comments-list" id="modal-comments-${post.id}"></div>
-                <div class="comment-input-container">
-                    <textarea class="comment-input" placeholder="Add a comment..." data-post-id="${post.id}" data-modal="true"></textarea>
-                    <button class="comment-submit" data-post-id="${post.id}" data-modal="true">Post</button>
-                </div>
-            </div>
-        `;
-        postModalOverlay.classList.remove('hidden');
-        attachModalPostActions();
-    } catch (error) {
-        console.error('openPostModal error:', error);
-    }
-}
-
-function attachModalPostActions() {
-    document.querySelectorAll('.post-modal .like-button').forEach(btn => {
-        btn.addEventListener('click', async () => {
-            const postId = btn.dataset.postId;
-            await handleLike(postId, 'like', btn);
-            await openPostModal(postId); // refresh
-        });
-    });
-    document.querySelectorAll('.post-modal .dislike-button').forEach(btn => {
-        btn.addEventListener('click', async () => {
-            const postId = btn.dataset.postId;
-            await handleLike(postId, 'dislike', btn);
-            await openPostModal(postId);
-        });
-    });
-    document.querySelectorAll('.post-modal .comments-toggle').forEach(toggle => {
-        toggle.addEventListener('click', async () => {
-            const postId = toggle.dataset.postId;
-            const list = document.getElementById(`modal-comments-${postId}`);
-            if (list.classList.contains('show')) {
-                list.classList.remove('show');
-                toggle.textContent = 'Show Comments';
-            } else {
-                await loadModalComments(postId);
-                list.classList.add('show');
-                toggle.textContent = 'Hide Comments';
-            }
-        });
-    });
-    document.querySelectorAll('.post-modal .comment-submit').forEach(btn => {
-        btn.addEventListener('click', async () => {
-            const postId = btn.dataset.postId;
-            const input = document.querySelector(`.post-modal .comment-input[data-post-id="${postId}"]`);
-            const text = input.value.trim();
-            if (!text) return;
-            try {
-                await addDoc(collection(db, 'comments'), { postId, authorId: authUser.uid, text, createdAt: serverTimestamp() });
-                input.value = '';
-                await loadModalComments(postId);
-                const countSpan = document.querySelector(`.post-modal .comment-button[data-post-id="${postId}"] .comment-count`);
-                if (countSpan) countSpan.textContent = parseInt(countSpan.textContent) + 1;
-            } catch (error) {
-                console.error('comment submit error:', error);
-            }
-        });
-    });
-}
-
-async function loadModalComments(postId) {
-    const list = document.getElementById(`modal-comments-${postId}`);
-    try {
-        const snap = await getDocs(query(collection(db, 'comments'), where('postId', '==', postId), orderBy('createdAt', 'desc')));
-        if (snap.empty) {
-            list.innerHTML = '<div style="color:rgba(224,242,233,.5);padding:10px">No comments yet</div>';
-            return;
-        }
-        list.innerHTML = '';
-        for (const docSnap of snap.docs) {
-            const c = docSnap.data();
-            const authorSnap = await getDoc(doc(db, 'users', c.authorId));
-            const author = authorSnap.exists() ? authorSnap.data() : { displayName: 'Unknown', avatar: '' };
-            const item = document.createElement('div');
-            item.className = 'comment-item';
-            item.innerHTML = `
-                <div class="comment-header">
-                    <img class="comment-avatar" src="${author.avatar || 'https://via.placeholder.com/30'}" alt="${author.displayName}">
-                    <span class="comment-author">${author.displayName}</span>
-                </div>
-                <div class="comment-text">${c.text}</div>
-            `;
-            list.appendChild(item);
-        }
-    } catch (error) {
-        console.error('loadModalComments error:', error);
-        list.innerHTML = '<div style="color:#ff6b6b;padding:10px">Error loading comments</div>';
-    }
-}
-
-async function getUserLikeStatus(postId) {
-    if (!authUser) return null;
-    const snap = await getDocs(query(collection(db, 'likes'), where('userId', '==', authUser.uid), where('postId', '==', postId)));
-    return snap.empty ? null : snap.docs[0].data().type;
-}
-
-async function getCommentCount(postId) {
-    const snap = await getDocs(query(collection(db, 'comments'), where('postId', '==', postId)));
-    return snap.size;
-}
-
-async function handleLike(postId, type, button) {
-    try {
-        const likeSnap = await getDocs(query(collection(db, 'likes'), where('userId', '==', authUser.uid), where('postId', '==', postId)));
-        const postRef = doc(db, 'posts', postId);
-        const postCard = document.querySelector(`[data-post-id="${postId}"]`);
-        const likeBtn = postCard.querySelector('.like-button');
-        const dislikeBtn = postCard.querySelector('.dislike-button');
-
-        if (!likeSnap.empty) {
-            const existing = likeSnap.docs[0];
-            const existingType = existing.data().type;
-            if (existingType === type) {
-                await deleteDoc(existing.ref);
-                await updateDoc(postRef, { [type === 'like' ? 'likes' : 'dislikes']: increment(-1) });
-                button.classList.remove(type === 'like' ? 'liked' : 'disliked');
-                const count = parseInt(button.querySelector('span').textContent);
-                button.querySelector('span').textContent = count - 1;
-            } else {
-                await deleteDoc(existing.ref);
-                await addDoc(collection(db, 'likes'), { userId: authUser.uid, postId, type, createdAt: serverTimestamp() });
-                await updateDoc(postRef, {
-                    [existingType === 'like' ? 'likes' : 'dislikes']: increment(-1),
-                    [type === 'like' ? 'likes' : 'dislikes']: increment(1)
-                });
-                if (type === 'like') {
-                    likeBtn.classList.add('liked'); dislikeBtn.classList.remove('disliked');
-                    likeBtn.querySelector('span').textContent = parseInt(likeBtn.querySelector('span').textContent) + 1;
-                    dislikeBtn.querySelector('span').textContent = parseInt(dislikeBtn.querySelector('span').textContent) - 1;
-                } else {
-                    dislikeBtn.classList.add('disliked'); likeBtn.classList.remove('liked');
-                    dislikeBtn.querySelector('span').textContent = parseInt(dislikeBtn.querySelector('span').textContent) + 1;
-                    likeBtn.querySelector('span').textContent = parseInt(likeBtn.querySelector('span').textContent) - 1;
-                }
-            }
-        } else {
-            await addDoc(collection(db, 'likes'), { userId: authUser.uid, postId, type, createdAt: serverTimestamp() });
-            await updateDoc(postRef, { [type === 'like' ? 'likes' : 'dislikes']: increment(1) });
-            button.classList.add(type === 'like' ? 'liked' : 'disliked');
-            const count = parseInt(button.querySelector('span').textContent);
-            button.querySelector('span').textContent = count + 1;
-        }
-    } catch (error) {
-        console.error('handleLike error:', error);
-    }
-}
-
-/* ---------- profile core ---------- */
-function getUsernameFromUrl() {
-    const urlParams = new URLSearchParams(window.location.search);
-    const queryUsername = urlParams.get('u');
-    if (queryUsername) return queryUsername;
-    const path = window.location.pathname;
-    if (path && path !== '/' && !path.includes('.html')) return path.substring(1).replace(/\/$/, '');
-    return null;
-}
-
-async function loadProfile(username) {
-    try {
-        const usernameSnap = await getDoc(doc(db, 'usernames', username.toLowerCase()));
-        if (!usernameSnap.exists()) { showError(`User @${username} not found`); return; }
-        const uid = usernameSnap.data().userId;
-        profileUserId = uid;
-        const userSnap = await getDoc(doc(db, 'users', uid));
-        if (!userSnap.exists()) { showError('User profile not found'); return; }
-        const data = userSnap.data();
-        currentUserId = uid; currentUsername = data.username;
-        isOwnProfile = !!(authUser && authUser.uid === uid);
-        await renderProfile(data);
-    } catch (e) {
-        console.error('Profile loading error:', e);
-        showError('Error loading profile: ' + e.message);
-    }
-}
-
-async function renderProfile(data) {
-    document.title = `${data.displayName} (@${data.username}) – Lyko Lake`;
-    document.getElementById('titleName').textContent = data.displayName;
-    let displayHTML = data.displayName;
-    if (data.rank) {
-        let rankClass = '';
-        if (data.rank === 'CEO') rankClass = 'rank-ceo';
-        else if (data.rank === 'Admin') rankClass = 'rank-admin';
-        if (rankClass) displayHTML += ` <span class="profile-rank-badge ${rankClass}">${data.rank}</span>`;
-    }
-    document.getElementById('displayName').innerHTML = displayHTML;
-    document.getElementById('username').textContent = `@${data.username}`;
-    document.getElementById('uid').textContent = `User #${data.uid}`;
-    if (data.avatar) {
-        document.getElementById('profileAvatarImg').src = data.avatar;
-        document.getElementById('profileAvatarImg').style.display = 'block';
-        document.getElementById('profileAvatar').style.background = 'none';
-    } else {
-        document.getElementById('profileAvatarImg').style.display = 'none';
-        document.getElementById('profileAvatar').style.background = 'radial-gradient(circle,#88d8a3 0%,#5a9e6f 100%)';
-    }
-    if (data.bio) {
-        document.getElementById('bioText').textContent = data.bio;
-        document.getElementById('bioText').classList.remove('bio-placeholder');
-    } else {
-        document.getElementById('bioText').textContent = 'This user hasn\'t written a bio yet.';
-        document.getElementById('bioText').classList.add('bio-placeholder');
-    }
-    if (isOwnProfile) {
-        document.getElementById('bioText').classList.add('editable');
-        document.getElementById('profileAvatar').classList.add('editable');
-    } else if (authUser) {
-        const followBtn = document.getElementById('followButton');
-        followBtn.classList.remove('hidden');
-        const isFollowing = await checkIfFollowing();
-        followBtn.textContent = isFollowing ? 'Following' : 'Follow';
-        if (isFollowing) followBtn.classList.add('following');
-        followBtn.addEventListener('click', handleFollow);
-    }
-    setupHoverCard(document.getElementById('profileAvatar'), data);
-    setupHoverCard(document.getElementById('displayName'), data);
-    await loadStats(); await loadPosts();
-    document.getElementById('loading').classList.add('hidden');
-    document.getElementById('profileContent').classList.remove('hidden');
-}
-
-async function loadStats() {
-    try {
-        const postsSnap = await getDocs(query(collection(db, 'posts'), where('authorId', '==', profileUserId)));
-        document.getElementById('postsCount').textContent = postsSnap.size;
-        const followersSnap = await getDocs(query(collection(db, 'follows'), where('followingId', '==', profileUserId)));
-        document.getElementById('followersCount').textContent = followersSnap.size;
-        const followingSnap = await getDocs(query(collection(db, 'follows'), where('followerId', '==', profileUserId)));
-        document.getElementById('followingCount').textContent = followingSnap.size;
-    } catch (error) {
-        console.error('loadStats error:', error);
-    }
-}
-
-async function loadPosts() {
-    const postsGrid = document.getElementById('postsGrid');
-    try {
-        const postsSnap = await getDocs(query(collection(db, 'posts'), where('authorId', '==', profileUserId)));
-        if (postsSnap.empty) {
-            postsGrid.innerHTML = '<div style="text-align:center;color:rgba(224,242,233,.6);padding:40px">No posts yet</div>';
-            return;
-        }
-        postsGrid.innerHTML = '';
-        postsSnap.forEach(doc => {
-            const post = doc.data();
-            const card = document.createElement('div');
-            card.className = 'post-card';
-            card.addEventListener('click', () => openPostModal(doc.id));
-            let mediaHtml = '';
-            if (post.mediaUrl) {
-                mediaHtml = post.mediaType === 'video'
-                    ? `<video class="post-media" src="${post.mediaUrl}"></video>`
-                    : `<img class="post-media" src="${post.mediaUrl}" alt="Post">`;
-            }
-            card.innerHTML = `
-                ${mediaHtml}
-                ${post.content ? `<div class="post-content">${post.content}</div>` : ''}
-                <div class="post-meta">
-                    <span>❤️ ${post.likes || 0}</span>
-                    <span>👁️ ${post.views || 0}</span>
-                </div>
-            `;
-            postsGrid.appendChild(card);
-        });
-    } catch (error) {
-        console.error('loadPosts error:', error);
-        postsGrid.innerHTML = '<div style="text-align:center;color:#ff6b6b">Error loading posts</div>';
-    }
-}
-
-async function checkIfFollowing() {
-    if (!authUser) return false;
-    const snap = await getDocs(query(collection(db, 'follows'), where('followerId', '==', authUser.uid), where('followingId', '==', profileUserId)));
-    return !snap.empty;
-}
-
-async function handleFollow() {
-    const btn = document.getElementById('followButton');
-    const isFollowing = btn.classList.contains('following');
-    try {
-        if (isFollowing) {
-            const snap = await getDocs(query(collection(db, 'follows'), where('followerId', '==', authUser.uid), where('followingId', '==', profileUserId)));
-            snap.forEach(async d => await deleteDoc(d.ref));
-            btn.classList.remove('following'); btn.textContent = 'Follow';
-        } else {
-            await addDoc(collection(db, 'follows'), { followerId: authUser.uid, followingId: profileUserId, createdAt: serverTimestamp() });
-            btn.classList.add('following'); btn.textContent = 'Following';
-        }
-        await loadStats();
-    } catch (error) {
-        console.error('handleFollow error:', error);
-    }
-}
-
-/* ---------- bio / avatar ---------- */
-document.getElementById('bioText').addEventListener('click', () => {
-    if (!isOwnProfile) return;
-    document.getElementById('bioDisplay').classList.add('hidden');
-    document.getElementById('bioEdit').classList.remove('hidden');
-    document.getElementById('bioInput').value = document.getElementById('bioText').textContent === 'This user hasn\'t written a bio yet.' ? '' : document.getElementById('bioText').textContent;
-});
-document.getElementById('cancelBioButton').addEventListener('click', () => {
-    document.getElementById('bioEdit').classList.add('hidden');
-    document.getElementById('bioDisplay').classList.remove('hidden');
-});
-document.getElementById('saveBioButton').addEventListener('click', async () => {
-    const newBio = document.getElementById('bioInput').value.trim();
-    try {
-        await updateDoc(doc(db, 'users', currentUserId), { bio: newBio });
-        document.getElementById('bioText').textContent = newBio || 'This user hasn\'t written a bio yet.';
-        document.getElementById('bioText').classList.toggle('bio-placeholder', !newBio);
-        document.getElementById('bioEdit').classList.add('hidden');
-        document.getElementById('bioDisplay').classList.remove('hidden');
-    } catch (error) {
-        console.error('saveBio error:', error);
-    }
-});
-
-document.getElementById('profileAvatar').addEventListener('click', () => {
-    if (!isOwnProfile) return;
-    document.getElementById('uploadModal').classList.remove('hidden');
-});
-document.getElementById('closeModal').addEventListener('click', () => document.getElementById('uploadModal').classList.add('hidden'));
-document.getElementById('selectAvatar').addEventListener('click', () => document.getElementById('avatarInput').click());
-document.getElementById('avatarInput').addEventListener('change', e => {
-    const file = e.target.files[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = ev => {
-        document.getElementById('previewImg').src = ev.target.result;
-        document.getElementById('avatarPreview').style.display = 'block';
-    };
-    reader.readAsDataURL(file);
-});
-document.getElementById('cancelAvatar').addEventListener('click', () => {
-    document.getElementById('uploadModal').classList.add('hidden');
-    document.getElementById('avatarInput').value = '';
-    document.getElementById('avatarPreview').style.display = 'none';
-});
-document.getElementById('uploadAvatar').addEventListener('click', async () => {
-    const file = document.getElementById('avatarInput').files[0];
-    if (!file) return;
-    try {
-        const storageRef = ref(storage, `avatars/${currentUserId}_${Date.now()}`);
-        const snapshot = await uploadBytes(storageRef, file);
-        const url = await getDownloadURL(snapshot.ref);
-        await updateDoc(doc(db, 'users', currentUserId), { avatar: url });
-        document.getElementById('profileAvatarImg').src = url;
-        document.getElementById('profileAvatarImg').style.display = 'block';
-        document.getElementById('profileAvatar').style.background = 'none';
-        document.getElementById('navAvatarImg').src = url;
-        document.getElementById('navAvatarImg').style.display = 'block';
-        document.getElementById('uploadModal').classList.add('hidden');
-    } catch (error) {
-        console.error('uploadAvatar error:', error);
-        alert('Failed to upload avatar');
-    }
-});
-
-/* ---------- hover card ---------- */
-let hoverTimeout, currentHoverElement = null;
-function setupHoverCard(element, userData) {
-    element.addEventListener('mouseenter', e => {
-        currentHoverElement = element;
-        clearTimeout(hoverTimeout);
-        hoverTimeout = setTimeout(async () => {
-            if (!userData.rank && userData.userId) {
-                const userSnap = await getDoc(doc(db, 'users', userData.userId));
-                if (userSnap.exists()) {
-                    const fullData = userSnap.data();
-                    userData = { ...userData, ...fullData };
-                }
-            }
-            showHoverCard(e, userData);
-        }, 500);
-    });
-    element.addEventListener('mouseleave', () => {
-        clearTimeout(hoverTimeout);
-        if (!document.getElementById('hoverCard').contains(document.elementFromPoint(event.clientX, event.clientY))) {
-            hideHoverCard();
-        }
-    });
-}
-function showHoverCard(e, userData) {
-    const hoverAvatar = document.getElementById('hoverAvatar');
-    const hoverName = document.getElementById('hoverName');
-    const hoverUsername = document.getElementById('hoverUsername');
-    const hoverRank = document.getElementById('hoverRank');
-    const hoverDate = document.getElementById('hoverDate');
-    if (userData.avatar) {
-        hoverAvatar.src = userData.avatar;
-        hoverAvatar.style.display = 'block';
-    } else {
-        hoverAvatar.style.display = 'none';
-    }
-    hoverName.textContent = userData.displayName;
-    hoverUsername.textContent = `@${userData.username} | User #${userData.uid || 'N/A'}`;
-    if (userData.rank) {
-        hoverRank.textContent = userData.rank;
-        hoverRank.className = `hover-card-rank ${userData.rank.toLowerCase()}`;
-        hoverRank.style.background = userData.rank === 'CEO' ? '#ff6b6b' : '#88d8a3';
-        hoverRank.style.color = '#fff';
-        hoverRank.classList.remove('hidden');
-    } else {
-        hoverRank.classList.add('hidden');
-    }
-    hoverDate.textContent = userData.createdAt ? `Joined ${userData.createdAt.toDate().toLocaleDateString()}` : '';
-    const card = document.getElementById('hoverCard');
-    card.style.left = e.clientX + 10 + 'px';
-    card.style.top = e.clientY + 10 + 'px';
-    card.classList.remove('hidden');
-}
-function hideHoverCard() {
-    document.getElementById('hoverCard').classList.add('hidden');
-}
-document.addEventListener('mousemove', e => {
-    const card = document.getElementById('hoverCard');
-    if (card.classList.contains('show')) {
-        const rect = card.getBoundingClientRect();
-        if (e.clientX < rect.left || e.clientX > rect.right || e.clientY < rect.top || e.clientY > rect.bottom) {
-            if (!currentHoverElement?.contains(e.target)) hideHoverCard();
-        }
-    }
-});
-
-function showError(msg) {
-    document.getElementById('errorText').textContent = msg;
-    document.getElementById('loading').classList.add('hidden');
-    document.getElementById('errorContent').classList.remove('hidden');
-}
-
-const username = getUsernameFromUrl();
-if (username) {
-    loadProfile(username);
-} else {
-    showError('Please provide a username in the URL or log in.');
-}
-</script>
-
-<div style="position:fixed;bottom:10px;left:10px;color:rgba(224,242,233,0.5);font-size:0.8em;z-index:1000;pointer-events:none">
-    ©2025 Lyko Sokolov - Lyko Lake v1.1.0
-</div>
+        </div>
+        <div id="errorContent" class="hidden">
+            <p id="errorText"></p>
+        </div>
+    </div>
+    <div style="position:fixed;bottom:10px;left:10px;color:rgba(224,242,233,0.5);font-size:0.8em;z-index:1000;pointer-events:none">
+        ©2025 Lyko Sokolov - Lyko Lake v1.1.0 BETA
+    </div>
 </body>
 </html>
