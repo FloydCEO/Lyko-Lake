@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sign In - Lyko Lake</title>
+    <title>Sign In - Lyko Lake Tycoon</title>
     <style>
         * {
             margin: 0;
@@ -60,66 +60,45 @@
         .subtitle {
             text-align: center;
             color: rgba(255, 255, 255, 0.7);
-            margin-bottom: 30px;
+            margin-bottom: 40px;
         }
 
         .tab-container {
             display: flex;
-            gap: 10px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
             margin-bottom: 30px;
+            overflow: hidden;
         }
 
         .tab {
             flex: 1;
-            padding: 12px;
-            background: rgba(255, 255, 255, 0.05);
-            border: 2px solid rgba(34, 197, 164, 0.2);
-            border-radius: 10px;
-            color: rgba(255, 255, 255, 0.7);
+            padding: 15px;
+            text-align: center;
             cursor: pointer;
             transition: all 0.3s ease;
-            font-weight: 600;
-            text-align: center;
-        }
-
-        .tab:hover {
-            background: rgba(34, 197, 164, 0.1);
+            color: rgba(255, 255, 255, 0.7);
         }
 
         .tab.active {
             background: rgba(34, 197, 164, 0.2);
-            border-color: #22c5a4;
-            color: #22c5a4;
+            color: #fff;
         }
 
         .form-group {
-            margin-bottom: 20px;
+            margin-bottom: 25px;
         }
 
-        label {
+        .form-label {
             display: block;
-            margin-bottom: 8px;
+            margin-bottom: 10px;
             color: rgba(255, 255, 255, 0.9);
             font-weight: 500;
         }
 
-        .input-wrapper {
-            position: relative;
-        }
-
-        .input-prefix {
-            position: absolute;
-            left: 15px;
-            top: 50%;
-            transform: translateY(-50%);
-            color: #22c5a4;
-            font-weight: 600;
-            pointer-events: none;
-        }
-
-        input {
+        .form-input {
             width: 100%;
-            padding: 12px 15px;
+            padding: 15px;
             background: rgba(255, 255, 255, 0.05);
             border: 2px solid rgba(34, 197, 164, 0.3);
             border-radius: 10px;
@@ -128,530 +107,191 @@
             transition: all 0.3s ease;
         }
 
-        input.with-prefix {
-            padding-left: 30px;
-        }
-
-        input:focus {
+        .form-input:focus {
             outline: none;
             border-color: #22c5a4;
             background: rgba(34, 197, 164, 0.1);
         }
 
-        input::placeholder {
-            color: rgba(255, 255, 255, 0.4);
-        }
-
-        .input-hint {
-            font-size: 0.85em;
-            color: rgba(255, 255, 255, 0.6);
-            margin-top: 5px;
-        }
-
         .submit-button {
             width: 100%;
             padding: 15px;
-            background: rgba(34, 197, 164, 0.2);
-            border: 2px solid #22c5a4;
+            background: #22c5a4;
+            border: none;
             border-radius: 10px;
-            color: #fff;
-            font-size: 1.1em;
+            color: #0a4d4d;
             font-weight: 600;
+            font-size: 1.1em;
             cursor: pointer;
             transition: all 0.3s ease;
             margin-top: 10px;
         }
 
-        .submit-button:hover:not(:disabled) {
-            background: #22c5a4;
-            color: #0a4d4d;
+        .submit-button:hover {
+            background: #4dd4b8;
             transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(34, 197, 164, 0.4);
         }
 
-        .submit-button:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-            transform: none;
-        }
-
-        .error-message {
-            background: rgba(255, 59, 48, 0.2);
-            border: 2px solid rgba(255, 59, 48, 0.5);
-            color: #ff3b30;
-            padding: 12px;
+        .message {
+            margin-top: 20px;
+            padding: 15px;
             border-radius: 10px;
-            margin-bottom: 20px;
+            text-align: center;
             display: none;
-            font-size: 0.95em;
-            line-height: 1.5;
         }
 
-        .success-message {
+        .message.success {
             background: rgba(52, 199, 89, 0.2);
-            border: 2px solid rgba(52, 199, 89, 0.5);
             color: #34c759;
-            padding: 12px;
-            border-radius: 10px;
-            margin-bottom: 20px;
-            display: none;
         }
 
-        .info-message {
-            background: rgba(34, 197, 164, 0.2);
-            border: 2px solid rgba(34, 197, 164, 0.5);
-            color: #22c5a4;
-            padding: 12px;
-            border-radius: 10px;
-            margin-bottom: 20px;
-            display: none;
+        .message.error {
+            background: rgba(255, 59, 48, 0.2);
+            color: #ff3b30;
         }
 
-        .hidden {
-            display: none;
+        .resend-verification {
+            text-align: center;
+            margin-top: 20px;
+            color: rgba(255, 255, 255, 0.7);
         }
 
         .resend-link {
             color: #22c5a4;
-            cursor: pointer;
-            text-decoration: underline;
+            text-decoration: none;
+            font-weight: 500;
         }
 
         .resend-link:hover {
-            color: #4dd4b8;
+            text-decoration: underline;
         }
 
-        .config-status {
-            text-align: center;
-            padding: 10px;
-            margin-bottom: 20px;
-            border-radius: 10px;
-            font-size: 0.9em;
-        }
-
-        .config-status.checking {
+        .progress-bar {
+            width: 100%;
+            height: 4px;
             background: rgba(255, 255, 255, 0.1);
-            color: rgba(255, 255, 255, 0.7);
+            border-radius: 2px;
+            margin-top: 10px;
+            display: none;
         }
 
-        .config-status.error {
-            background: rgba(255, 59, 48, 0.2);
-            border: 2px solid rgba(255, 59, 48, 0.5);
-            color: #ff3b30;
+        .progress-fill {
+            height: 100%;
+            background: #22c5a4;
+            width: 0%;
+            transition: width 0.3s ease;
+            border-radius: 2px;
         }
 
-        .config-status.success {
-            background: rgba(52, 199, 89, 0.2);
-            border: 2px solid rgba(52, 199, 89, 0.5);
-            color: #34c759;
-        }
-
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(30px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        @media (max-width: 768px) {
-            .auth-container {
-                padding: 40px 30px;
-            }
-
-            h2 {
-                font-size: 1.8em;
-            }
-        }
+        .beta-tag{color:#ffcc00;font-size:0.8em}
     </style>
-</head>
-<body>
-    <div class="auth-container">
-        <div class="logo-link">
-            <a href="/" class="logo-text">🌊 Lyko Lake</a>
-        </div>
-
-        <h2>Welcome</h2>
-        <p class="subtitle">Sign in or create an account</p>
-
-        <div class="config-status checking" id="configStatus">Checking Firebase connection...</div>
-
-        <div class="tab-container">
-            <div class="tab active" onclick="switchTab('login')">Login</div>
-            <div class="tab" onclick="switchTab('register')">Register</div>
-        </div>
-
-        <div class="error-message" id="errorMessage"></div>
-        <div class="success-message" id="successMessage"></div>
-        <div class="info-message" id="infoMessage"></div>
-
-        <!-- Login Form -->
-        <form id="loginForm">
-            <div class="form-group">
-                <label for="loginUsername">Username</label>
-                <div class="input-wrapper">
-                    <span class="input-prefix">@</span>
-                    <input type="text" id="loginUsername" class="with-prefix" placeholder="username" required>
-                </div>
-            </div>
-            <div class="form-group">
-                <label for="loginPassword">Password</label>
-                <input type="password" id="loginPassword" placeholder="Enter your password" required>
-            </div>
-            <button type="submit" class="submit-button" id="loginButton">Sign In</button>
-        </form>
-
-        <!-- Register Form -->
-        <form id="registerForm" class="hidden">
-            <div class="form-group">
-                <label for="registerUsername">Username</label>
-                <div class="input-wrapper">
-                    <span class="input-prefix">@</span>
-                    <input type="text" id="registerUsername" class="with-prefix" placeholder="username" required pattern="[a-zA-Z0-9_]{3,20}" minlength="3" maxlength="20">
-                </div>
-                <div class="input-hint">3-20 characters, letters, numbers, and underscores only</div>
-            </div>
-            <div class="form-group">
-                <label for="registerDisplayName">Display Name</label>
-                <input type="text" id="registerDisplayName" placeholder="How you want to be called" required maxlength="30">
-                <div class="input-hint">This is how others will see you (max 30 characters)</div>
-            </div>
-            <div class="form-group">
-                <label for="registerEmail">Email</label>
-                <input type="email" id="registerEmail" placeholder="your@email.com" required>
-                <div class="input-hint">For account recovery only</div>
-            </div>
-            <div class="form-group">
-                <label for="registerPassword">Password</label>
-                <input type="password" id="registerPassword" placeholder="At least 6 characters" required>
-            </div>
-            <div class="form-group">
-                <label for="registerPasswordConfirm">Confirm Password</label>
-                <input type="password" id="registerPasswordConfirm" placeholder="Re-enter password" required>
-            </div>
-            <button type="submit" class="submit-button" id="registerButton">Create Account</button>
-        </form>
-    </div>
-
     <script type="module">
         import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
-        import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, sendEmailVerification } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
-        import { getFirestore, doc, setDoc, getDoc, updateDoc, increment } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
-        import { getStorage } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js';
+        import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, sendEmailVerification, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
+        import { getFirestore, doc, setDoc, getDoc } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
 
         const firebaseConfig = {
             apiKey: "AIzaSyDUBeWvs6kOijqST6FVGirWs2EZ12aAAwU",
             authDomain: "lyko-lake.firebaseapp.com",
             projectId: "lyko-lake",
-            storageBucket: "lyko-lake.appspot.com",
+            storageBucket: "lyko-lake.firebasestorage.app",
             messagingSenderId: "685592614306",
-            appId: "1:685592614306:web:b6a8f6f18407f9c0154efb",
-            measurementId: "G-QN0H7E9NEQ"
+            appId: "1:685592614306:web:b6a8f6f18407f9c0154efb"
         };
 
-        const isConfigured = !firebaseConfig.apiKey.includes('YOUR_');
-        
-        let app, auth, db, storage;
-        let firebaseReady = false;
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
 
-        if (isConfigured) {
-            try {
-                app = initializeApp(firebaseConfig);
-                auth = getAuth(app);
-                db = getFirestore(app);
-                storage = getStorage(app);
-                
-                const testRef = doc(db, 'metadata', 'test');
-                getDoc(testRef).then(() => {
-                    firebaseReady = true;
-                    showConfigStatus('success', '✓ Firebase connected');
-                }).catch((error) => {
-                    if (error.code === 'unavailable') {
-                        showConfigStatus('error', '✗ Firestore database not created yet. Please create it in Firebase Console.');
-                    } else if (error.code === 'permission-denied') {
-                        showConfigStatus('error', '✗ Firestore security rules not set. Please update rules in Firebase Console.');
-                    } else {
-                        showConfigStatus('error', `✗ Firebase error: ${error.message}`);
-                    }
-                });
-            } catch (error) {
-                showConfigStatus('error', `✗ Firebase initialization failed: ${error.message}`);
-            }
-        } else {
-            showConfigStatus('error', '✗ Firebase not configured! Please add your Firebase config to this file.');
-        }
+        const signInTab = document.getElementById('signInTab');
+        const signUpTab = document.getElementById('signUpTab');
+        const signInForm = document.getElementById('signInForm');
+        const signUpForm = document.getElementById('signUpForm');
+        const message = document.getElementById('message');
+        const resendVerification = document.getElementById('resendVerification');
+        const progressBar = document.getElementById('progressBar');
+        const progressFill = document.getElementById('progressFill');
 
-        function showConfigStatus(type, message) {
-            const statusEl = document.getElementById('configStatus');
-            statusEl.className = `config-status ${type}`;
-            statusEl.textContent = message;
-            
-            if (type === 'success') {
-                setTimeout(() => {
-                    statusEl.style.display = 'none';
-                }, 3000);
-            }
-        }
+        signInTab.addEventListener('click', () => {
+            signInTab.classList.add('active');
+            signUpTab.classList.remove('active');
+            signInForm.classList.remove('hidden');
+            signUpForm.classList.add('hidden');
+            resendVerification.classList.add('hidden');
+        });
 
-        if (isConfigured && auth) {
-            onAuthStateChanged(auth, async (user) => {
-                if (user) {
-                    if (user.emailVerified) {
-                        showSuccess('Already logged in! Redirecting...');
-                        setTimeout(() => {
-                            window.location.href = '/';
-                        }, 1500);
-                    } else {
-                        showInfo(`Please verify your email (${user.email}). Check your inbox! <span class="resend-link" onclick="resendVerification()">Resend verification email</span>`);
-                    }
-                }
-            });
-        }
+        signUpTab.addEventListener('click', () => {
+            signUpTab.classList.add('active');
+            signInTab.classList.remove('active');
+            signUpForm.classList.remove('hidden');
+            signInForm.classList.add('hidden');
+            resendVerification.classList.add('hidden');
+        });
 
-        window.resendVerification = async function() {
-            if (!firebaseReady) {
-                showError('Firebase is not ready. Please check your configuration.');
-                return;
-            }
-            
-            const user = auth.currentUser;
-            if (user && !user.emailVerified) {
-                try {
-                    await sendEmailVerification(user);
-                    showSuccess('Verification email sent! Check your inbox.');
-                } catch (error) {
-                    showError('Failed to send verification email. Please try again later.');
-                }
-            }
-        };
-
-        window.switchTab = function(tab) {
-            const tabs = document.querySelectorAll('.tab');
-            const loginForm = document.getElementById('loginForm');
-            const registerForm = document.getElementById('registerForm');
-            
-            tabs.forEach(t => t.classList.remove('active'));
-            
-            if (tab === 'login') {
-                tabs[0].classList.add('active');
-                loginForm.classList.remove('hidden');
-                registerForm.classList.add('hidden');
-            } else {
-                tabs[1].classList.add('active');
-                loginForm.classList.add('hidden');
-                registerForm.classList.remove('hidden');
-            }
-            
-            hideMessages();
-        };
-
-        async function isUsernameAvailable(username) {
-            if (!firebaseReady) {
-                throw new Error('Firebase not ready');
-            }
-            const usernameDoc = await getDoc(doc(db, 'usernames', username.toLowerCase()));
-            return !usernameDoc.exists();
-        }
-
-        async function getUserEmailByUsername(username) {
-            if (!firebaseReady) {
-                throw new Error('Firebase not ready');
-            }
-            const usernameDoc = await getDoc(doc(db, 'usernames', username.toLowerCase()));
-            if (!usernameDoc.exists()) {
-                return null;
-            }
-            const userId = usernameDoc.data().userId;
-            const userDoc = await getDoc(doc(db, 'users', userId));
-            if (!userDoc.exists()) {
-                return null;
-            }
-            return userDoc.data().email;
-        }
-
-        async function getNextUID() {
-            if (!firebaseReady) {
-                throw new Error('Firebase not ready');
-            }
-            
-            const counterDoc = doc(db, 'metadata', 'userCounter');
-            const counterSnap = await getDoc(counterDoc);
-            
-            if (!counterSnap.exists()) {
-                await setDoc(counterDoc, { count: 1 });
-                return 1;
-            }
-            
-            const currentCount = counterSnap.data().count;
-            await updateDoc(counterDoc, { count: increment(1) });
-            return currentCount + 1;
-        }
-
-        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+        signInForm.addEventListener('submit', async e => {
             e.preventDefault();
-            
-            if (!firebaseReady) {
-                showError('Firebase is not ready. Please check the configuration message above.');
-                return;
-            }
-            
-            const username = document.getElementById('loginUsername').value.trim();
-            const password = document.getElementById('loginPassword').value;
-            const button = document.getElementById('loginButton');
-            
-            button.disabled = true;
-            button.textContent = 'Signing in...';
-            hideMessages();
-            
+            const email = document.getElementById('signInEmail').value;
+            const password = document.getElementById('signInPassword').value;
             try {
-                const email = await getUserEmailByUsername(username);
-                if (!email) {
-                    showError('Username not found!');
-                    button.disabled = false;
-                    button.textContent = 'Sign In';
-                    return;
-                }
-
-                const userCredential = await signInWithEmailAndPassword(auth, email, password);
-                const user = userCredential.user;
-                
-                if (user.emailVerified) {
-                    showSuccess('Login successful! Redirecting...');
-                    setTimeout(() => {
-                        window.location.href = '/';
-                    }, 1500);
-                } else {
-                    showInfo(`Please verify your email first! Check your inbox for the verification link. <span class="resend-link" onclick="resendVerification()">Resend verification email</span>`);
-                    button.disabled = false;
-                    button.textContent = 'Sign In';
-                }
+                await signInWithEmailAndPassword(auth, email, password);
+                // Redirect to index.html after login
+                window.location.href = '/';
             } catch (error) {
-                console.error('Login error:', error);
-                if (error.message.includes('Firebase not ready')) {
-                    showError('Username not found!');
-                } else {
-                    showError(getErrorMessage(error.code));
-                }
-                button.disabled = false;
-                button.textContent = 'Sign In';
+                showMessage(getDetailedErrorMessage(error), 'error');
             }
         });
 
-        document.getElementById('registerForm').addEventListener('submit', async (e) => {
+        signUpForm.addEventListener('submit', async e => {
             e.preventDefault();
-            
-            if (!firebaseReady) {
-                showError('Firebase is not ready. Please check the configuration message above.');
-                return;
-            }
-            
-            const username = document.getElementById('registerUsername').value.trim();
-            const displayName = document.getElementById('registerDisplayName').value.trim();
-            const email = document.getElementById('registerEmail').value;
-            const password = document.getElementById('registerPassword').value;
-            const confirmPassword = document.getElementById('registerPasswordConfirm').value;
-            const button = document.getElementById('registerButton');
-            
-            hideMessages();
-            
-            const usernameRegex = /^[a-zA-Z0-9_]{3,20}$/;
-            if (!usernameRegex.test(username)) {
-                showError('Username must be 3-20 characters and contain only letters, numbers, and underscores!');
-                return;
-            }
-            
-            if (displayName.length < 1 || displayName.length > 30) {
-                showError('Display name must be 1-30 characters!');
-                return;
-            }
-            
-            if (password !== confirmPassword) {
-                showError('Passwords do not match!');
-                return;
-            }
-            
-            if (password.length < 6) {
-                showError('Password must be at least 6 characters!');
-                return;
-            }
-            
-            button.disabled = true;
-            button.textContent = 'Creating account...';
-            
+            const email = document.getElementById('signUpEmail').value;
+            const password = document.getElementById('signUpPassword').value;
+            const username = document.getElementById('signUpUsername').value.toLowerCase();
             try {
-                const available = await isUsernameAvailable(username);
-                if (!available) {
-                    showError('Username is already taken! Please choose another.');
-                    button.disabled = false;
-                    button.textContent = 'Create Account';
-                    return;
-                }
-                
-                const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-                const user = userCredential.user;
-                
-                const uid = await getNextUID();
-                
+                const usernameSnap = await getDoc(doc(db, 'usernames', username));
+                if (usernameSnap.exists()) throw { code: 'auth/username-in-use' };
+
+                const { user } = await createUserWithEmailAndPassword(auth, email, password);
                 await setDoc(doc(db, 'users', user.uid), {
-                    uid: uid,
-                    username: username,
-                    displayName: displayName,
-                    email: email,
-                    createdAt: new Date(),
-                    emailVerified: false,
-                    bio: ''
+                    username,
+                    displayName: username,
+                    email,
+                    createdAt: serverTimestamp(),
+                    money: 0,
+                    level: 1,
+                    properties: [],
+                    character: {hair: 'black', eyes: 'brown', skin: 'light', clothes: 'casual'},
+                    playedBefore: false
                 });
-                
-                await setDoc(doc(db, 'usernames', username.toLowerCase()), {
-                    userId: user.uid,
-                    createdAt: new Date()
-                });
-                
+                await setDoc(doc(db, 'usernames', username), { userId: user.uid, username });
                 await sendEmailVerification(user);
-                
-                showSuccess(`🎉 Account created! You are user #${uid}. Please check your email to verify your account.`);
-                button.disabled = false;
-                button.textContent = 'Create Account';
-                
-                document.getElementById('registerUsername').value = '';
-                document.getElementById('registerDisplayName').value = '';
-                document.getElementById('registerEmail').value = '';
-                document.getElementById('registerPassword').value = '';
-                document.getElementById('registerPasswordConfirm').value = '';
-                
+                showMessage('Account created! Check your email for verification.', 'success');
             } catch (error) {
-                console.error('Registration error:', error);
-                showError(getDetailedErrorMessage(error));
-                button.disabled = false;
-                button.textContent = 'Create Account';
+                showMessage(getDetailedErrorMessage(error), 'error');
             }
         });
 
-        function showError(message) {
-            const errorEl = document.getElementById('errorMessage');
-            errorEl.innerHTML = message;
-            errorEl.style.display = 'block';
-        }
+        onAuthStateChanged(auth, user => {
+            if (user && !user.emailVerified) {
+                resendVerification.classList.remove('hidden');
+            } else if (user) {
+                window.location.href = '/';
+            }
+        });
 
-        function showSuccess(message) {
-            const successEl = document.getElementById('successMessage');
-            successEl.innerHTML = message;
-            successEl.style.display = 'block';
-        }
+        document.getElementById('resendLink').addEventListener('click', async () => {
+            try {
+                await sendEmailVerification(auth.currentUser);
+                showMessage('Verification email resent!', 'success');
+            } catch (error) {
+                showMessage('Failed to resend: ' + error.message, 'error');
+            }
+        });
 
-        function showInfo(message) {
-            const infoEl = document.getElementById('infoMessage');
-            infoEl.innerHTML = message;
-            infoEl.style.display = 'block';
-        }
-
-        function hideMessages() {
-            document.getElementById('errorMessage').style.display = 'none';
-            document.getElementById('successMessage').style.display = 'none';
-            document.getElementById('infoMessage').style.display = 'none';
+        function showMessage(text, type) {
+            message.textContent = text;
+            message.className = `message ${type}`;
+            message.style.display = 'block';
+            setTimeout(() => message.style.display = 'none', 5000);
         }
 
         function getErrorMessage(code) {
@@ -670,6 +310,8 @@
                     return 'Incorrect username or password!';
                 case 'auth/too-many-requests':
                     return 'Too many failed attempts. Please try again later.';
+                case 'auth/username-in-use':
+                    return 'Username already taken!';
                 default:
                     return `An error occurred: ${code}. Please try again.`;
             }
@@ -686,5 +328,56 @@
             return getErrorMessage(error.code);
         }
     </script>
+</head>
+<body>
+    <div class="auth-container">
+        <div class="logo-link">
+            <a href="/" class="logo-text">Lyko Lake Tycoon <span class="beta-tag">BETA</span></a>
+        </div>
+        <h2>Sign In</h2>
+        <div class="subtitle">Join the tycoon adventure!</div>
+
+        <div class="tab-container">
+            <div id="signInTab" class="tab active">Sign In</div>
+            <div id="signUpTab" class="tab">Sign Up</div>
+        </div>
+
+        <form id="signInForm">
+            <div class="form-group">
+                <label class="form-label" for="signInEmail">Email</label>
+                <input type="email" id="signInEmail" class="form-input" required>
+            </div>
+            <div class="form-group">
+                <label class="form-label" for="signInPassword">Password</label>
+                <input type="password" id="signInPassword" class="form-input" required>
+            </div>
+            <button type="submit" class="submit-button">Sign In</button>
+        </form>
+
+        <form id="signUpForm" class="hidden">
+            <div class="form-group">
+                <label class="form-label" for="signUpUsername">Username</label>
+                <input type="text" id="signUpUsername" class="form-input" required pattern="[a-zA-Z0-9_]+" title="Letters, numbers, and underscores only">
+            </div>
+            <div class="form-group">
+                <label class="form-label" for="signUpEmail">Email</label>
+                <input type="email" id="signUpEmail" class="form-input" required>
+            </div>
+            <div class="form-group">
+                <label class="form-label" for="signUpPassword">Password</label>
+                <input type="password" id="signUpPassword" class="form-input" required minlength="6">
+            </div>
+            <button type="submit" class="submit-button">Sign Up</button>
+        </form>
+
+        <div id="message" class="message"></div>
+        <div id="progressBar" class="progress-bar">
+            <div id="progressFill" class="progress-fill"></div>
+        </div>
+
+        <div id="resendVerification" class="resend-verification hidden">
+            Email not verified. <a id="resendLink" class="resend-link">Resend verification email</a>
+        </div>
+    </div>
 </body>
 </html>
