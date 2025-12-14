@@ -36,12 +36,20 @@
         "destination": "/profile.html"
       },
       {
-        "source": "/upload.html",
-        "destination": "/upload.html"
+        "source": "/game.html",
+        "destination": "/game.html"
       },
       {
-        "source": "/upload",
-        "destination": "/upload.html"
+        "source": "/game",
+        "destination": "/game.html"
+      },
+      {
+        "source": "/customize.html",
+        "destination": "/customize.html"
+      },
+      {
+        "source": "/customize",
+        "destination": "/customize.html"
       },
       {
         "source": "/:username",
