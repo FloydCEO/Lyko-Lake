@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Customize Character - Lyko Lake</title>
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box}
+        body{
+            font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Oxygen,Ubuntu,Cantarell,sans-serif;
+            background:linear-gradient(135deg,#0a4d4d 0%,#1a6b6b 50%,#0f3d3d 100%);
+            color:#fff;min-height:100vh;
+        }
+        nav{
+            background:rgba(10,77,77,.95);backdrop-filter:blur(10px);padding:20px 40px;display:flex;justify-content:space-between;align-items:center;
+            border-bottom:2px solid rgba(34,197,164,.3)}
+        .logo{font-size:1.8em;font-weight:bold;color:#22c5a4;text-decoration:none}
+        .container{max-width:600px;margin:60px auto;padding:0 20px}
+        h1{text-align:center;font-size:3em;margin-bottom:40px;color:#22c5a4}
+        .form-group{margin-bottom:20px}
+        label{display:block;margin-bottom:10px}
+        select{width:100%;padding:10px;background:rgba(255,255,255,.1);border:2px solid #22c5a4;color:#fff;border-radius:5px}
+        button{width:100%;padding:15px;background:#22c5a4;color:#000;border:none;border-radius:10px;cursor:pointer}
+        .preview{width:200px;height:300px;margin:20px auto;background:#fff;border-radius:10px;overflow:hidden}
+        .beta-tag{color:#ffcc00}
+    </style>
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+        import { getAuth, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
+        import { getFirestore, doc, getDoc, updateDoc } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDUBeWvs6kOijqST6FVGirWs2EZ12aAAwU",
+            authDomain: "lyko-lake.firebaseapp.com",
+            projectId: "lyko-lake",
+            storageBucket: "lyko-lake.firebasestorage.app",
+            messagingSenderId: "685592614306",
+            appId: "1:685592614306:web:b6a8f6f18407f9c0154efb"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        let currentUser = null;
+
+        onAuthStateChanged(auth, async user => {
+            if (!user) return window.location.href = '/auth.html';
+            const snap = await getDoc(doc(db, 'users', user.uid));
+            currentUser = { ...snap.data(), userId: user.uid };
+            loadCurrentCharacter();
+        });
+
+        function loadCurrentCharacter() {
+            const char = currentUser.character || {};
+            document.getElementById('hair').value = char.hair || 'black';
+            document.getElementById('eyes').value = char.eyes || 'brown';
+            document.getElementById('skin').value = char.skin || 'light';
+            document.getElementById('clothes').value = char.clothes || 'casual';
+            updatePreview();
+        }
+
+        document.querySelectorAll('select').forEach(sel => {
+            sel.addEventListener('change', updatePreview);
+        });
+
+        function updatePreview() {
+            const hair = document.getElementById('hair').value;
+            const eyes = document.getElementById('eyes').value;
+            const skin = document.getElementById('skin').value;
+            const clothes = document.getElementById('clothes').value;
+            const svg = `
+                <svg width="200" height="300">
+                    <rect x="50" y="50" width="100" height="150" fill="${skin === 'light' ? '#ffdab9' : '#cd853f'}"/>
+                    <circle cx="100" cy="30" r="30" fill="${hair}"/>
+                    <circle cx="80" cy="30" r="5" fill="${eyes}"/>
+                    <circle cx="120" cy="30" r="5" fill="${eyes}"/>
+                    <rect x="50" y="200" width="100" height="100" fill="${clothes === 'casual' ? '#add8e6' : '#ff0000'}"/>
+                </svg>`;
+            document.getElementById('preview').innerHTML = svg;
+        }
+
+        document.getElementById('saveButton').addEventListener('click', async () => {
+            const character = {
+                hair: document.getElementById('hair').value,
+                eyes: document.getElementById('eyes').value,
+                skin: document.getElementById('skin').value,
+                clothes: document.getElementById('clothes').value
+            };
+            await updateDoc(doc(db, 'users', currentUser.userId), { character });
+            alert('Character saved!');
+            window.location.href = '/';
+        });
+    </script>
+</head>
+<body>
+    <nav>
+        <a href="/" class="logo">Lyko Lake Tycoon <span class="beta-tag">BETA</span></a>
+    </nav>
+    <div class="container">
+        <h1>Customize Character</h1>
+        <div class="form-group">
+            <label>Hair Color</label>
+            <select id="hair">
+                <option value="black">Black</option>
+                <option value="brown">Brown</option>
+                <option value="blonde">Blonde</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label>Eye Color</label>
+            <select id="eyes">
+                <option value="brown">Brown</option>
+                <option value="blue">Blue</option>
+                <option value="green">Green</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label>Skin Tone</label>
+            <select id="skin">
+                <option value="light">Light</option>
+                <option value="dark">Dark</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label>Clothes</label>
+            <select id="clothes">
+                <option value="casual">Casual</option>
+                <option value="formal">Formal</option>
+            </select>
+        </div>
+        <div id="preview" class="preview"></div>
+        <button id="saveButton">Save Character</button>
+    </div>
+</body>
+</html>
