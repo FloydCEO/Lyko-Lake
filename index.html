@@ -3,138 +3,858 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lyko Lake - BETA Tycoon Game</title>
+    <title>Lyko Lake Browser - The Internet's Most Unhinged Browser</title>
     <style>
-        *{margin:0;padding:0;box-sizing:border-box}
-        body{
-            font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Oxygen,Ubuntu,Cantarell,sans-serif;
-            background:radial-gradient(ellipse at bottom,#1a3d2e 0%,#0d2818 50%,#06140f 100%);
-            color:#e0f2e9;min-height:100vh;
-            background-attachment:fixed;
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
-        .hidden{display:none!important}
-        nav{
-            background:rgba(13,40,24,.85);backdrop-filter:blur(10px);
-            padding:20px 40px;display:flex;justify-content:space-between;align-items:center;
-            position:sticky;top:0;z-index:1000;
-            box-shadow:0 4px 20px rgba(0,0,0,.4);
-            border-bottom:2px solid rgba(88,166,100,.4);
-        }
-        .logo{font-size:1.8em;font-weight:bold;color:#88d8a3;text-decoration:none;display:flex;align-items:center;gap:10px;transition:transform .3s ease}
-        .logo:hover{transform:scale(1.05)}
-        .container{max-width:800px;margin:100px auto;padding:20px;text-align:center}
-        h1{font-size:3em;margin-bottom:20px;color:#88d8a3}
-        p{margin-bottom:40px;color:rgba(224,242,233,.8)}
-        .button{background:#88d8a3;color:#0d2818;padding:15px 40px;border-radius:10px;text-decoration:none;font-weight:600;display:inline-block;margin:10px;transition:all .3s ease}
-        .button:hover{background:#a3e8b8;transform:translateY(-3px)}
-        .search-modal{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.8);display:none;align-items:center;justify-content:center;z-index:2000}
-        .search-modal.show{display:flex}
-        .search-content{background:rgba(13,40,24,.95);padding:40px;border-radius:20px;max-width:500px;width:90%;text-align:left}
-        .search-input{width:100%;padding:15px;background:rgba(255,255,255,.1);border:2px solid #88d8a3;border-radius:10px;color:#fff;margin-bottom:20px}
-        .search-results{max-height:300px;overflow-y:auto}
-        .search-result{padding:10px;border-bottom:1px solid rgba(255,255,255,.1);display:flex;align-items:center;gap:10px}
-        .search-result a{color:#88d8a3;text-decoration:none}
-        .beta-tag{color:#ffcc00;font-size:0.8em;margin-left:10px}
-    </style>
-    <script type="module">
-        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
-        import { getAuth, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
-        import { getFirestore, doc, getDoc, collection, query, where, getDocs } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
 
-        const firebaseConfig = {
-            apiKey: "AIzaSyDUBeWvs6kOijqST6FVGirWs2EZ12aAAwU",
-            authDomain: "lyko-lake.firebaseapp.com",
-            projectId: "lyko-lake",
-            storageBucket: "lyko-lake.firebasestorage.app",
-            messagingSenderId: "685592614306",
-            appId: "1:685592614306:web:b6a8f6f18407f9c0154efb"
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #0a4d4d 0%, #1a6b6b 50%, #0f3d3d 100%);
+            color: #fff;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        #app {
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Top Navigation Bar */
+        .nav-bar {
+            background: rgba(10, 30, 30, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 12px 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            border-bottom: 2px solid rgba(34, 197, 164, 0.3);
+        }
+
+        .nav-btn {
+            background: rgba(34, 197, 164, 0.2);
+            border: 2px solid #22c5a4;
+            color: #22c5a4;
+            padding: 8px 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .nav-btn:hover {
+            background: #22c5a4;
+            color: #0a4d4d;
+        }
+
+        .nav-btn:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+
+        .address-bar {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid rgba(34, 197, 164, 0.3);
+            border-radius: 10px;
+            padding: 10px 15px;
+        }
+
+        .address-input {
+            flex: 1;
+            background: none;
+            border: none;
+            outline: none;
+            color: #fff;
+            font-size: 14px;
+        }
+
+        .address-input::placeholder {
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        /* Tabs Bar */
+        .tabs-bar {
+            background: rgba(10, 30, 30, 0.9);
+            padding: 8px 20px;
+            display: flex;
+            gap: 8px;
+            overflow-x: auto;
+            border-bottom: 2px solid rgba(34, 197, 164, 0.2);
+        }
+
+        .tab {
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid rgba(34, 197, 164, 0.3);
+            border-radius: 8px 8px 0 0;
+            padding: 8px 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            min-width: 150px;
+            max-width: 200px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .tab.active {
+            background: rgba(34, 197, 164, 0.3);
+            border-color: #22c5a4;
+        }
+
+        .tab:hover {
+            background: rgba(34, 197, 164, 0.2);
+        }
+
+        .tab-title {
+            flex: 1;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            font-size: 13px;
+        }
+
+        .tab-close {
+            background: none;
+            border: none;
+            color: #fff;
+            cursor: pointer;
+            padding: 2px 6px;
+            border-radius: 4px;
+        }
+
+        .tab-close:hover {
+            background: rgba(255, 59, 48, 0.3);
+        }
+
+        .new-tab-btn {
+            background: rgba(34, 197, 164, 0.2);
+            border: 2px solid #22c5a4;
+            color: #22c5a4;
+            padding: 8px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        /* Warning Banner */
+        .warning-banner {
+            background: linear-gradient(90deg, #ff6b6b, #ff8c42);
+            color: #fff;
+            padding: 12px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-weight: 600;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.8; }
+        }
+
+        .close-warning {
+            background: rgba(0, 0, 0, 0.3);
+            border: none;
+            color: #fff;
+            padding: 4px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+
+        /* Browser View */
+        .browser-view {
+            flex: 1;
+            background: #0a2828;
+            position: relative;
+        }
+
+        iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+
+        /* Home Page */
+        .home-page {
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 40px;
+            text-align: center;
+            background: radial-gradient(ellipse at center, #1a6b6b 0%, #0a4d4d 100%);
+        }
+
+        .home-logo {
+            font-size: 120px;
+            margin-bottom: 20px;
+            animation: float 3s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+        }
+
+        .home-title {
+            font-size: 48px;
+            font-weight: bold;
+            background: linear-gradient(135deg, #22c5a4 0%, #4dd4b8 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 16px;
+        }
+
+        .home-subtitle {
+            font-size: 24px;
+            color: rgba(255, 255, 255, 0.8);
+            margin-bottom: 40px;
+        }
+
+        .quick-links {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            max-width: 800px;
+            width: 100%;
+            margin-top: 40px;
+        }
+
+        .quick-link {
+            background: rgba(34, 197, 164, 0.2);
+            border: 2px solid #22c5a4;
+            border-radius: 15px;
+            padding: 30px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .quick-link:hover {
+            background: rgba(34, 197, 164, 0.3);
+            transform: translateY(-5px);
+        }
+
+        .quick-link-icon {
+            font-size: 48px;
+            margin-bottom: 12px;
+        }
+
+        .quick-link-title {
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        /* Settings Page */
+        .settings-page {
+            height: 100%;
+            overflow-y: auto;
+            padding: 40px;
+            background: radial-gradient(ellipse at top, #1a6b6b 0%, #0a4d4d 100%);
+        }
+
+        .settings-container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .settings-title {
+            font-size: 36px;
+            font-weight: bold;
+            color: #22c5a4;
+            margin-bottom: 40px;
+        }
+
+        .setting-card {
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px solid rgba(34, 197, 164, 0.3);
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 30px;
+        }
+
+        .setting-card h3 {
+            font-size: 24px;
+            color: #22c5a4;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .setting-card p {
+            color: rgba(255, 255, 255, 0.7);
+            margin-bottom: 20px;
+            line-height: 1.6;
+        }
+
+        .personality-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+        }
+
+        .personality-btn {
+            background: rgba(34, 197, 164, 0.1);
+            border: 2px solid rgba(34, 197, 164, 0.3);
+            border-radius: 12px;
+            padding: 20px;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: center;
+        }
+
+        .personality-btn.active {
+            background: rgba(34, 197, 164, 0.3);
+            border-color: #22c5a4;
+        }
+
+        .personality-btn:hover {
+            background: rgba(34, 197, 164, 0.2);
+        }
+
+        .personality-icon {
+            font-size: 36px;
+            margin-bottom: 8px;
+        }
+
+        .toggle-btn {
+            background: rgba(34, 197, 164, 0.2);
+            border: 2px solid #22c5a4;
+            color: #22c5a4;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .toggle-btn.active {
+            background: #22c5a4;
+            color: #0a4d4d;
+        }
+
+        .toggle-btn:hover {
+            background: rgba(34, 197, 164, 0.3);
+        }
+
+        /* ADHD Mode Overlay */
+        .adhd-overlay {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(255, 204, 0, 0.95);
+            color: #000;
+            padding: 12px 24px;
+            border-radius: 10px;
+            font-weight: 600;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+            z-index: 100;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            position: fixed;
+            right: 0;
+            top: 0;
+            bottom: 0;
+            width: 350px;
+            background: rgba(10, 30, 30, 0.98);
+            border-left: 2px solid rgba(34, 197, 164, 0.3);
+            padding: 20px;
+            overflow-y: auto;
+            z-index: 1000;
+            transform: translateX(100%);
+            transition: transform 0.3s;
+        }
+
+        .sidebar.show {
+            transform: translateX(0);
+        }
+
+        .sidebar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .sidebar-title {
+            font-size: 24px;
+            font-weight: bold;
+            color: #22c5a4;
+        }
+
+        .sidebar-close {
+            background: rgba(255, 59, 48, 0.2);
+            border: 2px solid #ff3b30;
+            color: #ff3b30;
+            padding: 6px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+
+        .history-item {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(34, 197, 164, 0.2);
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 12px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .history-item:hover {
+            background: rgba(34, 197, 164, 0.2);
+        }
+
+        .history-title {
+            font-weight: 600;
+            margin-bottom: 4px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .history-time {
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.6);
+        }
+    </style>
+</head>
+<body>
+    <div id="app">
+        <!-- Navigation Bar -->
+        <div class="nav-bar">
+            <button class="nav-btn" id="backBtn" title="Go back">◀</button>
+            <button class="nav-btn" id="forwardBtn" title="Go forward">▶</button>
+            <button class="nav-btn" id="reloadBtn" title="Reload">⟳</button>
+            <div class="address-bar">
+                <input type="text" class="address-input" id="addressInput" placeholder="Type a URL or search..." />
+            </div>
+            <button class="nav-btn" id="homeBtn" title="Home">🏠</button>
+            <button class="nav-btn" id="bookmarkBtn" title="Bookmark">⭐</button>
+            <button class="nav-btn" id="historyBtn" title="History">🕒</button>
+            <button class="nav-btn" id="settingsBtn" title="Settings">⚙️</button>
+        </div>
+
+        <!-- Tabs Bar -->
+        <div class="tabs-bar" id="tabsBar">
+            <!-- Tabs will be inserted here -->
+            <button class="new-tab-btn" id="newTabBtn">+ New Tab</button>
+        </div>
+
+        <!-- Warning Banner -->
+        <div class="warning-banner" id="warningBanner" style="display: none;">
+            <span id="warningText"></span>
+            <button class="close-warning" id="closeWarning">✕</button>
+        </div>
+
+        <!-- Browser View -->
+        <div class="browser-view" id="browserView">
+            <!-- Content will be dynamically loaded here -->
+        </div>
+
+        <!-- History Sidebar -->
+        <div class="sidebar" id="historySidebar">
+            <div class="sidebar-header">
+                <h2 class="sidebar-title">History</h2>
+                <button class="sidebar-close" id="closeSidebar">✕</button>
+            </div>
+            <div id="historyList"></div>
+        </div>
+    </div>
+
+    <script>
+        // Browser State
+        const state = {
+            tabs: [{ id: 1, url: 'lyko://home', title: 'Home', active: true }],
+            activeTabId: 1,
+            nextTabId: 2,
+            personalityMode: 'unhinged',
+            adhdMode: false,
+            history: [],
+            bookmarks: [{ url: 'lyko://home', title: 'Home' }]
         };
 
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
+        const personalities = {
+            professional: {
+                name: 'Professional',
+                icon: '💼',
+                errorMsg: 'The requested page failed to load.',
+                tabLimit: 'You have reached the maximum number of open tabs.',
+                loading: 'Loading page...'
+            },
+            unhinged: {
+                name: 'Unhinged',
+                icon: '🔥',
+                errorMsg: 'bruh this website said "nah" and dipped 💀',
+                tabLimit: 'BRO YOU HAVE TOO MANY TABS OPEN WHAT ARE YOU EVEN DOING',
+                loading: 'yoinking this page rn hold up...'
+            },
+            passive: {
+                name: 'Passive-Aggressive',
+                icon: '😒',
+                errorMsg: 'Oh, *another* broken link. How surprising.',
+                tabLimit: 'Sure, open MORE tabs. It\'s not like I\'m already struggling.',
+                loading: 'Loading this for you... again...'
+            },
+            therapist: {
+                name: 'Therapist',
+                icon: '🧘',
+                errorMsg: 'Let\'s explore why this page didn\'t load. How does that make you feel?',
+                tabLimit: 'I notice you\'re opening a lot of tabs. Is everything okay?',
+                loading: 'Taking a moment to bring this page to you mindfully...'
+            }
+        };
 
-        let currentUser = null;
+        // Utility Functions
+        function normalizeUrl(url) {
+            if (url.startsWith('lyko://')) return url;
+            if (!url.startsWith('http://') && !url.startsWith('https://')) {
+                return 'https://' + url;
+            }
+            return url;
+        }
 
-        onAuthStateChanged(auth, async user => {
-            if (user && user.emailVerified) {
-                const snap = await getDoc(doc(db, 'users', user.uid));
-                if (snap.exists()) {
-                    currentUser = { ...snap.data(), userId: user.uid };
-                    document.getElementById('authSection').classList.add('hidden');
-                    document.getElementById('menuSection').classList.remove('hidden');
-                    document.getElementById('profileLink').href = `/profile.html?u=${currentUser.username}`;
-                }
+        function getActiveTab() {
+            return state.tabs.find(t => t.id === state.activeTabId);
+        }
+
+        function getCurrentPersonality() {
+            return personalities[state.personalityMode];
+        }
+
+        // Tab Management
+        function createTab(url = 'lyko://home', title = 'New Tab') {
+            const tab = {
+                id: state.nextTabId++,
+                url,
+                title,
+                active: false
+            };
+            state.tabs.push(tab);
+            renderTabs();
+            switchToTab(tab.id);
+            checkTabCount();
+        }
+
+        function closeTab(id) {
+            if (state.tabs.length === 1) return;
+            
+            const index = state.tabs.findIndex(t => t.id === id);
+            state.tabs.splice(index, 1);
+            
+            if (id === state.activeTabId) {
+                const newActiveTab = state.tabs[Math.max(0, index - 1)];
+                switchToTab(newActiveTab.id);
+            }
+            
+            renderTabs();
+            checkTabCount();
+        }
+
+        function switchToTab(id) {
+            state.tabs.forEach(t => t.active = false);
+            const tab = state.tabs.find(t => t.id === id);
+            if (tab) {
+                tab.active = true;
+                state.activeTabId = id;
+                renderTabs();
+                renderContent();
+                document.getElementById('addressInput').value = tab.url;
+            }
+        }
+
+        function updateActiveTab(updates) {
+            const tab = getActiveTab();
+            if (tab) {
+                Object.assign(tab, updates);
+                renderTabs();
+            }
+        }
+
+        function checkTabCount() {
+            if (state.tabs.length > 15) {
+                showWarning(`${getCurrentPersonality().tabLimit}\n\nMemory usage: ${Math.floor(state.tabs.length * 6.7)}MB\nRecommendation: Close some tabs`);
             } else {
-                document.getElementById('authSection').classList.remove('hidden');
-                document.getElementById('menuSection').classList.add('hidden');
+                hideWarning();
+            }
+        }
+
+        // Navigation
+        function navigate(url) {
+            const normalized = normalizeUrl(url);
+            updateActiveTab({ url: normalized, title: extractTitle(normalized) });
+            addToHistory(normalized);
+            renderContent();
+        }
+
+        function extractTitle(url) {
+            if (url.startsWith('lyko://')) {
+                return url.replace('lyko://', '').charAt(0).toUpperCase() + url.slice(8);
+            }
+            try {
+                const hostname = new URL(url).hostname;
+                return hostname.replace('www.', '');
+            } catch {
+                return 'Unknown';
+            }
+        }
+
+        function addToHistory(url) {
+            state.history.push({
+                url,
+                title: extractTitle(url),
+                time: new Date()
+            });
+        }
+
+        // Rendering
+        function renderTabs() {
+            const tabsBar = document.getElementById('tabsBar');
+            const newTabBtn = tabsBar.querySelector('.new-tab-btn');
+            
+            // Remove old tabs
+            const oldTabs = tabsBar.querySelectorAll('.tab');
+            oldTabs.forEach(t => t.remove());
+            
+            // Add tabs
+            state.tabs.forEach(tab => {
+                const tabEl = document.createElement('div');
+                tabEl.className = `tab ${tab.active ? 'active' : ''}`;
+                tabEl.innerHTML = `
+                    <span class="tab-title">${tab.title}</span>
+                    <button class="tab-close">✕</button>
+                `;
+                
+                tabEl.addEventListener('click', (e) => {
+                    if (!e.target.classList.contains('tab-close')) {
+                        switchToTab(tab.id);
+                    }
+                });
+                
+                tabEl.querySelector('.tab-close').addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    closeTab(tab.id);
+                });
+                
+                tabsBar.insertBefore(tabEl, newTabBtn);
+            });
+        }
+
+        function renderContent() {
+            const browserView = document.getElementById('browserView');
+            const activeTab = getActiveTab();
+            
+            if (!activeTab) return;
+            
+            if (activeTab.url === 'lyko://home') {
+                renderHomePage();
+            } else if (activeTab.url === 'lyko://settings') {
+                renderSettingsPage();
+            } else {
+                renderWebPage(activeTab.url);
+            }
+        }
+
+        function renderHomePage() {
+            const browserView = document.getElementById('browserView');
+            browserView.innerHTML = `
+                <div class="home-page">
+                    <div class="home-logo">🌊</div>
+                    <h1 class="home-title">Lyko Lake Browser</h1>
+                    <p class="home-subtitle">${
+                        state.personalityMode === 'unhinged' ? "the internet's most unhinged browser fr fr" :
+                        state.personalityMode === 'professional' ? "A modern web browser for professionals" :
+                        state.personalityMode === 'passive' ? "I guess you can browse the web here" :
+                        "Let's explore the internet together"
+                    }</p>
+                    
+                    <div class="quick-links">
+                        <div class="quick-link" data-url="https://wikipedia.org">
+                            <div class="quick-link-icon">📚</div>
+                            <div class="quick-link-title">Wikipedia</div>
+                        </div>
+                        <div class="quick-link" data-url="https://github.com">
+                            <div class="quick-link-icon">💻</div>
+                            <div class="quick-link-title">GitHub</div>
+                        </div>
+                        <div class="quick-link" data-url="https://lillyko.space">
+                            <div class="quick-link-icon">🏠</div>
+                            <div class="quick-link-title">Lyko Lake</div>
+                        </div>
+                        <div class="quick-link" data-url="lyko://settings">
+                            <div class="quick-link-icon">⚙️</div>
+                            <div class="quick-link-title">Settings</div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            browserView.querySelectorAll('.quick-link').forEach(link => {
+                link.addEventListener('click', () => {
+                    navigate(link.dataset.url);
+                });
+            });
+        }
+
+        function renderSettingsPage() {
+            const browserView = document.getElementById('browserView');
+            browserView.innerHTML = `
+                <div class="settings-page">
+                    <div class="settings-container">
+                        <h1 class="settings-title">Settings</h1>
+                        
+                        <div class="setting-card">
+                            <h3>🧠 Personality Mode</h3>
+                            <p>Choose how your browser talks to you</p>
+                            <div class="personality-grid">
+                                ${Object.entries(personalities).map(([key, p]) => `
+                                    <div class="personality-btn ${state.personalityMode === key ? 'active' : ''}" data-mode="${key}">
+                                        <div class="personality-icon">${p.icon}</div>
+                                        <div>${p.name}</div>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                        
+                        <div class="setting-card">
+                            <h3>⚡ ADHD-Friendly Mode</h3>
+                            <p>Reduces distractions, pauses infinite scroll, and helps you focus</p>
+                            <button class="toggle-btn ${state.adhdMode ? 'active' : ''}" id="adhdToggle">
+                                ${state.adhdMode ? '✓ Enabled' : 'Enable ADHD Mode'}
+                            </button>
+                        </div>
+                        
+                        <div class="setting-card">
+                            <h3>📊 Browser Stats</h3>
+                            <p>Current tabs: ${state.tabs.length}</p>
+                            <p>Memory usage: ~${Math.floor(state.tabs.length * 6.7)}MB</p>
+                            <p>History items: ${state.history.length}</p>
+                            <p>Bookmarks: ${state.bookmarks.length}</p>
+                        </div>
+                        
+                        <div class="setting-card">
+                            <h3>ℹ️ About</h3>
+                            <p>Lyko Lake Browser v1.0.0 - "Unhinged Edition"</p>
+                            <p>Built by the internet, for the internet.</p>
+                            <p>A browser that doesn't take itself seriously.</p>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            // Personality buttons
+            browserView.querySelectorAll('.personality-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    state.personalityMode = btn.dataset.mode;
+                    renderSettingsPage();
+                });
+            });
+            
+            // ADHD toggle
+            document.getElementById('adhdToggle').addEventListener('click', () => {
+                state.adhdMode = !state.adhdMode;
+                renderSettingsPage();
+                renderContent();
+            });
+        }
+
+        function renderWebPage(url) {
+            const browserView = document.getElementById('browserView');
+            browserView.innerHTML = `
+                <iframe src="${url}" sandbox="allow-same-origin allow-scripts allow-forms allow-popups allow-popups-to-escape-sandbox"></iframe>
+                ${state.adhdMode ? '<div class="adhd-overlay">🧠 ADHD Mode Active</div>' : ''}
+            `;
+        }
+
+        // Warning Banner
+        function showWarning(text) {
+            document.getElementById('warningText').textContent = text;
+            document.getElementById('warningBanner').style.display = 'flex';
+        }
+
+        function hideWarning() {
+            document.getElementById('warningBanner').style.display = 'none';
+        }
+
+        // History Sidebar
+        function toggleHistorySidebar() {
+            const sidebar = document.getElementById('historySidebar');
+            sidebar.classList.toggle('show');
+            
+            if (sidebar.classList.contains('show')) {
+                renderHistory();
+            }
+        }
+
+        function renderHistory() {
+            const historyList = document.getElementById('historyList');
+            historyList.innerHTML = state.history.slice().reverse().map(item => `
+                <div class="history-item" data-url="${item.url}">
+                    <div class="history-title">${item.title}</div>
+                    <div class="history-time">${item.time.toLocaleTimeString()}</div>
+                </div>
+            `).join('');
+            
+            historyList.querySelectorAll('.history-item').forEach(item => {
+                item.addEventListener('click', () => {
+                    navigate(item.dataset.url);
+                    toggleHistorySidebar();
+                });
+            });
+        }
+
+        // Event Listeners
+        document.getElementById('backBtn').addEventListener('click', () => window.history.back());
+        document.getElementById('forwardBtn').addEventListener('click', () => window.history.forward());
+        document.getElementById('reloadBtn').addEventListener('click', () => renderContent());
+        document.getElementById('homeBtn').addEventListener('click', () => navigate('lyko://home'));
+        document.getElementById('settingsBtn').addEventListener('click', () => navigate('lyko://settings'));
+        document.getElementById('historyBtn').addEventListener('click', () => toggleHistorySidebar());
+        document.getElementById('closeSidebar').addEventListener('click', () => toggleHistorySidebar());
+        document.getElementById('newTabBtn').addEventListener('click', () => createTab());
+        document.getElementById('closeWarning').addEventListener('click', () => hideWarning());
+
+        document.getElementById('addressInput').addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                navigate(e.target.value);
             }
         });
 
-        document.getElementById('searchButton').addEventListener('click', () => {
-            document.getElementById('searchModal').classList.add('show');
+        document.getElementById('bookmarkBtn').addEventListener('click', () => {
+            const tab = getActiveTab();
+            if (!state.bookmarks.find(b => b.url === tab.url)) {
+                state.bookmarks.push({ url: tab.url, title: tab.title });
+                alert(`${state.personalityMode === 'unhinged' ? 'yooo bookmarked 🔥' : 'Bookmarked!'}`);
+            }
         });
 
-        document.getElementById('closeSearch').addEventListener('click', () => {
-            document.getElementById('searchModal').classList.remove('show');
+        // Keyboard Shortcuts
+        document.addEventListener('keydown', (e) => {
+            if (e.ctrlKey && e.key === 't') {
+                e.preventDefault();
+                createTab();
+            }
+            if (e.ctrlKey && e.key === 'w') {
+                e.preventDefault();
+                closeTab(state.activeTabId);
+            }
         });
 
-        document.getElementById('playerSearchInput').addEventListener('input', async e => {
-            const queryStr = e.target.value.toLowerCase();
-            if (queryStr.length < 3) return;
-            const q = query(collection(db, 'usernames'), where('username', '>=', queryStr), where('username', '<=', queryStr + '\uf8ff'));
-            const snaps = await getDocs(q);
-            const results = document.getElementById('searchResults');
-            results.innerHTML = '';
-            snaps.forEach(snap => {
-                const data = snap.data();
-                results.innerHTML += `<div class="search-result">
-                    <a href="/profile.html?u=${data.username}">${data.username}</a>
-                    <button onclick="addFriend('${data.userId}')">Add Friend</button>
-                </div>`;
-            });
-        });
-
-        window.addFriend = async (friendId) => {
-            if (!currentUser) return;
-            await addDoc(collection(db, 'follows'), { followerId: currentUser.userId, followingId: friendId });
-            alert('Friend added!');
-        };
+        // Initialize
+        renderTabs();
+        renderContent();
     </script>
-</head>
-<body>
-    <nav>
-        <a href="/" class="logo">Lyko Lake <span class="beta-tag">BETA</span></a>
-        <div class="nav-right">
-            <a href="/help.html" class="button">Help</a>
-            <a id="adminLink" href="/admin.html" class="button hidden">Admin</a>
-        </div>
-    </nav>
-    <div class="container">
-        <h1>Welcome to Lyko Lake Tycoon</h1>
-        <p>A multiplayer .io tycoon game where you build your empire through missions and properties. BETA - In Progress!</p>
-        
-        <div id="authSection">
-            <a href="/auth.html" class="button">Sign In / Sign Up</a>
-        </div>
-        
-        <div id="menuSection" class="hidden">
-            <a href="/game.html" class="button">Start Game</a>
-            <a id="profileLink" href="#" class="button">My Profile</a>
-            <a id="searchButton" class="button">Search Players</a>
-            <a href="/customize.html" class="button">Customize Character</a>
-        </div>
-    </div>
-    
-    <div id="searchModal" class="search-modal">
-        <div class="search-content">
-            <h2>Search Players</h2>
-            <input id="playerSearchInput" type="text" placeholder="Enter username..." class="search-input">
-            <div id="searchResults" class="search-results"></div>
-            <button id="closeSearch" class="button">Close</button>
-        </div>
-    </div>
-    
-    <div class="version-footer">©2025 Lyko Sokolov - Lyko Lake v1.1.0 BETA</div>
 </body>
 </html>
