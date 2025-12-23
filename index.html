@@ -14,13 +14,14 @@
         }
 
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
             min-height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
             overflow: hidden;
             position: relative;
+            background: #0a0a0a;
         }
 
         /* Background video/image container */
@@ -37,18 +38,50 @@
             width: 100%;
             height: 100%;
             object-fit: cover;
-            filter: blur(3px);
+            filter: blur(4px) brightness(0.7);
         }
 
-        /* Overlay for better contrast */
+        /* Dark overlay */
         .overlay {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0, 0, 0, 0.4);
+            background: linear-gradient(135deg, rgba(88, 28, 135, 0.3), rgba(0, 0, 0, 0.7));
             z-index: -1;
+        }
+
+        /* Ash particles */
+        .ash-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .ash {
+            position: absolute;
+            background: rgba(200, 200, 200, 0.4);
+            border-radius: 50%;
+            animation: fall linear infinite;
+        }
+
+        @keyframes fall {
+            0% {
+                transform: translateY(-10px) translateX(0);
+                opacity: 0.8;
+            }
+            50% {
+                opacity: 0.4;
+            }
+            100% {
+                transform: translateY(100vh) translateX(var(--drift));
+                opacity: 0;
+            }
         }
 
         /* Volume control */
@@ -56,18 +89,25 @@
             position: fixed;
             top: 20px;
             left: 20px;
-            background: rgba(27, 27, 27, 0.5);
-            border: 2px solid rgba(27, 27, 27, 0.45);
-            border-radius: 12px;
+            background: rgba(88, 28, 135, 0.3);
+            border: 2px solid rgba(139, 92, 246, 0.3);
+            border-radius: 14px;
             padding: 12px;
-            backdrop-filter: blur(10px);
+            backdrop-filter: blur(20px);
             z-index: 1000;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .volume-control:hover {
+            background: rgba(88, 28, 135, 0.5);
+            border-color: rgba(139, 92, 246, 0.5);
+            transform: scale(1.05);
         }
 
         .volume-icon {
             color: white;
             font-size: 24px;
-            cursor: pointer;
         }
 
         /* Profile views counter */
@@ -75,35 +115,40 @@
             position: fixed;
             bottom: 20px;
             left: 20px;
-            background: rgba(27, 27, 27, 0.5);
-            border: 2px solid rgba(27, 27, 27, 0.45);
-            border-radius: 12px;
+            background: rgba(88, 28, 135, 0.3);
+            border: 2px solid rgba(139, 92, 246, 0.3);
+            border-radius: 14px;
             padding: 10px 16px;
-            backdrop-filter: blur(10px);
+            backdrop-filter: blur(20px);
             color: white;
             font-size: 14px;
             font-weight: 550;
             display: flex;
             align-items: center;
             gap: 8px;
+            z-index: 1000;
         }
 
         /* Main profile container */
         .profile-container {
-            background: rgba(27, 27, 27, 0.5);
-            border-radius: 20px;
-            padding: 35px 15px;
+            background: linear-gradient(135deg, rgba(88, 28, 135, 0.4), rgba(30, 20, 50, 0.6));
+            border: 2px solid rgba(139, 92, 246, 0.3);
+            border-radius: 24px;
+            padding: 40px 30px;
             width: 90%;
-            max-width: 640px;
-            backdrop-filter: blur(0px);
+            max-width: 500px;
+            backdrop-filter: blur(20px);
             text-align: center;
-            animation: fadeIn 0.5s ease-in;
+            animation: fadeIn 0.6s ease-in;
+            position: relative;
+            z-index: 1;
+            box-shadow: 0 8px 32px rgba(139, 92, 246, 0.2);
         }
 
         @keyframes fadeIn {
             from {
                 opacity: 0;
-                transform: translateY(20px);
+                transform: translateY(30px);
             }
             to {
                 opacity: 1;
@@ -111,55 +156,89 @@
             }
         }
 
-        /* Avatar */
+        /* Avatar with glow */
         .avatar-container {
-            margin-bottom: 20px;
+            margin-bottom: 24px;
+            position: relative;
+            display: inline-block;
+        }
+
+        .avatar-glow {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 140px;
+            height: 140px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(139, 92, 246, 0.6), transparent 70%);
+            filter: blur(20px);
+            animation: pulse 3s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                transform: translate(-50%, -50%) scale(1);
+                opacity: 0.8;
+            }
+            50% {
+                transform: translate(-50%, -50%) scale(1.1);
+                opacity: 1;
+            }
         }
 
         .avatar {
             width: 120px;
             height: 120px;
             border-radius: 50%;
-            border: 2px solid rgba(27, 27, 27, 0.4);
+            border: 3px solid rgba(139, 92, 246, 0.6);
             object-fit: cover;
+            position: relative;
+            z-index: 1;
+            box-shadow: 0 0 30px rgba(139, 92, 246, 0.5);
         }
 
         /* Username */
         .username {
             color: #ffffff;
-            font-size: 39.5px;
-            font-weight: 600;
+            font-size: 36px;
+            font-weight: 700;
             margin-bottom: 8px;
-            filter: drop-shadow(0px 0px 16.5px #ffffff);
+            text-shadow: 0 0 20px rgba(139, 92, 246, 0.8), 0 0 40px rgba(139, 92, 246, 0.4);
+            letter-spacing: 0.5px;
         }
 
         /* Location */
         .location {
-            color: rgba(255, 255, 255, 0.65);
+            color: rgba(255, 255, 255, 0.7);
             font-size: 15px;
             font-weight: 450;
-            margin-bottom: 24px;
+            margin-bottom: 28px;
             display: flex;
             align-items: center;
             justify-content: center;
             gap: 6px;
         }
 
+        .location svg {
+            opacity: 0.7;
+        }
+
         /* Social icons */
         .social-icons {
             display: flex;
             justify-content: center;
-            gap: 16px;
-            margin-bottom: 30px;
+            gap: 12px;
+            margin-bottom: 24px;
             flex-wrap: wrap;
         }
 
         .social-icon {
-            width: 48px;
-            height: 48px;
-            background: rgba(27, 27, 27, 0.2);
-            border: 2px solid rgba(27, 27, 27, 0.04);
-            border-radius: 12px;
+            width: 50px;
+            height: 50px;
+            background: rgba(88, 28, 135, 0.3);
+            border: 2px solid rgba(139, 92, 246, 0.3);
+            border-radius: 14px;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -167,64 +246,68 @@
             transition: all 0.3s ease;
             color: #ffffff;
             font-size: 24px;
-            filter: drop-shadow(#ffffff 1px 0 7px);
+            text-decoration: none;
         }
 
         .social-icon:hover {
-            background: rgba(255, 255, 255, 0.1);
-            transform: translateY(-3px);
+            background: rgba(88, 28, 135, 0.5);
+            border-color: rgba(139, 92, 246, 0.6);
+            transform: translateY(-4px);
+            box-shadow: 0 8px 20px rgba(139, 92, 246, 0.4);
         }
 
         /* Business Email Section */
         .business-email {
-            margin: 20px 0;
-            padding: 16px;
-            background: rgba(27, 27, 27, 0.3);
-            border: 2px solid rgba(27, 27, 27, 0.1);
-            border-radius: 12px;
+            margin: 20px 0 0 0;
+            padding: 18px;
+            background: rgba(88, 28, 135, 0.2);
+            border: 2px solid rgba(139, 92, 246, 0.25);
+            border-radius: 14px;
             text-align: center;
         }
 
         .email-label {
             display: block;
-            color: rgba(255, 255, 255, 0.7);
-            font-size: 13px;
-            font-weight: 500;
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 12px;
+            font-weight: 600;
             margin-bottom: 8px;
             text-transform: uppercase;
-            letter-spacing: 0.5px;
+            letter-spacing: 1px;
         }
 
         .email-link {
-            color: #ffffff;
+            color: #a78bfa;
             text-decoration: none;
-            font-size: 15px;
+            font-size: 14px;
             font-weight: 500;
             transition: all 0.3s ease;
             display: inline-block;
         }
 
         .email-link:hover {
-            color: rgba(255, 255, 255, 0.8);
+            color: #c4b5fd;
             transform: scale(1.05);
         }
 
         /* Audio player */
         .audio-player {
-            background: rgba(27, 27, 27, 0.4);
+            background: rgba(88, 28, 135, 0.2);
+            border: 2px solid rgba(139, 92, 246, 0.25);
             border-radius: 16px;
             padding: 16px;
-            margin-top: 20px;
+            margin-top: 24px;
             display: flex;
             align-items: center;
-            gap: 12px;
+            gap: 14px;
         }
 
         .audio-cover {
-            width: 50px;
-            height: 50px;
-            border-radius: 8px;
+            width: 55px;
+            height: 55px;
+            border-radius: 10px;
             object-fit: cover;
+            border: 2px solid rgba(139, 92, 246, 0.3);
         }
 
         .audio-info {
@@ -235,107 +318,100 @@
         .audio-title {
             color: white;
             font-size: 14px;
-            font-weight: 500;
-            margin-bottom: 8px;
+            font-weight: 600;
+            margin-bottom: 10px;
         }
 
         .audio-progress {
             display: flex;
             align-items: center;
-            gap: 12px;
+            gap: 10px;
         }
 
         .progress-bar {
             flex: 1;
-            height: 4px;
-            background: rgba(255, 255, 255, 0.3);
-            border-radius: 2px;
+            height: 5px;
+            background: rgba(139, 92, 246, 0.3);
+            border-radius: 10px;
             position: relative;
             cursor: pointer;
+            overflow: hidden;
         }
 
         .progress-fill {
             height: 100%;
-            background: #ffffff;
-            border-radius: 2px;
+            background: linear-gradient(90deg, #a78bfa, #8b5cf6);
+            border-radius: 10px;
             width: 30%;
+            box-shadow: 0 0 10px rgba(139, 92, 246, 0.6);
         }
 
         .time {
-            color: rgba(255, 255, 255, 0.7);
-            font-size: 12px;
-            min-width: 40px;
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 11px;
+            min-width: 35px;
+            font-weight: 500;
         }
 
         .audio-controls {
             display: flex;
-            gap: 12px;
+            gap: 10px;
             align-items: center;
         }
 
         .control-btn {
             background: none;
             border: none;
-            color: rgba(255, 255, 255, 0.5);
+            color: rgba(255, 255, 255, 0.6);
             cursor: pointer;
-            font-size: 20px;
-            transition: color 0.3s;
+            font-size: 18px;
+            transition: all 0.3s;
+            padding: 4px;
         }
 
         .control-btn.play {
-            color: #ffffff;
-            font-size: 28px;
+            color: #a78bfa;
+            font-size: 24px;
         }
 
         .control-btn:hover {
             color: #ffffff;
+            transform: scale(1.1);
         }
 
         /* Responsive */
         @media (max-width: 768px) {
             .profile-container {
                 width: 95%;
-                padding: 25px 12px;
+                padding: 30px 20px;
             }
 
             .username {
-                font-size: 32px;
+                font-size: 30px;
             }
 
             .social-icon {
-                width: 44px;
-                height: 44px;
+                width: 46px;
+                height: 46px;
             }
-        }
-
-        /* Custom scrollbar */
-        ::-webkit-scrollbar {
-            width: 8px;
-        }
-
-        ::-webkit-scrollbar-track {
-            background: rgba(255, 255, 255, 0.1);
-        }
-
-        ::-webkit-scrollbar-thumb {
-            background: rgba(255, 255, 255, 0.3);
-            border-radius: 4px;
         }
     </style>
 </head>
 <body>
     <!-- Background Video -->
     <div class="background-container">
-        <!-- Replace 'background-video.mp4' with your video file -->
         <video class="background-video" autoplay loop muted playsinline>
             <source src="background-video.mp4" type="video/mp4">
         </video>
     </div>
     <div class="overlay"></div>
 
+    <!-- Ash particles container -->
+    <div class="ash-container" id="ashContainer"></div>
+
     <!-- Volume Control -->
-    <div class="volume-control">
-        <span class="volume-icon" onclick="toggleMute()">🔊</span>
+    <div class="volume-control" onclick="toggleMute()">
+        <span class="volume-icon" id="volumeIcon">🔊</span>
     </div>
 
     <!-- Profile Views -->
@@ -348,9 +424,9 @@
 
     <!-- Main Profile Container -->
     <div class="profile-container">
-        <!-- Avatar -->
+        <!-- Avatar with glow effect -->
         <div class="avatar-container">
-            <!-- Replace 'avatar.webp' with your avatar image -->
+            <div class="avatar-glow"></div>
             <img src="avatar.webp" alt="Profile Avatar" class="avatar">
         </div>
 
@@ -397,13 +473,12 @@
 
         <!-- Business Email Display -->
         <div class="business-email">
-            <span class="email-label">Business Inquiries:</span>
+            <span class="email-label">Business Inquiries</span>
             <a href="mailto:lillykobusiness69@gmail.com" class="email-link">lillykobusiness69@gmail.com</a>
         </div>
 
         <!-- Audio Player -->
         <div class="audio-player">
-            <!-- Replace 'audio-cover.webp' with your audio cover image -->
             <img src="audio-cover.webp" alt="Audio Cover" class="audio-cover">
             <div class="audio-info">
                 <div class="audio-title">You Are Welcome Here....</div>
@@ -425,7 +500,6 @@
 
     <!-- Hidden audio element -->
     <audio id="audioPlayer" loop>
-        <!-- Replace 'audio-track.mp3' with your audio file -->
         <source src="audio-track.mp3" type="audio/mpeg">
     </audio>
 
@@ -443,19 +517,55 @@
             let currentViews = localStorage.getItem('profileViews');
             
             if (!currentViews) {
-                currentViews = 27; // Starting count
+                currentViews = 27;
             } else {
                 currentViews = parseInt(currentViews);
             }
             
-            // Increment view count
             currentViews++;
             localStorage.setItem('profileViews', currentViews);
             viewCountElement.textContent = currentViews;
         }
 
-        // Initialize view counter on page load
         updateViewCount();
+
+        // Create ash particles (Silent Hill style)
+        function createAsh() {
+            const ashContainer = document.getElementById('ashContainer');
+            const ash = document.createElement('div');
+            ash.className = 'ash';
+            
+            // Random size between 1-4px
+            const size = Math.random() * 3 + 1;
+            ash.style.width = size + 'px';
+            ash.style.height = size + 'px';
+            
+            // Random starting position
+            ash.style.left = Math.random() * 100 + '%';
+            
+            // Random animation duration between 8-15 seconds
+            const duration = Math.random() * 7 + 8;
+            ash.style.animationDuration = duration + 's';
+            
+            // Random horizontal drift
+            const drift = (Math.random() - 0.5) * 100;
+            ash.style.setProperty('--drift', drift + 'px');
+            
+            ashContainer.appendChild(ash);
+            
+            // Remove ash after animation completes
+            setTimeout(() => {
+                ash.remove();
+            }, duration * 1000);
+        }
+
+        // Create ash particles continuously
+        setInterval(createAsh, 200);
+
+        // Create initial batch
+        for (let i = 0; i < 30; i++) {
+            setTimeout(createAsh, i * 100);
+        }
 
         // Auto-play audio when page loads
         window.addEventListener('load', () => {
@@ -478,7 +588,7 @@
         }
 
         function toggleMute() {
-            const volumeIcon = document.querySelector('.volume-icon');
+            const volumeIcon = document.getElementById('volumeIcon');
             if (isMuted) {
                 bgVideo.muted = true;
                 audio.muted = false;
@@ -504,7 +614,6 @@
         }
 
         function nextTrack() {
-            // Implement playlist logic here
             audio.currentTime = 0;
         }
 
@@ -513,14 +622,12 @@
             const percentage = (audio.currentTime / audio.duration) * 100;
             progressFill.style.width = percentage + '%';
             
-            // Update time display
             const currentMin = Math.floor(audio.currentTime / 60);
             const currentSec = Math.floor(audio.currentTime % 60);
             document.querySelectorAll('.time')[0].textContent = 
                 `${currentMin}:${currentSec.toString().padStart(2, '0')}`;
         });
 
-        // Handle audio end
         audio.addEventListener('ended', () => {
             playBtn.textContent = '▶';
             isPlaying = false;
