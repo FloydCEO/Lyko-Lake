@@ -45,7 +45,6 @@ class GameScene extends Phaser.Scene {
     constructor() {
         super({ key: 'GameScene' });
         this.players = new Map();
-        this.movementThrottle = 0;
     }
 
     preload() {
@@ -53,6 +52,8 @@ class GameScene extends Phaser.Scene {
     }
 
     create() {
+        console.log('Game scene created');
+        
         // Create background grid
         this.createGrid();
         
@@ -120,10 +121,13 @@ class GameScene extends Phaser.Scene {
 
         socket.on('connect', () => {
             playerId = socket.id;
+            console.log('Connected! Player ID:', playerId);
             
             // Create local player at random position
             const startX = Phaser.Math.Between(100, GAME_WIDTH - 100);
             const startY = Phaser.Math.Between(100, GAME_HEIGHT - 100);
+
+            console.log('Sending playerJoin event:', { name: playerName, color: playerColor, x: startX, y: startY });
 
             // Send join event
             socket.emit('playerJoin', {
@@ -139,8 +143,10 @@ class GameScene extends Phaser.Scene {
 
         // Receive current players
         socket.on('currentPlayers', (players) => {
+            console.log('Received current players:', players);
             players.forEach(playerData => {
                 if (playerData.id !== playerId) {
+                    console.log('Creating remote player:', playerData);
                     this.createPlayer(
                         playerData.id,
                         playerData.name,
@@ -156,6 +162,7 @@ class GameScene extends Phaser.Scene {
 
         // New player joined
         socket.on('newPlayer', (playerData) => {
+            console.log('New player joined:', playerData);
             this.createPlayer(
                 playerData.id,
                 playerData.name,
@@ -169,39 +176,36 @@ class GameScene extends Phaser.Scene {
 
         // Player moved
         socket.on('playerMoved', (movement) => {
+            console.log('Player moved:', movement);
             if (this.players.has(movement.id)) {
                 const player = this.players.get(movement.id);
-                // Smooth interpolation
-                this.tweens.add({
-                    targets: player.circle,
-                    x: movement.x,
-                    y: movement.y,
-                    duration: 50,
-                    ease: 'Linear'
-                });
+                player.circle.x = movement.x;
+                player.circle.y = movement.y;
+                console.log(`Updated player ${movement.id} to position:`, movement.x, movement.y);
+            } else {
+                console.warn('Received movement for unknown player:', movement.id);
             }
         });
 
         // Player disconnected
-        socket.on('playerDisconnected', (playerId) => {
-            if (this.players.has(playerId)) {
-                const player = this.players.get(playerId);
+        socket.on('playerDisconnected', (disconnectedPlayerId) => {
+            console.log('Player disconnected:', disconnectedPlayerId);
+            if (this.players.has(disconnectedPlayerId)) {
+                const player = this.players.get(disconnectedPlayerId);
                 player.circle.destroy();
                 player.nameText.destroy();
-                this.players.delete(playerId);
+                this.players.delete(disconnectedPlayerId);
                 this.updatePlayerCount();
             }
         });
 
-        // Periodic game state sync (backup for any missed updates)
+        // Periodic game state sync
         socket.on('gameState', (allPlayers) => {
+            console.log('Received game state:', allPlayers);
             allPlayers.forEach(playerData => {
-                if (playerData.id !== playerId && this.players.has(playerData.id)) {
-                    const player = this.players.get(playerData.id);
-                    // Only update if position is significantly different (avoid jitter)
-                    const dx = Math.abs(player.circle.x - playerData.x);
-                    const dy = Math.abs(player.circle.y - playerData.y);
-                    if (dx > 10 || dy > 10) {
+                if (playerData.id !== playerId) {
+                    if (this.players.has(playerData.id)) {
+                        const player = this.players.get(playerData.id);
                         player.circle.x = playerData.x;
                         player.circle.y = playerData.y;
                     }
@@ -211,6 +215,8 @@ class GameScene extends Phaser.Scene {
     }
 
     createPlayer(id, name, color, x, y, isLocal) {
+        console.log(`Creating player: ${name} (${id}) at ${x},${y} - Local: ${isLocal}`);
+        
         const circle = this.add.circle(x, y, PLAYER_SIZE, color);
         const nameText = this.add.text(0, 0, name, {
             fontSize: '14px',
@@ -230,6 +236,8 @@ class GameScene extends Phaser.Scene {
             nameText: nameText,
             isLocal: isLocal
         });
+
+        console.log('Total players now:', this.players.size);
     }
 
     updatePlayerCount() {
@@ -259,16 +267,15 @@ class GameScene extends Phaser.Scene {
             localPlayer.circle.body.setVelocityY(speed);
         }
 
-        // Send position updates (throttled)
-        this.movementThrottle++;
-        if (this.movementThrottle >= 2) {  // Reduced from 3 to 2 for faster updates
-            if (Math.abs(oldX - localPlayer.circle.x) > 1 || Math.abs(oldY - localPlayer.circle.y) > 1) {
-                socket.emit('playerMove', {
-                    x: Math.round(localPlayer.circle.x),
-                    y: Math.round(localPlayer.circle.y)
-                });
-            }
-            this.movementThrottle = 0;
+        // Send position updates every frame if moving
+        const newX = Math.round(localPlayer.circle.x);
+        const newY = Math.round(localPlayer.circle.y);
+        
+        if (Math.abs(oldX - newX) > 0.5 || Math.abs(oldY - newY) > 0.5) {
+            socket.emit('playerMove', {
+                x: newX,
+                y: newY
+            });
         }
 
         // Update all player name positions
