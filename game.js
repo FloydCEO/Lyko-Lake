@@ -171,8 +171,14 @@ class GameScene extends Phaser.Scene {
         socket.on('playerMoved', (movement) => {
             if (this.players.has(movement.id)) {
                 const player = this.players.get(movement.id);
-                player.circle.x = movement.x;
-                player.circle.y = movement.y;
+                // Smooth interpolation
+                this.tweens.add({
+                    targets: player.circle,
+                    x: movement.x,
+                    y: movement.y,
+                    duration: 50,
+                    ease: 'Linear'
+                });
             }
         });
 
@@ -185,6 +191,22 @@ class GameScene extends Phaser.Scene {
                 this.players.delete(playerId);
                 this.updatePlayerCount();
             }
+        });
+
+        // Periodic game state sync (backup for any missed updates)
+        socket.on('gameState', (allPlayers) => {
+            allPlayers.forEach(playerData => {
+                if (playerData.id !== playerId && this.players.has(playerData.id)) {
+                    const player = this.players.get(playerData.id);
+                    // Only update if position is significantly different (avoid jitter)
+                    const dx = Math.abs(player.circle.x - playerData.x);
+                    const dy = Math.abs(player.circle.y - playerData.y);
+                    if (dx > 10 || dy > 10) {
+                        player.circle.x = playerData.x;
+                        player.circle.y = playerData.y;
+                    }
+                }
+            });
         });
     }
 
@@ -239,11 +261,11 @@ class GameScene extends Phaser.Scene {
 
         // Send position updates (throttled)
         this.movementThrottle++;
-        if (this.movementThrottle >= 3) {
-            if (oldX !== localPlayer.circle.x || oldY !== localPlayer.circle.y) {
+        if (this.movementThrottle >= 2) {  // Reduced from 3 to 2 for faster updates
+            if (Math.abs(oldX - localPlayer.circle.x) > 1 || Math.abs(oldY - localPlayer.circle.y) > 1) {
                 socket.emit('playerMove', {
-                    x: localPlayer.circle.x,
-                    y: localPlayer.circle.y
+                    x: Math.round(localPlayer.circle.x),
+                    y: Math.round(localPlayer.circle.y)
                 });
             }
             this.movementThrottle = 0;
