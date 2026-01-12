@@ -15,6 +15,14 @@ app.use(express.static(__dirname));
 // Game state
 const players = new Map();
 
+// Send full state updates periodically
+setInterval(() => {
+    if (players.size > 0) {
+        const allPlayers = Array.from(players.values());
+        io.emit('gameState', allPlayers);
+    }
+}, 1000); // Every second, send full game state
+
 // Socket.io connection handling
 io.on('connection', (socket) => {
     console.log(`New player connected: ${socket.id}`);
@@ -44,8 +52,9 @@ io.on('connection', (socket) => {
             const player = players.get(socket.id);
             player.x = movement.x;
             player.y = movement.y;
+            player.lastUpdate = Date.now();
 
-            // Broadcast to all other players
+            // Broadcast to all other players immediately
             socket.broadcast.emit('playerMoved', {
                 id: socket.id,
                 x: movement.x,
