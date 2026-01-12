@@ -19,31 +19,40 @@ const players = new Map();
 setInterval(() => {
     if (players.size > 0) {
         const allPlayers = Array.from(players.values());
+        console.log(`Broadcasting game state to ${players.size} players`);
         io.emit('gameState', allPlayers);
     }
-}, 1000); // Every second, send full game state
+}, 1000);
 
 // Socket.io connection handling
 io.on('connection', (socket) => {
-    console.log(`New player connected: ${socket.id}`);
+    console.log(`\n[CONNECTION] New player connected: ${socket.id}`);
+    console.log(`[INFO] Total connections: ${io.engine.clientsCount}`);
 
     // Handle new player
     socket.on('playerJoin', (playerData) => {
+        console.log(`[JOIN] Player joining:`, playerData);
+        
         players.set(socket.id, {
             id: socket.id,
             name: playerData.name,
             color: playerData.color,
             x: playerData.x,
-            y: playerData.y
+            y: playerData.y,
+            lastUpdate: Date.now()
         });
 
+        console.log(`[JOIN] Player ${playerData.name} added to game`);
+        console.log(`[INFO] Total players in game: ${players.size}`);
+
         // Send current players to new player
-        socket.emit('currentPlayers', Array.from(players.values()));
+        const currentPlayers = Array.from(players.values());
+        console.log(`[SYNC] Sending ${currentPlayers.length} players to new player`);
+        socket.emit('currentPlayers', currentPlayers);
 
         // Notify all other players about new player
+        console.log(`[BROADCAST] Notifying other players about ${playerData.name}`);
         socket.broadcast.emit('newPlayer', players.get(socket.id));
-
-        console.log(`Player joined: ${playerData.name} (Total: ${players.size})`);
     });
 
     // Handle player movement
@@ -54,7 +63,7 @@ io.on('connection', (socket) => {
             player.y = movement.y;
             player.lastUpdate = Date.now();
 
-            // Broadcast to all other players immediately
+            // Broadcast to all other players
             socket.broadcast.emit('playerMoved', {
                 id: socket.id,
                 x: movement.x,
@@ -67,8 +76,9 @@ io.on('connection', (socket) => {
     socket.on('disconnect', () => {
         if (players.has(socket.id)) {
             const player = players.get(socket.id);
-            console.log(`Player disconnected: ${player.name} (Remaining: ${players.size - 1})`);
+            console.log(`\n[DISCONNECT] Player left: ${player.name}`);
             players.delete(socket.id);
+            console.log(`[INFO] Remaining players: ${players.size}`);
             
             // Notify all players
             io.emit('playerDisconnected', socket.id);
@@ -77,6 +87,9 @@ io.on('connection', (socket) => {
 });
 
 server.listen(PORT, () => {
-    console.log(`🎮 Lyko Lake Server running on port ${PORT}`);
-    console.log(`🌐 Visit http://localhost:${PORT} to play`);
+    console.log(`\n========================================`);
+    console.log(`🎮 Lyko Lake Server running`);
+    console.log(`🌐 Local: http://localhost:${PORT}`);
+    console.log(`📡 Network: http://YOUR_IP:${PORT}`);
+    console.log(`========================================\n`);
 });
