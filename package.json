@@ -1,0 +1,24 @@
+{
+  "name": "itslyko.space",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/FloydCEO/Lyko-Lake.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/FloydCEO/Lyko-Lake/issues"
+  },
+  "homepage": "https://github.com/FloydCEO/Lyko-Lake#readme",
+  "dependencies": {
+    "phaser": "^3.90.0"
+  }
+}
