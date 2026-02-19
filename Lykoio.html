@@ -14,7 +14,6 @@ html,body{width:100%;height:100%;background:#07080f;overflow:hidden;
   position:fixed;inset:0;width:100%;height:100%;border:none;
   opacity:0;transition:opacity .5s;z-index:1
 }
-
 #overlay{
   position:fixed;inset:0;background:#07080f;z-index:10;
   display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;
@@ -57,31 +56,14 @@ html,body{width:100%;height:100%;background:#07080f;overflow:hidden;
 .btn-retry:hover{border-color:#00e5ff;color:#00e5ff}
 .btn-offline{border:1px solid #1e2240;color:#5a6a90}
 .btn-offline:hover{border-color:#f5a623;color:#f5a623}
-.btn-offline:disabled{opacity:.3;cursor:not-allowed;border-color:#1e2240;color:#5a6a90}
 
 #errDetail{font-size:9px;letter-spacing:1px;color:#2a3050;margin-top:8px;max-width:340px;
   line-height:1.9;display:none;text-align:center}
 #errDetail.show{display:block}
-
-/* Offline "coming soon" popup */
-#offlinePopup{
-  position:fixed;inset:0;background:rgba(7,8,15,.92);z-index:20;
-  display:none;flex-direction:column;align-items:center;justify-content:center;gap:14px}
-#offlinePopup.show{display:flex}
-.popup-box{background:#121428;border:1px solid #1e2240;padding:28px 36px;
-  max-width:340px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:12px}
-.popup-title{font-family:'Orbitron',sans-serif;font-size:13px;color:#fff;letter-spacing:2px}
-.popup-text{font-size:10px;letter-spacing:1px;color:#5a6a90;line-height:1.9}
-.popup-text b{color:#f5a623;font-weight:400}
-.popup-close{background:transparent;border:1px solid #1e2240;color:#5a6a90;
-  font-family:'DM Mono',monospace;font-size:9px;letter-spacing:3px;text-transform:uppercase;
-  padding:9px 22px;cursor:pointer;transition:all .2s;margin-top:4px}
-.popup-close:hover{border-color:#00e5ff;color:#00e5ff}
 </style>
 </head>
 <body>
 
-<!-- Loading / error overlay -->
 <div id="overlay">
   <div class="owrap"><div class="orb"></div><div class="orb"></div><div class="orb"></div></div>
   <div class="scanlines"></div>
@@ -91,26 +73,12 @@ html,body{width:100%;height:100%;background:#07080f;overflow:hidden;
     <div class="pbar" id="pbar"><div class="pfill"></div></div>
     <div class="btn-row">
       <button class="btn btn-retry"   id="retryBtn"   onclick="tryLoad()">↺ Retry</button>
-      <button class="btn btn-offline" id="offlineBtn" onclick="showOfflinePopup()">Play Offline</button>
+      <button class="btn btn-offline" id="offlineBtn" onclick="goOffline()">Play Offline</button>
     </div>
     <div id="errDetail"></div>
   </div>
 </div>
 
-<!-- Offline mode popup (coming soon) -->
-<div id="offlinePopup">
-  <div class="popup-box">
-    <div class="popup-title">OFFLINE MODE</div>
-    <div class="popup-text">
-      Offline mode is <b>coming soon</b>.<br><br>
-      For now the game requires a server connection.<br>
-      Try again later or hit Retry — the server may just be restarting.
-    </div>
-    <button class="popup-close" onclick="closeOfflinePopup()">← Go Back</button>
-  </div>
-</div>
-
-<!-- The actual game loads in here — users still see lillyko.space/Lykoio.html in URL bar -->
 <iframe
   id="gameFrame"
   src="about:blank"
@@ -119,9 +87,26 @@ html,body{width:100%;height:100%;background:#07080f;overflow:hidden;
 ></iframe>
 
 <script>
-// Your Wispbyte server IP + port
-const SERVER   = 'http://212.132.120.102:13888';
-const GAME_URL = SERVER + '/Lykoio.html';
+// ══════════════════════════════════════════════════════════════════════════════
+//  SERVER URL — Wispbyte proxies your Node server through HTTPS via the
+//  Custom Subdomains feature. You've added lillyko.space there (ACTIVE).
+//
+//  BUT: lillyko.space root is also your GitHub Pages site, which causes a
+//  conflict. The cleanest fix:
+//
+//  Option A (recommended): In Wispbyte Custom Subdomains, click "+ Add Subdomain"
+//  and add "game.lillyko.space". Then add an A record in Cloudflare DNS:
+//    Name: game   →   IP: 212.132.120.102
+//  Then change SERVER below to 'https://game.lillyko.space'
+//
+//  Option B (quick test): If lillyko.space is currently routing to your
+//  Wispbyte server (not GitHub Pages), just use 'https://lillyko.space'
+//  Change whichever one works for you below:
+// ══════════════════════════════════════════════════════════════════════════════
+const SERVER = 'https://game.lillyko.space'; // ← change this if needed
+
+const GAME_URL    = SERVER + '/Lykoio.html';
+const OFFLINE_URL = 'Lykoio_offline.html';
 
 const frame      = document.getElementById('gameFrame');
 const overlay    = document.getElementById('overlay');
@@ -149,54 +134,64 @@ function setError(msg, detail) {
   pbar.classList.add('hidden');
   retryBtn.classList.add('show');
   offlineBtn.classList.add('show');
-  if (detail) {
-    errDetail.textContent = detail;
-    errDetail.classList.add('show');
-  }
+  if (detail) { errDetail.textContent = detail; errDetail.classList.add('show'); }
+}
+
+function showGame() {
+  overlay.classList.add('fade');
+  frame.style.opacity = '1';
+  setTimeout(() => overlay.style.display = 'none', 450);
 }
 
 function tryLoad() {
   loadAttempt++;
   setLoading(loadAttempt > 1 ? 'Retrying...' : 'Connecting to server...');
 
-  const controller = new AbortController();
-  const killTimer  = setTimeout(() => controller.abort(), 7000);
+  // Use an image probe instead of fetch — avoids mixed content issues entirely
+  // because image loads don't trigger mixed content blocks the same way
+  const img = new Image();
+  const timer = setTimeout(() => {
+    img.src = ''; // cancel
+    setError('✗ Server down', 'Connection timed out. Try again or play offline.');
+  }, 7000);
 
-  fetch(SERVER + '/socket.io/socket.io.js', {
-    method: 'HEAD',
-    mode:   'no-cors',
-    signal: controller.signal
-  })
-  .then(() => {
-    clearTimeout(killTimer);
+  img.onload = () => {
+    clearTimeout(timer);
     statusLine.textContent = '✓ Server found — loading game...';
     statusLine.className = 'ok';
     setTimeout(() => { frame.src = GAME_URL; }, 400);
-  })
-  .catch(err => {
-    clearTimeout(killTimer);
-    if (err.name === 'AbortError') {
-      setError('✗ Server down', 'Connection timed out. The server may be restarting — try again in a moment.');
+  };
+
+  img.onerror = () => {
+    // onerror fires even for valid servers that return non-image responses
+    // If the server is UP, we'll still get an error (it's not an image)
+    // but the error fires quickly. If the server is DOWN, it takes longer / times out.
+    // So we use timing: fast error = server up, slow = server down
+    const elapsed = Date.now() - startT;
+    if (elapsed < 5000) {
+      // Server responded (just not with an image) — it's up
+      clearTimeout(timer);
+      statusLine.textContent = '✓ Server found — loading game...';
+      statusLine.className = 'ok';
+      setTimeout(() => { frame.src = GAME_URL; }, 400);
     } else {
-      setError('✗ Server down', 'Could not reach the game server. Try again shortly.');
+      clearTimeout(timer);
+      setError('✗ Server down', 'Could not reach the server. Try again or play offline.');
     }
-  });
+  };
+
+  const startT = Date.now();
+  img.src = SERVER + '/favicon.ico?_=' + Date.now();
 }
 
-// Fade overlay and show game once iframe loads
 frame.addEventListener('load', () => {
   if (!frame.src || frame.src === 'about:blank') return;
-  overlay.classList.add('fade');
-  frame.style.opacity = '1';
-  setTimeout(() => overlay.style.display = 'none', 450);
+  showGame();
 });
 
-// Offline popup
-function showOfflinePopup() {
-  document.getElementById('offlinePopup').classList.add('show');
-}
-function closeOfflinePopup() {
-  document.getElementById('offlinePopup').classList.remove('show');
+function goOffline() {
+  setLoading('Loading offline mode...');
+  frame.src = OFFLINE_URL;
 }
 
 tryLoad();
