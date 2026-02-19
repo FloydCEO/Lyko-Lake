@@ -15,7 +15,7 @@
 html,body{width:100%;height:100%;background:var(--void);overflow:hidden;
   font-family:'DM Mono',monospace;color:var(--text)}
 
-/* ── shared bg ── */
+/* ── bg decoration ── */
 .owrap{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);
   width:620px;height:620px;pointer-events:none;opacity:.05;z-index:0}
 .orb{position:absolute;inset:0;border:1px solid #fff;border-radius:50%;animation:spin 40s linear infinite}
@@ -25,21 +25,19 @@ html,body{width:100%;height:100%;background:var(--void);overflow:hidden;
 .scan{position:fixed;inset:0;pointer-events:none;z-index:0;
   background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,.025) 2px,rgba(0,0,0,.025) 4px)}
 
-/* ── LAUNCHER SCREENS ── */
-.lscreen{position:fixed;inset:0;display:flex;flex-direction:column;
+/* ── launcher screens ── */
+.LS{position:fixed;inset:0;display:flex;flex-direction:column;
   align-items:center;justify-content:center;transition:opacity .35s;z-index:20}
-.lscreen.hide{opacity:0;pointer-events:none}
-.lscreen.off{display:none}
+.LS.hide{opacity:0;pointer-events:none}
+.LS.off{display:none}
 .inner{position:relative;z-index:2;display:flex;flex-direction:column;align-items:center;text-align:center}
 
-.logo{font-family:'Orbitron',sans-serif;font-size:clamp(50px,9vw,88px);
-  color:#fff;letter-spacing:2px;line-height:1}
+.logo{font-family:'Orbitron',sans-serif;font-size:clamp(50px,9vw,88px);color:#fff;letter-spacing:2px;line-height:1}
 .logo .io{color:var(--cyan)}
 .logo.sm{font-size:clamp(28px,4vw,44px)}
 .eyebrow{font-size:9px;letter-spacing:4px;color:var(--dim);margin-top:6px;margin-bottom:22px}
 .divider{width:120px;height:1px;background:linear-gradient(90deg,transparent,var(--cyan),transparent);margin-bottom:26px}
 
-/* name screen inputs */
 #nameIn{background:var(--surf);border:1px solid var(--bord);color:var(--text);
   font-family:'DM Mono',monospace;font-size:15px;padding:13px 22px;width:280px;
   outline:none;letter-spacing:2px;text-align:center;transition:border-color .3s;margin-bottom:12px}
@@ -47,11 +45,12 @@ html,body{width:100%;height:100%;background:var(--void);overflow:hidden;
 #nameIn::placeholder{color:#2a3a60}
 .btn-p{background:var(--cyan);color:var(--void);font-family:'Orbitron',sans-serif;
   font-size:11px;font-weight:700;letter-spacing:3px;border:none;
-  padding:14px 48px;cursor:pointer;transition:background .2s,transform .1s;margin-bottom:10px;display:block;width:280px}
+  padding:14px 0;cursor:pointer;transition:background .2s,transform .1s;
+  margin-bottom:10px;width:280px;display:block}
 .btn-p:hover{background:#fff;transform:scale(1.03)}
 .btn-g{background:transparent;border:1px solid var(--bord);color:var(--dim);
-  font-family:'DM Mono',monospace;font-size:9px;letter-spacing:3px;padding:9px 24px;
-  cursor:pointer;transition:all .2s;margin-bottom:24px;display:block;width:280px}
+  font-family:'DM Mono',monospace;font-size:9px;letter-spacing:3px;padding:9px 0;
+  cursor:pointer;transition:all .2s;margin-bottom:24px;width:280px;display:block}
 .btn-g:hover{border-color:var(--gold);color:var(--gold)}
 .hints{font-size:9px;letter-spacing:1px;color:#3a4a68;line-height:2.4}
 .hints b{color:var(--gold);font-weight:400}
@@ -59,8 +58,8 @@ html,body{width:100%;height:100%;background:var(--void);overflow:hidden;
 /* server list */
 .srv-sub{font-size:9px;letter-spacing:2px;color:var(--dim);margin-top:10px;margin-bottom:24px}
 .srv-sub span{color:var(--cyan)}
-.srvlist{display:flex;flex-direction:column;gap:10px;width:330px}
-.srv{background:#0d1020;border:1px solid var(--bord);padding:16px 18px;
+.srvlist{display:flex;flex-direction:column;gap:10px;width:340px}
+.srv{background:#0d1020;border:1px solid var(--bord);padding:15px 18px;
   cursor:pointer;transition:border-color .2s,background .2s;
   display:flex;align-items:center;gap:14px;position:relative;text-align:left}
 .srv:hover:not(.dead){border-color:var(--cyan);background:#111626}
@@ -70,10 +69,15 @@ html,body{width:100%;height:100%;background:var(--void);overflow:hidden;
 .dot.off{background:#2a3050}
 .srvname{font-family:'Orbitron',sans-serif;font-size:9px;letter-spacing:2px;color:#fff}
 .srvdesc{font-size:8px;letter-spacing:1px;color:var(--dim);margin-top:3px}
-.stag{position:absolute;right:14px;font-size:7px;letter-spacing:2px;
-  padding:3px 8px;border:1px solid;text-transform:uppercase}
+.stag{position:absolute;right:14px;top:50%;transform:translateY(-50%);
+  font-size:7px;letter-spacing:2px;padding:3px 8px;border:1px solid;text-transform:uppercase}
 .stag.live{color:var(--green);border-color:#39ff8f33;background:#39ff8f08}
 .stag.soon{color:var(--gold);border-color:#f5a62333;background:#f5a62308}
+/* player count badge on server card */
+.srv-count{position:absolute;right:14px;bottom:10px;font-size:7px;
+  letter-spacing:1px;color:var(--dim)}
+.srv-count.fetching{color:#2a3a60}
+.srv-count.live-count{color:var(--cyan)}
 .btn-back{background:none;border:none;font-family:'DM Mono',monospace;
   font-size:8px;letter-spacing:2px;color:#2a3a60;cursor:pointer;
   padding:8px;margin-top:14px;transition:color .2s}
@@ -96,18 +100,13 @@ html,body{width:100%;height:100%;background:var(--void);overflow:hidden;
 .lbtn-r{border:1px solid var(--bord);color:var(--dim)}.lbtn-r:hover{border-color:var(--cyan);color:var(--cyan)}
 .lbtn-b{border:1px solid var(--bord);color:var(--dim)}.lbtn-b:hover{border-color:var(--gold);color:var(--gold)}
 
-/* ══════════════════════════════════════════════
-   GAME UI (hidden until game starts)
-══════════════════════════════════════════════ */
-#gameUI{display:none}
-
+/* ── GAME UI ── */
+#gameWrap{position:fixed;inset:0;display:none;z-index:5}
 #offlineBadge{position:fixed;top:12px;right:12px;z-index:200;display:none;
   background:rgba(245,166,35,.12);border:1px solid var(--gold);
   padding:5px 12px;font-size:9px;letter-spacing:2px;color:var(--gold)}
-
 canvas{display:block;position:fixed;inset:0;z-index:0}
-
-#hud{position:fixed;inset:0;pointer-events:none;z-index:10;display:none}
+#hud{position:fixed;inset:0;pointer-events:none;z-index:10}
 #stats{position:absolute;top:14px;left:14px;background:rgba(7,8,15,.9);
   border:1px solid var(--bord);padding:14px 18px;min-width:205px}
 #sName{font-family:'Orbitron',sans-serif;font-size:12px;color:#fff;letter-spacing:2px;margin-bottom:10px}
@@ -121,8 +120,7 @@ canvas{display:block;position:fixed;inset:0;z-index:0}
 #sKills{font-size:9px;color:var(--dim);letter-spacing:1px;margin-top:3px}
 #mm{position:absolute;top:14px;right:14px;width:158px;height:158px;
   background:rgba(7,8,15,.9);border:1px solid var(--bord);overflow:hidden}
-#invBar{position:absolute;bottom:14px;left:50%;transform:translateX(-50%);
-  display:flex;gap:5px;pointer-events:all}
+#invBar{position:absolute;bottom:14px;left:50%;transform:translateX(-50%);display:flex;gap:5px;pointer-events:all}
 .isl{width:52px;height:52px;background:rgba(7,8,15,.92);border:1px solid var(--bord);
   display:flex;flex-direction:column;align-items:center;justify-content:center;
   cursor:pointer;position:relative;transition:border-color .2s;font-size:22px}
@@ -140,12 +138,10 @@ canvas{display:block;position:fixed;inset:0;z-index:0}
 .kfe{background:rgba(7,8,15,.9);border:1px solid var(--bord);padding:5px 14px;
   font-size:10px;letter-spacing:2px;animation:kfi .3s both,kfo .4s 3.6s both}
 .kk{color:var(--cyan)}.kv{color:var(--red)}
-@keyframes kfi{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:translateY(0)}}
+@keyframes kfi{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:none}}
 @keyframes kfo{to{opacity:0}}
-#ctrl{position:absolute;bottom:80px;left:14px;font-size:9px;letter-spacing:1px;
-  color:var(--dim);line-height:2;pointer-events:none}
+#ctrl{position:absolute;bottom:80px;left:14px;font-size:9px;letter-spacing:1px;color:var(--dim);line-height:2;pointer-events:none}
 #ctrl span{color:var(--text)}
-
 #npcBox{position:fixed;bottom:86px;left:50%;transform:translateX(-50%);
   background:rgba(7,8,15,.97);border:1px solid rgba(0,229,255,.3);
   padding:16px 22px;max-width:420px;width:90%;z-index:30;display:none;
@@ -156,11 +152,9 @@ canvas{display:block;position:fixed;inset:0;z-index:0}
 #npcBox .nclose{margin-top:10px;font-size:9px;letter-spacing:2px;color:var(--dim);text-align:right}
 #npcBox .nclose span{color:var(--cyan);cursor:pointer}
 #npcBox .nclose span:hover{color:#fff}
-
 #interactHint{position:fixed;bottom:155px;left:50%;transform:translateX(-50%);
   font-size:9px;letter-spacing:2px;color:var(--dim);pointer-events:none;display:none;z-index:20;
   background:rgba(7,8,15,.85);border:1px solid var(--bord);padding:5px 14px}
-
 #death{position:fixed;inset:0;background:rgba(7,8,15,.93);z-index:50;
   display:none;flex-direction:column;align-items:center;justify-content:center;gap:18px;
   font-family:'Orbitron',sans-serif}
@@ -173,7 +167,6 @@ canvas{display:block;position:fixed;inset:0;z-index:0}
   font-size:12px;font-weight:700;letter-spacing:3px;border:none;
   padding:14px 40px;cursor:pointer;margin-top:14px;transition:background .2s}
 #rbtn:hover{background:#fff;color:var(--void)}
-
 #dcScreen{position:fixed;inset:0;background:rgba(7,8,15,.96);z-index:60;
   display:none;flex-direction:column;align-items:center;justify-content:center;gap:16px;
   font-family:'Orbitron',sans-serif}
@@ -182,31 +175,32 @@ canvas{display:block;position:fixed;inset:0;z-index:0}
 .dcbtn{background:var(--cyan);color:var(--void);font-family:'Orbitron',sans-serif;
   font-size:11px;font-weight:700;letter-spacing:2px;border:none;
   padding:10px 28px;cursor:pointer;margin-top:8px}
-
 #lvlFlash{position:fixed;inset:0;pointer-events:none;z-index:40;
   display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity .2s}
 #lvlFlash.on{opacity:1}
 #lvlFlash span{font-family:'Orbitron',sans-serif;font-size:58px;font-weight:900;
   color:var(--gold);text-shadow:0 0 60px var(--gold)}
-
 #islBanner{position:fixed;inset:0;background:rgba(7,8,15,.93);z-index:48;
   display:none;flex-direction:column;align-items:center;justify-content:center;gap:16px;
   font-family:'Orbitron',sans-serif}
 #islBanner h2{font-size:36px;color:var(--gold);letter-spacing:3px}
 #islBanner p{font-size:11px;color:var(--dim);letter-spacing:2px;text-align:center;line-height:1.9}
 .islbtn{background:var(--gold);color:var(--void);font-family:'Orbitron',sans-serif;
-  font-size:11px;font-weight:700;letter-spacing:2px;border:none;
-  padding:10px 28px;cursor:pointer;margin-top:8px}
+  font-size:11px;font-weight:700;letter-spacing:2px;border:none;padding:10px 28px;cursor:pointer;margin-top:8px}
+#srvFullScreen{position:fixed;inset:0;background:rgba(7,8,15,.96);z-index:60;
+  display:none;flex-direction:column;align-items:center;justify-content:center;gap:16px;
+  font-family:'Orbitron',sans-serif}
+#srvFullScreen h2{font-size:28px;color:var(--red);letter-spacing:3px}
+#srvFullScreen p{font-size:11px;color:var(--dim);letter-spacing:2px}
 </style>
 </head>
 <body>
 
-<!-- shared bg -->
 <div class="owrap"><div class="orb"></div><div class="orb"></div><div class="orb"></div></div>
 <div class="scan"></div>
 
-<!-- ══ SCREEN 1: Name Entry ══ -->
-<div class="lscreen" id="S1">
+<!-- ══ S1: Name ══ -->
+<div class="LS" id="S1">
   <div class="inner" style="gap:0">
     <div class="logo">LYKO<span class="io">IO</span></div>
     <div class="eyebrow">Welcome to LilLyko.space</div>
@@ -222,43 +216,50 @@ canvas{display:block;position:fixed;inset:0;z-index:0}
   </div>
 </div>
 
-<!-- ══ SCREEN 2: Server Picker ══ -->
-<div class="lscreen hide off" id="S2">
+<!-- ══ S2: Server Picker ══ -->
+<div class="LS hide off" id="S2">
   <div class="inner" style="gap:0">
     <div class="logo sm">SELECT SERVER</div>
     <div class="srv-sub">Choose your island, <span id="greetName"></span></div>
     <div class="srvlist">
-      <div class="srv" onclick="joinServer()">
+
+      <div class="srv" id="srvCard1" onclick="joinServer()">
         <div class="dot on"></div>
-        <div>
+        <div style="flex:1;min-width:0;padding-right:80px">
           <div class="srvname">ISLAND 1 — LYKO REALM</div>
           <div class="srvdesc">Roguelike survival · All players welcome</div>
         </div>
-        <div class="stag live">LIVE</div>
+        <div class="stag live" style="top:10px;bottom:auto;transform:none">LIVE</div>
+        <div class="srv-count fetching" id="srv1Count">fetching...</div>
       </div>
+
       <div class="srv dead">
         <div class="dot off"></div>
-        <div>
+        <div style="flex:1;min-width:0;padding-right:80px">
           <div class="srvname">ISLAND 2 — THE VOID</div>
           <div class="srvdesc">Harder enemies · Higher loot · PvP focused</div>
         </div>
-        <div class="stag soon">SOON</div>
+        <div class="stag soon" style="top:10px;bottom:auto;transform:none">SOON</div>
+        <div class="srv-count">— / 20</div>
       </div>
+
       <div class="srv dead">
         <div class="dot off"></div>
-        <div>
+        <div style="flex:1;min-width:0;padding-right:80px">
           <div class="srvname">ISLAND 3 — ???</div>
           <div class="srvdesc">Unknown territory</div>
         </div>
-        <div class="stag soon">SOON</div>
+        <div class="stag soon" style="top:10px;bottom:auto;transform:none">SOON</div>
+        <div class="srv-count">— / 20</div>
       </div>
+
     </div>
     <button class="btn-back" onclick="goTo('S1')">← Back</button>
   </div>
 </div>
 
-<!-- ══ SCREEN 3: Connecting ══ -->
-<div class="lscreen hide off" id="S3">
+<!-- ══ S3: Connecting ══ -->
+<div class="LS hide off" id="S3">
   <div class="inner" style="gap:0">
     <div class="logo sm">LYKO<span class="io">IO</span></div>
     <div id="loadMsg">Connecting to server...</div>
@@ -270,8 +271,8 @@ canvas{display:block;position:fixed;inset:0;z-index:0}
   </div>
 </div>
 
-<!-- ══ GAME UI (shown after game starts) ══ -->
-<div id="gameUI">
+<!-- ══ GAME WRAP ══ -->
+<div id="gameWrap">
   <div id="offlineBadge">⚡ OFFLINE MODE</div>
   <canvas id="c"></canvas>
   <div id="hud">
@@ -287,9 +288,7 @@ canvas{display:block;position:fixed;inset:0;z-index:0}
     <div id="kf"></div>
     <div id="ctrl">
       <span>WASD</span> – Move<br>
-      <span>Click</span> enemy – Attack<br>
-      <span>Click</span> item – Use/Equip<br>
-      <span>Right-click</span> – Drop<br>
+      <span>Click</span> – Attack<br>
       <span>E</span> – Interact
     </div>
   </div>
@@ -297,7 +296,7 @@ canvas{display:block;position:fixed;inset:0;z-index:0}
   <div id="interactHint">[ E ] Talk to LYKO</div>
   <div id="npcBox">
     <div class="nname">✦ LYKO</div>
-    <div class="ntext" id="npcText">Hello!</div>
+    <div class="ntext" id="npcText"></div>
     <div class="nclose"><span id="npcClose">[ E ] Close</span></div>
   </div>
   <div id="death">
@@ -315,6 +314,11 @@ canvas{display:block;position:fixed;inset:0;z-index:0}
     <p>Lost connection to the server.</p>
     <button class="dcbtn" onclick="location.reload()">RECONNECT</button>
   </div>
+  <div id="srvFullScreen">
+    <h2>SERVER FULL</h2>
+    <p>Island 1 is at capacity (20/20).<br>Try again in a moment.</p>
+    <button class="dcbtn" onclick="location.reload()">← Back</button>
+  </div>
   <div id="islBanner">
     <h2>✦ ISLAND UNLOCKED ✦</h2>
     <p>You've reached <b style="color:var(--gold)">MAX LEVEL</b> on Island 1.<br>Island 2 is coming soon.</p>
@@ -326,54 +330,74 @@ canvas{display:block;position:fixed;inset:0;z-index:0}
 <script>
 'use strict';
 
-// ╔══════════════════════════════════════════════════════════╗
-// ║  SERVER CONFIG                                           ║
-// ║  game.lillyko.space DNS resolves but Wispbyte's HTTPS   ║
-// ║  proxy may not be active yet for that subdomain.        ║
-// ║  We try game.lillyko.space first, fall back to nothing. ║
-// ║  Socket.IO is loaded dynamically from the server itself.║
-// ╚══════════════════════════════════════════════════════════╝
-const SERVER_URL = 'https://game.lillyko.space';
+// ══════════════════════════════════════════════════════════════
+//  SERVER — change this if your domain ever changes
+//  game.lillyko.space MUST be proxied by Wispbyte to port 3000
+//  See README note below the script
+// ══════════════════════════════════════════════════════════════
+const SERVER = 'https://game.lillyko.space';
 
-// ── LAUNCHER ──────────────────────────────────────────────────────────────────
+// ── launcher state ────────────────────────────────────────────
 let playerName = '';
-let attempt    = 0;
 let isOffline  = false;
+let attempt    = 0;
 
+// ── screen helpers ────────────────────────────────────────────
 function goTo(id) {
   ['S1','S2','S3'].forEach(s => {
     const el = document.getElementById(s);
     if (s === id) { el.classList.remove('hide','off'); }
     else {
       el.classList.add('hide');
-      setTimeout(() => { if (el.classList.contains('hide')) el.classList.add('off'); }, 380);
+      setTimeout(()=>{ if(el.classList.contains('hide')) el.classList.add('off'); }, 400);
     }
   });
 }
-function hideAllLauncher() {
+function hideLauncher() {
   ['S1','S2','S3'].forEach(s => {
     const el = document.getElementById(s);
     el.classList.add('hide');
-    setTimeout(() => el.classList.add('off'), 400);
+    setTimeout(()=>el.classList.add('off'), 420);
   });
 }
 
+// ── S1: name entry ────────────────────────────────────────────
 document.getElementById('playBtn').onclick = () => {
   playerName = document.getElementById('nameIn').value.trim() || 'Wanderer';
   document.getElementById('greetName').textContent = playerName;
   goTo('S2');
+  fetchPlayerCount(); // fetch count when server screen opens
 };
 document.getElementById('nameIn').onkeydown = e => {
   if (e.key === 'Enter') document.getElementById('playBtn').click();
 };
 document.getElementById('offlineBtn').onclick = () => {
   playerName = document.getElementById('nameIn').value.trim() || 'Wanderer';
-  isOffline  = true;
+  isOffline = true;
   goTo('S3');
   setMsg('Loading offline mode...');
   setTimeout(() => launchGame(), 400);
 };
 
+// ── S2: fetch live player count from server ───────────────────
+function fetchPlayerCount() {
+  const el = document.getElementById('srv1Count');
+  el.textContent = 'fetching...';
+  el.className = 'srv-count fetching';
+
+  fetch(SERVER + '/api/status', { signal: AbortSignal.timeout(5000) })
+    .then(r => r.json())
+    .then(d => {
+      el.textContent = `${d.players} / ${d.max} players`;
+      el.className = 'srv-count live-count';
+    })
+    .catch(() => {
+      el.textContent = '? / 20 players';
+      el.className = 'srv-count';
+    });
+}
+
+// ── S2: join server ───────────────────────────────────────────
 function joinServer() {
   isOffline = false;
   attempt   = 0;
@@ -381,7 +405,7 @@ function joinServer() {
   probe();
 }
 
-// ── CONNECT SCREEN ────────────────────────────────────────────────────────────
+// ── S3: connect logic ─────────────────────────────────────────
 function setMsg(msg) {
   const el = document.getElementById('loadMsg');
   el.textContent = msg;
@@ -390,70 +414,43 @@ function setMsg(msg) {
   document.getElementById('retryBtn').classList.toggle('show', msg.includes('✗'));
   document.getElementById('backBtn2').classList.toggle('show', msg.includes('✗'));
 }
-
-function retryConn() {
-  attempt++;
-  setMsg('Retrying...');
-  setTimeout(probe, 300);
-}
+function retryConn() { attempt++; setMsg('Retrying...'); setTimeout(probe, 300); }
 
 function probe() {
   setMsg(attempt > 0 ? 'Retrying...' : 'Connecting to server...');
-  const t0  = Date.now();
-  const TL  = 6000;
+  const t0 = Date.now(), TL = 6000;
   const img = new Image();
 
-  const ok = () => {
-    clearTimeout(timer);
-    setMsg('✓ Server found — loading game...');
-    setTimeout(launchGame, 500);
-  };
-
-  const timer = setTimeout(() => {
-    img.src = '';
-    setMsg('✗ Server timed out — check connection or retry');
-  }, TL);
-
-  img.onload  = () => ok();
-  img.onerror = () => {
-    // Fast error = server responded (just not an image) = it's reachable
-    if (Date.now() - t0 < TL - 1000) ok();
-    else { clearTimeout(timer); setMsg('✗ Server unreachable — retry or play offline'); }
-  };
-  img.src = SERVER_URL + '/favicon.ico?t=' + Date.now();
+  const ok = () => { clearTimeout(timer); setMsg('✓ Server found — loading game...'); setTimeout(launchGame, 500); };
+  const timer = setTimeout(() => { img.src=''; setMsg('✗ Server timed out — retry or play offline'); }, TL);
+  img.onload  = ok;
+  img.onerror = () => { Date.now()-t0 < TL-800 ? ok() : (clearTimeout(timer), setMsg('✗ Server unreachable — retry or play offline')); };
+  img.src = SERVER + '/favicon.ico?t=' + Date.now();
 }
 
-// ── LAUNCH GAME ───────────────────────────────────────────────────────────────
+// ── launch game ───────────────────────────────────────────────
 function launchGame() {
-  hideAllLauncher();
-  document.getElementById('gameUI').style.display = 'block';
-  document.getElementById('hud').style.display    = 'block';
-  if (isOffline) {
-    document.getElementById('offlineBadge').style.display = 'block';
-  }
+  hideLauncher();
+  const gw = document.getElementById('gameWrap');
+  gw.style.display = 'block';
+  if (isOffline) document.getElementById('offlineBadge').style.display = 'block';
   initCanvas();
-  if (isOffline) {
-    startOffline(playerName);
-  } else {
-    // Load socket.io from the server, then connect
-    loadSocketIO(() => connectOnline(playerName));
-  }
   requestAnimationFrame(renderLoop);
+  if (isOffline) startOffline(playerName);
+  else loadSocketIO(() => connectOnline(playerName));
 }
 
 function loadSocketIO(cb) {
-  const s  = document.createElement('script');
-  s.src    = SERVER_URL + '/socket.io/socket.io.js';
+  const s = document.createElement('script');
+  s.src = SERVER + '/socket.io/socket.io.js';
   s.onload  = cb;
-  s.onerror = () => {
-    document.getElementById('dcScreen').style.display = 'flex';
-  };
+  s.onerror = () => { document.getElementById('dcScreen').style.display='flex'; };
   document.head.appendChild(s);
 }
 
-// ╔══════════════════════════════════════════════════════════╗
-// ║  GAME ENGINE                                             ║
-// ╚══════════════════════════════════════════════════════════╝
+// ══════════════════════════════════════════════════════════════
+//  GAME ENGINE
+// ══════════════════════════════════════════════════════════════
 const ITEMS = {
   stick:       {id:'stick',       name:'Stick',       type:'weapon',dmg:8,  icon:'🪵',rarity:'common'  },
   stone_axe:   {id:'stone_axe',   name:'Stone Axe',   type:'weapon',dmg:18, icon:'🪓',rarity:'common'  },
@@ -473,12 +470,17 @@ const ANIMAL_TPLS = [
   {kind:'bear',  name:'Bear',  maxHp:220,dmg:30,xp:95,speed:1.0,r:26,aggro:true, icon:'🐻',loot:['meat','chain_vest']  },
   {kind:'spider',name:'Spider',maxHp:45, dmg:9, xp:22,speed:1.7,r:14,aggro:true, icon:'🕷️',loot:['apple','stick']      },
 ];
-const XP_TBL  = [0,100,250,450,700,1050,1500,2100,2900,4000,5500];
-const MAX_LVL = 10;
-const MAP_W=3200, MAP_H=3200;
-const LOBBY_X=MAP_W/2, LOBBY_Y=MAP_H/2;
-const LOBBY_W=220,     LOBBY_H=180;
-const LYKO_X=LOBBY_X,  LYKO_Y=LOBBY_Y-20;
+const XP_TBL=[0,100,250,450,700,1050,1500,2100,2900,4000,5500];
+const MAX_LVL=10;
+const MAP_W=3200,MAP_H=3200;
+const LOBBY_CX=MAP_W/2,LOBBY_CY=MAP_H/2;
+const LOBBY_W=220,LOBBY_H=180;
+// Animal exclusion zone (slightly larger than visible lobby)
+const LOBBY_EXCL_LEFT  = LOBBY_CX - LOBBY_W/2 - 55;
+const LOBBY_EXCL_RIGHT = LOBBY_CX + LOBBY_W/2 + 55;
+const LOBBY_EXCL_TOP   = LOBBY_CY - LOBBY_H/2 - 55;
+const LOBBY_EXCL_BOTTOM= LOBBY_CY + LOBBY_H/2 + 55;
+const LYKO_X=LOBBY_CX,LYKO_Y=LOBBY_CY-20;
 const LYKO_DIST=80;
 const TILE=80;
 
@@ -487,125 +489,138 @@ const dist = (a,b) => Math.hypot(a.x-b.x,a.y-b.y);
 const clamp= (v,a,b) => Math.max(a,Math.min(b,v));
 let _uid=0; const uid=()=>'u'+(++_uid);
 
-// Canvas
-let canvas, ctx, mmc, mmx;
-function initCanvas(){
-  canvas = document.getElementById('c');
-  ctx    = canvas.getContext('2d');
-  mmc    = document.getElementById('mmc');
-  mmx    = mmc.getContext('2d');
-  canvas.width=innerWidth; canvas.height=innerHeight;
-  addEventListener('resize',()=>{ canvas.width=innerWidth; canvas.height=innerHeight; });
+function inLobby(x,y){
+  return x>LOBBY_EXCL_LEFT && x<LOBBY_EXCL_RIGHT && y>LOBBY_EXCL_TOP && y<LOBBY_EXCL_BOTTOM;
+}
+function safePosOutsideLobby(margin=100){
+  let x,y,t=0;
+  do{ x=rnd(margin,MAP_W-margin); y=rnd(margin,MAP_H-margin); t++; }
+  while(inLobby(x,y)&&t<60);
+  return {x,y};
+}
+// Spawn position — inside lobby
+function lobbySpawn(){
+  return {
+    x: LOBBY_CX + (Math.random()-.5)*90,
+    y: LOBBY_CY + 15 + Math.random()*35
+  };
 }
 
-// Game state
-let socket=null, myId='offline_player';
-let me=null, mapData=null, itemDefs=ITEMS;
-let worldPlayers={}, worldAnimals={}, worldDrops={};
-let hits=[], floats=[];
-let keys={}, camX=0, camY=0;
-let lykoOpen=false, frameT=0;
-let lykoVisit=0;
-const grassBlades = Array.from({length:500},()=>({
-  x:Math.random()*MAP_W, y:Math.random()*MAP_H,
-  tall:Math.random()>.65, seed:Math.random()
+let canvas,ctx,mmc,mmx;
+function initCanvas(){
+  canvas=document.getElementById('c'); ctx=canvas.getContext('2d');
+  mmc=document.getElementById('mmc'); mmx=mmc.getContext('2d');
+  canvas.width=innerWidth; canvas.height=innerHeight;
+  addEventListener('resize',()=>{canvas.width=innerWidth;canvas.height=innerHeight;});
+}
+
+let socket=null,myId='offline_player';
+let me=null,mapData=null,itemDefs=ITEMS;
+let worldPlayers={},worldAnimals={},worldDrops={};
+let hits=[],floats=[];
+let keys={},camX=0,camY=0;
+let lykoOpen=false,frameT=0,lykoVisit=0;
+
+const grassBlades=Array.from({length:500},()=>({
+  x:Math.random()*MAP_W,y:Math.random()*MAP_H,tall:Math.random()>.65,seed:Math.random()
 }));
 
-const LYKO_LINES = [
-  n=>`Hello, ${n}! Welcome to the Lobby.\nI am Lyko — guardian of this island.\nYou start with nothing. Everything you need, you must find.`,
-  n=>`Good to see you again, ${n}.\nThe wilds are dangerous — wolves and bears roam freely.\nStay sharp. The strong survive here.`,
-  n=>`${n}... You keep coming back. I respect that.\nWhispers say more islands lie beyond this one.\nReach Level 10 and see for yourself.`,
-  n=>`A word of advice, ${n} — items drop when you kill animals.\nWalk over them to pick them up automatically.\nA weapon makes all the difference.`,
+const LYKO_LINES=[
+  n=>`Hello, ${n}! Welcome to the Lobby.\nI am Lyko — guardian of this island.\nYou start with nothing here. Everything you need is out there.`,
+  n=>`Good to see you again, ${n}.\nThe wilds beyond are dangerous — wolves and bears roam freely.\nThe lobby is the only safe zone. Stay sharp out there.`,
+  n=>`${n}... You keep coming back. I respect that.\nWhispers say more islands lie beyond this one.\nReach Level 10 and you'll find a way.`,
+  n=>`A word, ${n} — animals cannot enter this lobby.\nIt's your safe haven. Use it wisely.\nItems drop when you kill creatures. Walk over them to pick up.`,
 ];
 
 function mkPlayer(name){
-  return {id:myId, name:name||'Wanderer',
-    x:LOBBY_X, y:LOBBY_Y+60, vx:0, vy:0,
-    hp:100, maxHp:100, xp:0, level:1,
-    inv:[], equipped:{weapon:null,head:null,body:null},
-    atkCd:0, dead:false, deathTimer:0,
-    kills:0, pvpKills:0};
+  const p=lobbySpawn();
+  return {id:myId,name:name||'Wanderer',x:p.x,y:p.y,vx:0,vy:0,
+    hp:100,maxHp:100,xp:0,level:1,
+    inv:[],equipped:{weapon:null,head:null,body:null},
+    atkCd:0,dead:false,kills:0,pvpKills:0};
 }
 
-// ── OFFLINE ───────────────────────────────────────────────────────────────────
-let offAnimals={}, offDrops={};
+// ── OFFLINE ───────────────────────────────────────────────────
+let offAnimals={},offDrops={};
 
 function startOffline(name){
   myId='offline';
   me=mkPlayer(name);
   worldPlayers[myId]=me;
-
-  // Build world
-  const trees=Array.from({length:90},()=>({id:uid(),x:rnd(80,MAP_W-80),y:rnd(80,MAP_H-80),r:rnd(18,34)}));
-  const rocks=Array.from({length:55},()=>({id:uid(),x:rnd(80,MAP_W-80),y:rnd(80,MAP_H-80),r:rnd(14,26)}));
+  const trees=Array.from({length:90},()=>{const p=safePosOutsideLobby(80);return{id:uid(),x:p.x,y:p.y,r:rnd(18,34)};});
+  const rocks=Array.from({length:55},()=>{const p=safePosOutsideLobby(80);return{id:uid(),x:p.x,y:p.y,r:rnd(14,26)};});
   mapData={w:MAP_W,h:MAP_H,trees,rocks};
-  for(let i=0;i<50;i++){const id=uid();offDrops[id]={id,itemId:ITEM_IDS[Math.floor(Math.random()*ITEM_IDS.length)],x:rnd(100,MAP_W-100),y:rnd(100,MAP_H-100)};}
+  for(let i=0;i<50;i++){const id=uid(),p=safePosOutsideLobby();offDrops[id]={id,itemId:ITEM_IDS[Math.floor(Math.random()*ITEM_IDS.length)],x:p.x,y:p.y};}
   for(let i=0;i<65;i++) spawnOffAnimal();
   worldAnimals=offAnimals; worldDrops=offDrops;
-
   updateHUD(); buildInv();
   setTimeout(()=>showLyko(name),900);
-
   let last=Date.now();
-  setInterval(()=>{
-    const now=Date.now(),dt=now-last;last=now;
-    tickOffAnimals(dt);
-    tickOffPlayer(dt);
-  },50);
-
+  setInterval(()=>{const now=Date.now(),dt=now-last;last=now;tickOffAnimals(dt);tickOffPlayer(dt);},50);
   document.getElementById('rbtn').onclick=()=>offRespawn();
 }
 
 function spawnOffAnimal(){
   const t=ANIMAL_TPLS[Math.floor(Math.random()*ANIMAL_TPLS.length)];
-  const id=uid();
-  offAnimals[id]={...t,id,hp:t.maxHp,x:rnd(100,MAP_W-100),y:rnd(100,MAP_H-100),
-    vx:0,vy:0,target:null,wanderX:rnd(100,MAP_W-100),wanderY:rnd(100,MAP_H-100),
-    wanderTimer:rnd(2000,5000),atkCd:0};
+  const id=uid(),p=safePosOutsideLobby();
+  offAnimals[id]={...t,id,hp:t.maxHp,x:p.x,y:p.y,vx:0,vy:0,target:null,
+    wanderX:p.x,wanderY:p.y,wanderTimer:rnd(2000,5000),atkCd:0};
 }
 
 function tickOffAnimals(dt){
   for(const a of Object.values(offAnimals)){
     if(a.atkCd>0) a.atkCd-=dt;
-    if(a.aggro&&!a.target&&me&&!me.dead&&dist(a,me)<220) a.target='offline';
+    // Only aggro player if player is OUTSIDE lobby
+    if(a.aggro&&!a.target&&me&&!me.dead&&!inLobby(me.x,me.y)&&dist(a,me)<220) a.target='offline';
+    // Drop aggro if player retreated to lobby
+    if(a.target==='offline'&&me&&inLobby(me.x,me.y)) a.target=null;
     const tp=a.target==='offline'?me:null;
     if(tp&&!tp.dead){
       const d=dist(a,tp);
       if(d>2800){a.target=null;}
       else{
         const ang=Math.atan2(tp.y-a.y,tp.x-a.x);
-        a.vx=Math.cos(ang)*a.speed*1.6; a.vy=Math.sin(ang)*a.speed*1.6;
+        const nx=a.x+Math.cos(ang)*a.speed*1.6, ny=a.y+Math.sin(ang)*a.speed*1.6;
+        if(!inLobby(nx,ny)){a.vx=Math.cos(ang)*a.speed*1.6;a.vy=Math.sin(ang)*a.speed*1.6;}
+        else{a.vx=0;a.vy=0;a.target=null;}
         if(d<38&&a.atkCd<=0){
-          const def=(tp.equipped?.head&&ITEMS[tp.equipped.head]?.def||0)+(tp.equipped?.body&&ITEMS[tp.equipped.body]?.def||0);
+          const def=(me.equipped?.head&&ITEMS[me.equipped.head]?.def||0)+(me.equipped?.body&&ITEMS[me.equipped.body]?.def||0);
           const dmg=Math.max(1,a.dmg-def);
-          tp.hp-=dmg; a.atkCd=1100;
-          hits.push({x:tp.x,y:tp.y,r:5,a:1});
-          fl(tp.x,tp.y-14,`-${dmg}`,'#e94560',800);
-          updateHUD();
-          if(tp.hp<=0) offKillPlayer();
+          me.hp-=dmg;a.atkCd=1100;
+          hits.push({x:me.x,y:me.y,r:5,a:1});fl(me.x,me.y-14,`-${dmg}`,'#e94560',800);
+          updateHUD();if(me.hp<=0)offKillPlayer();
         }
       }
     } else {
-      a.target=null; a.wanderTimer-=dt;
-      if(a.wanderTimer<=0){a.wanderTimer=rnd(2000,5000);a.wanderX=rnd(100,MAP_W-100);a.wanderY=rnd(100,MAP_H-100);}
+      a.target=null;a.wanderTimer-=dt;
+      if(a.wanderTimer<=0){
+        a.wanderTimer=rnd(2000,5000);
+        const wp=safePosOutsideLobby();a.wanderX=wp.x;a.wanderY=wp.y;
+      }
       const d2=dist(a,{x:a.wanderX,y:a.wanderY});
-      if(d2>12){const ang=Math.atan2(a.wanderY-a.y,a.wanderX-a.x);a.vx=Math.cos(ang)*a.speed*.55;a.vy=Math.sin(ang)*a.speed*.55;}
-      else{a.vx=0;a.vy=0;}
+      if(d2>12){
+        const ang=Math.atan2(a.wanderY-a.y,a.wanderX-a.x);
+        const nx=a.x+Math.cos(ang)*a.speed*.55,ny=a.y+Math.sin(ang)*a.speed*.55;
+        if(!inLobby(nx,ny)){a.vx=Math.cos(ang)*a.speed*.55;a.vy=Math.sin(ang)*a.speed*.55;}
+        else{a.vx=0;a.vy=0;const wp=safePosOutsideLobby();a.wanderX=wp.x;a.wanderY=wp.y;}
+      }else{a.vx=0;a.vy=0;}
     }
-    a.x=clamp(a.x+a.vx,10,MAP_W-10); a.y=clamp(a.y+a.vy,10,MAP_H-10);
+    let fx=clamp(a.x+a.vx,10,MAP_W-10),fy=clamp(a.y+a.vy,10,MAP_H-10);
+    if(inLobby(fx,fy)){fx=a.x;fy=a.y;a.vx=0;a.vy=0;}
+    a.x=fx;a.y=fy;
   }
 }
 
 function tickOffPlayer(dt){
-  if(!me||me.dead) return;
-  if(me.atkCd>0) me.atkCd-=dt;
-  me.x=clamp(me.x+me.vx,10,MAP_W-10); me.y=clamp(me.y+me.vy,10,MAP_H-10);
+  if(!me||me.dead)return;
+  if(me.atkCd>0)me.atkCd-=dt;
+  me.x=clamp(me.x+me.vx,10,MAP_W-10);me.y=clamp(me.y+me.vy,10,MAP_H-10);
   worldPlayers[myId]=me;
   for(const [did,d] of Object.entries(offDrops)){
     if(dist(me,d)<32&&me.inv.length<10){
       me.inv.push({id:uid(),itemId:d.itemId});
-      delete offDrops[did]; delete worldDrops[did];
-      buildInv(); updateHUD();
+      delete offDrops[did];delete worldDrops[did];
+      buildInv();updateHUD();
     }
   }
   const hint=document.getElementById('interactHint');
@@ -613,79 +628,74 @@ function tickOffPlayer(dt){
 }
 
 function offKillPlayer(){
-  if(!me||me.dead) return;
-  me.dead=true; me.hp=0;
-  me.inv=[]; me.equipped={weapon:null,head:null,body:null};
+  if(!me||me.dead)return; me.dead=true;me.hp=0;
+  me.inv=[];me.equipped={weapon:null,head:null,body:null};
   document.getElementById('dBy').textContent='Killed by a wild animal';
   document.getElementById('dK').textContent=me.kills;
   document.getElementById('dP').textContent=0;
   document.getElementById('dL').textContent=me.level;
   document.getElementById('death').style.display='flex';
-  buildInv(); updateHUD();
+  buildInv();updateHUD();
 }
-
 function offRespawn(){
-  if(!me) return;
-  me.dead=false; me.hp=me.maxHp;
-  me.x=rnd(300,MAP_W-300); me.y=rnd(300,MAP_H-300);
-  me.vx=0; me.vy=0;
+  if(!me)return;
+  me.dead=false;me.hp=me.maxHp;
+  const p=lobbySpawn();me.x=p.x;me.y=p.y;me.vx=0;me.vy=0;
   document.getElementById('death').style.display='none';
-  buildInv(); updateHUD();
+  buildInv();updateHUD();
   setTimeout(()=>showLyko(me.name),600);
 }
-
 function offKillAnimal(id){
-  const a=offAnimals[id]; if(!a||!me) return;
-  a.loot.forEach(itemId=>{
-    if(Math.random()<.65){const i=uid();offDrops[i]={id:i,itemId,x:a.x+rnd(-25,25),y:a.y+rnd(-25,25)};worldDrops[i]=offDrops[i];}
-  });
-  delete offAnimals[id]; delete worldAnimals[id];
-  me.kills++;
-  offAddXp(a.xp);
-  setTimeout(spawnOffAnimal,9000);
+  const a=offAnimals[id];if(!a||!me)return;
+  a.loot.forEach(itemId=>{if(Math.random()<.65){const i=uid(),p={x:a.x+rnd(-25,25),y:a.y+rnd(-25,25)};offDrops[i]={id:i,itemId,x:p.x,y:p.y};worldDrops[i]=offDrops[i];}});
+  delete offAnimals[id];delete worldAnimals[id];
+  me.kills++;offAddXp(a.xp);setTimeout(spawnOffAnimal,9000);
 }
-
 function offAddXp(amt){
-  me.xp+=amt; fl(me.x,me.y-28,`+${amt} XP`,'#00e5ff',1100);
+  me.xp+=amt;fl(me.x,me.y-28,`+${amt} XP`,'#00e5ff',1100);
   let lv=false;
   while(me.level<MAX_LVL&&me.xp>=XP_TBL[me.level]){me.xp-=XP_TBL[me.level];me.level++;me.maxHp=100+(me.level-1)*20;me.hp=me.maxHp;lv=true;}
   if(lv){fl(me.x,me.y-50,'LEVEL UP!','#f5a623',1600);const f=document.getElementById('lvlFlash');f.classList.add('on');setTimeout(()=>f.classList.remove('on'),700);if(me.level>=10)document.getElementById('islBanner').style.display='flex';}
   updateHUD();
 }
 
-// ── ONLINE ────────────────────────────────────────────────────────────────────
+// ── ONLINE ────────────────────────────────────────────────────
 function connectOnline(name){
-  socket=io(SERVER_URL,{reconnection:true,reconnectionAttempts:15});
-  socket.on('connect',()=>{ myId=socket.id; socket.emit('join',{name}); });
-  socket.on('disconnect',()=>{ document.getElementById('dcScreen').style.display='flex'; });
+  socket=io(SERVER,{reconnection:true,reconnectionAttempts:15});
+  socket.on('connect',()=>{myId=socket.id;socket.emit('join',{name});});
+  socket.on('disconnect',()=>{document.getElementById('dcScreen').style.display='flex';});
+  socket.on('serverFull',()=>{document.getElementById('srvFullScreen').style.display='flex';});
   socket.on('init',d=>{
-    me=d.me; myId=me.id; itemDefs=d.items; mapData=d.map;
-    worldPlayers[myId]=me;
-    updateHUD(); buildInv();
+    me=d.me;myId=me.id;itemDefs=d.items;mapData=d.map;
+    worldPlayers[myId]=me;updateHUD();buildInv();
     setTimeout(()=>showLyko(me.name),900);
   });
   socket.on('state',d=>{
-    worldPlayers={}; d.players.forEach(p=>worldPlayers[p.id]=p);
-    worldAnimals={}; d.animals.forEach(a=>worldAnimals[a.id]=a);
-    worldDrops={};   d.drops.forEach(g=>worldDrops[g.id]=g);
-    const wp=worldPlayers[myId];
-    if(wp&&me){me.x=wp.x;me.y=wp.y;me.hp=wp.hp;me.level=wp.level;}
+    worldPlayers={};d.players.forEach(p=>worldPlayers[p.id]=p);
+    worldAnimals={};d.animals.forEach(a=>worldAnimals[a.id]=a);
+    worldDrops={};d.drops.forEach(g=>worldDrops[g.id]=g);
+    const wp=worldPlayers[myId];if(wp&&me){me.x=wp.x;me.y=wp.y;me.hp=wp.hp;me.level=wp.level;}
   });
-  socket.on('xpGain',d=>{ if(me){me.xp=d.xp;me.level=d.level;} fl(me?.x||0,(me?.y||0)-28,`+${d.amt} XP`,'#00e5ff',1100); updateHUD(); });
-  socket.on('levelUp',d=>{ if(me)me.level=d.level; fl(me?.x||0,(me?.y||0)-50,'LEVEL UP!','#f5a623',1600); const f=document.getElementById('lvlFlash');f.classList.add('on');setTimeout(()=>f.classList.remove('on'),700);updateHUD();if(d.level>=10)document.getElementById('islBanner').style.display='flex'; });
-  socket.on('hpUpdate',d=>{ if(me){me.hp=d.hp;me.maxHp=d.maxHp;} updateHUD(); });
-  socket.on('hit',d=>{ hits.push({x:d.x,y:d.y,r:5,a:1}); fl(d.x,d.y-14,`-${d.dmg}`,'#e94560',800); });
-  socket.on('invUpdate',d=>{ if(me){me.inv=d.inv;me.equipped=d.equipped;me.hp=d.hp;} buildInv();updateHUD(); });
+  socket.on('playerCount',d=>{
+    // Update server card count in background (even while in game, in case user returns)
+    const el=document.getElementById('srv1Count');
+    if(el){el.textContent=`${d.count} / ${d.max} players`;el.className='srv-count live-count';}
+  });
+  socket.on('xpGain',d=>{if(me){me.xp=d.xp;me.level=d.level;}fl(me?.x||0,(me?.y||0)-28,`+${d.amt} XP`,'#00e5ff',1100);updateHUD();});
+  socket.on('levelUp',d=>{if(me)me.level=d.level;fl(me?.x||0,(me?.y||0)-50,'LEVEL UP!','#f5a623',1600);const f=document.getElementById('lvlFlash');f.classList.add('on');setTimeout(()=>f.classList.remove('on'),700);updateHUD();if(d.level>=10)document.getElementById('islBanner').style.display='flex';});
+  socket.on('hpUpdate',d=>{if(me){me.hp=d.hp;me.maxHp=d.maxHp;}updateHUD();});
+  socket.on('hit',d=>{hits.push({x:d.x,y:d.y,r:5,a:1});fl(d.x,d.y-14,`-${d.dmg}`,'#e94560',800);});
+  socket.on('invUpdate',d=>{if(me){me.inv=d.inv;me.equipped=d.equipped;me.hp=d.hp;}buildInv();updateHUD();});
   socket.on('killfeed',d=>addKf(d.killer,d.victim));
-  socket.on('youDied',d=>{ document.getElementById('dBy').textContent=`Killed by ${d.by}`;document.getElementById('dK').textContent=me?.kills||0;document.getElementById('dP').textContent=me?.pvpKills||0;document.getElementById('dL').textContent=me?.level||1;document.getElementById('death').style.display='flex';if(me)me.dead=true; });
-  socket.on('respawned',d=>{ me=d; document.getElementById('death').style.display='none'; buildInv();updateHUD(); });
+  socket.on('youDied',d=>{document.getElementById('dBy').textContent=`Killed by ${d.by}`;document.getElementById('dK').textContent=me?.kills||0;document.getElementById('dP').textContent=me?.pvpKills||0;document.getElementById('dL').textContent=me?.level||1;document.getElementById('death').style.display='flex';if(me)me.dead=true;});
+  socket.on('respawned',d=>{me=d;document.getElementById('death').style.display='none';buildInv();updateHUD();});
   socket.on('animalDied',id=>delete worldAnimals[id]);
   socket.on('dropRemoved',id=>delete worldDrops[id]);
-  socket.on('dropAdded',g=>{ if(g)worldDrops[g.id]=g; });
+  socket.on('dropAdded',g=>{if(g)worldDrops[g.id]=g;});
   document.getElementById('rbtn').onclick=()=>socket.emit('respawn');
 }
 
-// ── LYKO ──────────────────────────────────────────────────────────────────────
+// ── LYKO ──────────────────────────────────────────────────────
 function showLyko(name){
   const line=LYKO_LINES[lykoVisit%LYKO_LINES.length](name||me?.name||'wanderer');
   lykoVisit++;
@@ -694,62 +704,59 @@ function showLyko(name){
   document.getElementById('interactHint').style.display='none';
   lykoOpen=true;
 }
-function closeLyko(){ document.getElementById('npcBox').style.display='none'; lykoOpen=false; }
+function closeLyko(){document.getElementById('npcBox').style.display='none';lykoOpen=false;}
 document.getElementById('npcClose').onclick=closeLyko;
 
-// ── INPUT ─────────────────────────────────────────────────────────────────────
+// ── INPUT ─────────────────────────────────────────────────────
 addEventListener('keydown',e=>{
   keys[e.code]=true;
-  if(e.code==='KeyE'||e.code==='Escape'){
+  if(e.code==='Escape'&&lykoOpen){closeLyko();return;}
+  if(e.code==='KeyE'){
     if(lykoOpen){closeLyko();return;}
-    if(e.code==='KeyE'){
-      const px=worldPlayers[myId]?.x||me?.x||LOBBY_X;
-      const py=worldPlayers[myId]?.y||me?.y||LOBBY_Y;
-      if(Math.hypot(px-LYKO_X,py-LYKO_Y)<LYKO_DIST) showLyko(me?.name);
-    }
+    const px=worldPlayers[myId]?.x||me?.x||LOBBY_CX;
+    const py=worldPlayers[myId]?.y||me?.y||LOBBY_CY;
+    if(Math.hypot(px-LYKO_X,py-LYKO_Y)<LYKO_DIST) showLyko(me?.name);
   }
 });
 addEventListener('keyup',e=>keys[e.code]=false);
 
 setInterval(()=>{
-  if(!me||me.dead||lykoOpen) return;
+  if(!me||me.dead||lykoOpen)return;
   let vx=0,vy=0;
   if(keys['KeyW']||keys['ArrowUp'])   vy=-1;
   if(keys['KeyS']||keys['ArrowDown']) vy= 1;
   if(keys['KeyA']||keys['ArrowLeft']) vx=-1;
   if(keys['KeyD']||keys['ArrowRight'])vx= 1;
   if(vx&&vy){vx*=.707;vy*=.707;}
-  if(isOffline){
-    const spd=3.6+(me.level-1)*.12; me.vx=vx*spd; me.vy=vy*spd;
-  } else if(socket) {
-    socket.emit('move',{vx,vy});
+  if(isOffline){const spd=3.6+(me.level-1)*.12;me.vx=vx*spd;me.vy=vy*spd;}
+  else if(socket) socket.emit('move',{vx,vy});
+  if(!isOffline){
+    const px=worldPlayers[myId]?.x||me?.x||0,py=worldPlayers[myId]?.y||me?.y||0;
+    document.getElementById('interactHint').style.display=(!lykoOpen&&Math.hypot(px-LYKO_X,py-LYKO_Y)<LYKO_DIST)?'block':'none';
   }
 },33);
 
-canvas && canvas.addEventListener('click',e=>{
-  if(!me||me.dead) return;
-  const wx=e.clientX+camX, wy=e.clientY+camY;
+document.getElementById('c').addEventListener('click',e=>{
+  if(!me||me.dead)return;
+  const wx=e.clientX+camX,wy=e.clientY+camY;
   if(isOffline){
     for(const a of Object.values(offAnimals)){
       if(Math.hypot(a.x-wx,a.y-wy)<a.r+14){
-        if(me.atkCd>0) return;
-        const wdef=ITEMS[me.equipped?.weapon];
-        const dmg=Math.max(1,(wdef?.dmg||5)-2);
-        a.hp-=dmg; me.atkCd=600;
-        hits.push({x:a.x,y:a.y,r:5,a:1}); fl(a.x,a.y-14,`-${dmg}`,'#e94560',800);
-        if(a.hp<=0) offKillAnimal(a.id);
-        return;
+        if(me.atkCd>0)return;
+        const wdef=ITEMS[me.equipped?.weapon];const dmg=Math.max(1,(wdef?.dmg||5)-2);
+        a.hp-=dmg;me.atkCd=600;hits.push({x:a.x,y:a.y,r:5,a:1});fl(a.x,a.y-14,`-${dmg}`,'#e94560',800);
+        if(a.hp<=0)offKillAnimal(a.id);return;
       }
     }
-  } else if(socket){
-    for(const a of Object.values(worldAnimals)) if(Math.hypot(a.x-wx,a.y-wy)<a.r+14){socket.emit('atkAnimal',{id:a.id});return;}
+  }else if(socket){
+    for(const a of Object.values(worldAnimals))if(Math.hypot(a.x-wx,a.y-wy)<a.r+14){socket.emit('atkAnimal',{id:a.id});return;}
     for(const p of Object.values(worldPlayers)){if(p.id===myId)continue;if(Math.hypot(p.x-wx,p.y-wy)<24){socket.emit('atkPlayer',{id:p.id});return;}}
   }
 });
 
-// ── HUD ───────────────────────────────────────────────────────────────────────
+// ── HUD ───────────────────────────────────────────────────────
 function updateHUD(){
-  if(!me) return;
+  if(!me)return;
   document.getElementById('sName').textContent=(me.name||'').toUpperCase();
   const hp=Math.max(0,me.hp);
   document.getElementById('hpB').style.width=(hp/me.maxHp*100)+'%';
@@ -760,108 +767,102 @@ function updateHUD(){
   document.getElementById('sLvl').textContent=`LVL ${me.level}${me.level>=10?' ✦ MAX':''}`;
   document.getElementById('sKills').textContent=`Kills: ${me.kills||0}${isOffline?'':` | PvP: ${me.pvpKills||0}`}`;
 }
-
 function buildInv(){
-  const bar=document.getElementById('invBar'); bar.innerHTML='';
-  const inv=me?.inv||[], eq=me?.equipped||{};
+  const bar=document.getElementById('invBar');bar.innerHTML='';
+  const inv=me?.inv||[],eq=me?.equipped||{};
   const eqSet=new Set(Object.values(eq).filter(Boolean));
   for(let i=0;i<10;i++){
-    const sl=document.createElement('div'); sl.className='isl';
+    const sl=document.createElement('div');sl.className='isl';
     if(inv[i]){
       const def=itemDefs[inv[i].itemId];
       if(def){
         if(eqSet.has(inv[i].itemId))sl.classList.add('eq');
         sl.textContent=def.icon;
         const nm=document.createElement('span');nm.className='sn';nm.textContent=def.name;sl.appendChild(nm);
-        sl.dataset.iid=inv[i].id; sl.dataset.itemId=inv[i].itemId;
+        sl.dataset.iid=inv[i].id;sl.dataset.itemId=inv[i].itemId;
         sl.addEventListener('mouseenter',showTip);sl.addEventListener('mouseleave',hideTip);sl.addEventListener('mousemove',movTip);
-        sl.addEventListener('click',()=>{ isOffline?useItemOff(inv[i].id):socket?.emit('useItem',{invId:inv[i].id}); hideTip(); });
-        sl.addEventListener('contextmenu',e=>{e.preventDefault(); isOffline?dropItemOff(inv[i].id):socket?.emit('dropItem',{invId:inv[i].id}); hideTip();});
+        sl.addEventListener('click',()=>{isOffline?useItemOff(inv[i].id):socket?.emit('useItem',{invId:inv[i].id});hideTip();});
+        sl.addEventListener('contextmenu',e=>{e.preventDefault();isOffline?dropItemOff(inv[i].id):socket?.emit('dropItem',{invId:inv[i].id});hideTip();});
       }
-    } else { sl.innerHTML='<span class="iempty">+</span>'; }
+    }else{sl.innerHTML='<span class="iempty">+</span>';}
     bar.appendChild(sl);
   }
 }
-
 function useItemOff(invId){
-  if(!me)return;
-  const idx=me.inv.findIndex(i=>i.id===invId); if(idx===-1)return;
-  const def=ITEMS[me.inv[idx].itemId]; if(!def)return;
+  if(!me)return;const idx=me.inv.findIndex(i=>i.id===invId);if(idx===-1)return;
+  const def=ITEMS[me.inv[idx].itemId];if(!def)return;
   if(def.type==='food'){me.hp=Math.min(me.maxHp,me.hp+(def.heal>=999?me.maxHp:def.heal));me.inv.splice(idx,1);}
-  else if(def.type==='weapon') me.equipped.weapon=def.id;
-  else if(def.type==='armor')  me.equipped[def.slot]=def.id;
-  buildInv(); updateHUD();
+  else if(def.type==='weapon')me.equipped.weapon=def.id;
+  else if(def.type==='armor')me.equipped[def.slot]=def.id;
+  buildInv();updateHUD();
 }
 function dropItemOff(invId){
-  if(!me)return;
-  const idx=me.inv.findIndex(i=>i.id===invId); if(idx===-1)return;
-  const {itemId}=me.inv[idx]; me.inv.splice(idx,1);
-  const id=uid(); offDrops[id]={id,itemId,x:me.x+rnd(-35,35),y:me.y+rnd(-35,35)}; worldDrops[id]=offDrops[id];
-  buildInv(); updateHUD();
+  if(!me)return;const idx=me.inv.findIndex(i=>i.id===invId);if(idx===-1)return;
+  const{itemId}=me.inv[idx];me.inv.splice(idx,1);
+  const id=uid(),p={x:me.x+rnd(-35,35),y:me.y+rnd(-35,35)};
+  offDrops[id]={id,itemId,x:p.x,y:p.y};worldDrops[id]=offDrops[id];
+  buildInv();updateHUD();
 }
-
 function showTip(e){
-  const def=itemDefs[e.currentTarget.dataset.itemId]; if(!def)return;
+  const def=itemDefs[e.currentTarget.dataset.itemId];if(!def)return;
   const rc={common:'rc',uncommon:'ru',rare:'rr'}[def.rarity]||'rc';
   document.getElementById('tip').innerHTML=`<div class="tn">${def.icon} ${def.name}</div><div class="${rc}">${(def.rarity||'').toUpperCase()}</div>${def.dmg?`<div style="color:#e94560;font-size:10px">⚔ DMG ${def.dmg}</div>`:''}${def.def?`<div style="color:#00e5ff;font-size:10px">🛡 DEF ${def.def}</div>`:''}${def.heal?`<div style="color:#39ff8f;font-size:10px">❤ HEAL ${def.heal>=999?'Full HP':def.heal}</div>`:''}<div class="th">Click: Use/Equip · Right-click: Drop</div>`;
-  document.getElementById('tip').style.display='block'; movTip(e);
+  document.getElementById('tip').style.display='block';movTip(e);
 }
 function hideTip(){document.getElementById('tip').style.display='none';}
 function movTip(e){const t=document.getElementById('tip');t.style.left=(e.clientX+14)+'px';t.style.top=(e.clientY-10)+'px';}
 function addKf(k,v){const el=document.createElement('div');el.className='kfe';el.innerHTML=`<span class="kk">${k}</span> slew <span class="kv">${v}</span>`;document.getElementById('kf').appendChild(el);setTimeout(()=>el.remove(),4000);}
 function fl(x,y,txt,col,life){floats.push({x,y,txt,col,life,maxLife:life,vy:-.85});}
 
-// ── RENDER ────────────────────────────────────────────────────────────────────
+// ── RENDER ────────────────────────────────────────────────────
 function drawMM(){
   if(!me)return;
   const mw=mapData?.w||MAP_W,mh=mapData?.h||MAP_H,W=158,H=158,sx=W/mw,sy=H/mh;
-  mmx.clearRect(0,0,W,H); mmx.fillStyle='#0d1a0d'; mmx.fillRect(0,0,W,H);
-  mmx.fillStyle='rgba(0,229,255,.12)'; mmx.fillRect((LOBBY_X-LOBBY_W/2)*sx,(LOBBY_Y-LOBBY_H/2)*sy,LOBBY_W*sx,LOBBY_H*sy);
+  mmx.clearRect(0,0,W,H);mmx.fillStyle='#0d1a0d';mmx.fillRect(0,0,W,H);
+  mmx.fillStyle='rgba(0,229,255,.12)';mmx.fillRect((LOBBY_CX-LOBBY_W/2)*sx,(LOBBY_CY-LOBBY_H/2)*sy,LOBBY_W*sx,LOBBY_H*sy);
   if(mapData?.trees){mmx.fillStyle='rgba(39,80,45,.55)';mapData.trees.forEach(t=>mmx.fillRect(t.x*sx-1,t.y*sy-1,2,2));}
   if(mapData?.rocks){mmx.fillStyle='rgba(70,70,90,.45)';mapData.rocks.forEach(r=>mmx.fillRect(r.x*sx-1,r.y*sy-1,2,2));}
-  mmx.fillStyle='#e94560'; Object.values(worldAnimals).forEach(a=>mmx.fillRect(a.x*sx-1.5,a.y*sy-1.5,3,3));
+  mmx.fillStyle='#e94560';Object.values(worldAnimals).forEach(a=>mmx.fillRect(a.x*sx-1.5,a.y*sy-1.5,3,3));
   if(!isOffline){mmx.fillStyle='#00e5ff';Object.values(worldPlayers).forEach(p=>{if(p.id===myId)return;mmx.fillRect(p.x*sx-2,p.y*sy-2,4,4);});}
-  const mx=(worldPlayers[myId]?.x||me?.x||0)*sx, my2=(worldPlayers[myId]?.y||me?.y||0)*sy;
-  mmx.fillStyle='#fff'; mmx.fillRect(mx-3,my2-3,6,6);
+  const mx=(worldPlayers[myId]?.x||me?.x||0)*sx,my2=(worldPlayers[myId]?.y||me?.y||0)*sy;
+  mmx.fillStyle='#fff';mmx.fillRect(mx-3,my2-3,6,6);
 }
-
 function drawLobby(){
-  ctx.fillStyle='rgba(0,0,0,.3)'; ctx.fillRect(LOBBY_X-LOBBY_W/2+7,LOBBY_Y-LOBBY_H/2+7,LOBBY_W,LOBBY_H);
-  ctx.fillStyle='#0d1520'; ctx.fillRect(LOBBY_X-LOBBY_W/2,LOBBY_Y-LOBBY_H/2,LOBBY_W,LOBBY_H);
+  const lx=LOBBY_CX,ly=LOBBY_CY,lw=LOBBY_W,lh=LOBBY_H;
+  ctx.fillStyle='rgba(0,0,0,.3)';ctx.fillRect(lx-lw/2+7,ly-lh/2+7,lw,lh);
+  ctx.fillStyle='#0d1520';ctx.fillRect(lx-lw/2,ly-lh/2,lw,lh);
   ctx.fillStyle='#1a2a40';
-  ctx.fillRect(LOBBY_X-LOBBY_W/2,LOBBY_Y-LOBBY_H/2,LOBBY_W,13);
-  ctx.fillRect(LOBBY_X-LOBBY_W/2,LOBBY_Y+LOBBY_H/2-13,LOBBY_W,13);
-  ctx.fillRect(LOBBY_X-LOBBY_W/2,LOBBY_Y-LOBBY_H/2,13,LOBBY_H);
-  ctx.fillRect(LOBBY_X+LOBBY_W/2-13,LOBBY_Y-LOBBY_H/2,13,LOBBY_H);
-  ctx.fillStyle='#162b14'; ctx.fillRect(LOBBY_X-22,LOBBY_Y+LOBBY_H/2-13,44,13);
-  ctx.strokeStyle='rgba(0,229,255,.2)'; ctx.lineWidth=1.5;
-  ctx.strokeRect(LOBBY_X-LOBBY_W/2,LOBBY_Y-LOBBY_H/2,LOBBY_W,LOBBY_H);
-  ctx.strokeStyle='rgba(30,40,64,.35)'; ctx.lineWidth=.5;
-  for(let tx=LOBBY_X-LOBBY_W/2+13;tx<LOBBY_X+LOBBY_W/2-13;tx+=22){ctx.beginPath();ctx.moveTo(tx,LOBBY_Y-LOBBY_H/2+13);ctx.lineTo(tx,LOBBY_Y+LOBBY_H/2-13);ctx.stroke();}
-  for(let ty=LOBBY_Y-LOBBY_H/2+13;ty<LOBBY_Y+LOBBY_H/2-13;ty+=22){ctx.beginPath();ctx.moveTo(LOBBY_X-LOBBY_W/2+13,ty);ctx.lineTo(LOBBY_X+LOBBY_W/2-13,ty);ctx.stroke();}
-  ctx.fillStyle='rgba(0,229,255,.75)'; ctx.font="bold 10px 'DM Mono',monospace"; ctx.textAlign='center'; ctx.textBaseline='middle';
-  ctx.fillText('[ LOBBY ]',LOBBY_X,LOBBY_Y-LOBBY_H/2-11);
+  ctx.fillRect(lx-lw/2,ly-lh/2,lw,13);ctx.fillRect(lx-lw/2,ly+lh/2-13,lw,13);
+  ctx.fillRect(lx-lw/2,ly-lh/2,13,lh);ctx.fillRect(lx+lw/2-13,ly-lh/2,13,lh);
+  ctx.fillStyle='#162b14';ctx.fillRect(lx-22,ly+lh/2-13,44,13);
+  ctx.strokeStyle='rgba(0,229,255,.2)';ctx.lineWidth=1.5;ctx.strokeRect(lx-lw/2,ly-lh/2,lw,lh);
+  ctx.strokeStyle='rgba(30,40,64,.35)';ctx.lineWidth=.5;
+  for(let tx=lx-lw/2+13;tx<lx+lw/2-13;tx+=22){ctx.beginPath();ctx.moveTo(tx,ly-lh/2+13);ctx.lineTo(tx,ly+lh/2-13);ctx.stroke();}
+  for(let ty=ly-lh/2+13;ty<ly+lh/2-13;ty+=22){ctx.beginPath();ctx.moveTo(lx-lw/2+13,ty);ctx.lineTo(lx+lw/2-13,ty);ctx.stroke();}
+  ctx.fillStyle='rgba(0,229,255,.75)';ctx.font="bold 10px 'DM Mono',monospace";ctx.textAlign='center';ctx.textBaseline='middle';
+  ctx.fillText('[ LOBBY ]',lx,ly-lh/2-11);
+  // Safe zone label
+  ctx.fillStyle='rgba(57,255,143,.35)';ctx.font="8px 'DM Mono',monospace";
+  ctx.fillText('✦ SAFE ZONE',lx,ly+lh/2+16);
 }
-
 function drawLyko(){
-  const bob=Math.sin(frameT*.002)*2, lx=LYKO_X, ly=LYKO_Y+bob;
+  const bob=Math.sin(frameT*.002)*2,lx=LYKO_X,ly=LYKO_Y+bob;
   const pulse=.35+Math.sin(frameT*.003)*.18;
   const g=ctx.createRadialGradient(lx,ly,4,lx,ly,32);
-  g.addColorStop(0,`rgba(0,229,255,${pulse*.3})`); g.addColorStop(1,'rgba(0,229,255,0)');
+  g.addColorStop(0,`rgba(0,229,255,${pulse*.3})`);g.addColorStop(1,'rgba(0,229,255,0)');
   ctx.beginPath();ctx.arc(lx,ly,32,0,Math.PI*2);ctx.fillStyle=g;ctx.fill();
-  ctx.beginPath();ctx.arc(lx,ly,16,0,Math.PI*2); ctx.fillStyle='#0a1f30';ctx.fill();
+  ctx.beginPath();ctx.arc(lx,ly,16,0,Math.PI*2);ctx.fillStyle='#0a1f30';ctx.fill();
   ctx.strokeStyle='#00e5ff';ctx.lineWidth=2;ctx.stroke();
   ctx.fillStyle='#00e5ff';
   ctx.beginPath();ctx.arc(lx-5,ly-3,2.5,0,Math.PI*2);ctx.fill();
   ctx.beginPath();ctx.arc(lx+5,ly-3,2.5,0,Math.PI*2);ctx.fill();
-  ctx.font="bold 9px 'DM Mono',monospace"; ctx.fillStyle='#00e5ff'; ctx.textAlign='center';
+  ctx.font="bold 9px 'DM Mono',monospace";ctx.fillStyle='#00e5ff';ctx.textAlign='center';
   ctx.fillText('LYKO',lx,ly-23);
   ctx.beginPath();ctx.arc(lx,ly-29+bob*.5,2.5,0,Math.PI*2);
   ctx.fillStyle=`rgba(0,229,255,${.4+Math.sin(frameT*.005)*.5})`;ctx.fill();
 }
-
 function drawP(p,isMe){
-  const r=18; ctx.save();
+  const r=18;ctx.save();
   const bw=50,hp=Math.max(0,p.hp)/p.maxHp;
   ctx.fillStyle='#1e2240';ctx.fillRect(p.x-bw/2,p.y-r-24,bw,4);
   ctx.fillStyle=hp>.5?'#39ff8f':hp>.25?'#f5a623':'#e94560';ctx.fillRect(p.x-bw/2,p.y-r-24,bw*hp,4);
@@ -871,19 +872,17 @@ function drawP(p,isMe){
   ctx.strokeStyle=isMe?'#00e5ff':'#e94560';ctx.lineWidth=isMe?2.5:1.5;ctx.stroke();
   ctx.shadowBlur=0;
   if(p.equipped?.weapon&&itemDefs[p.equipped.weapon]){ctx.font='13px serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(itemDefs[p.equipped.weapon].icon,p.x+10,p.y+9);}
-  ctx.fillStyle=isMe?'#00e5ff':'#e94560';
-  ctx.font=`${isMe?'bold ':''}10px DM Mono`;ctx.textAlign='center';
-  ctx.fillText(`${p.name||'?'} [${p.level||1}]`,p.x,p.y-r-28);
-  ctx.restore();
+  ctx.fillStyle=isMe?'#00e5ff':'#e94560';ctx.font=`${isMe?'bold ':''}10px DM Mono`;ctx.textAlign='center';
+  ctx.fillText(`${p.name||'?'} [${p.level||1}]`,p.x,p.y-r-28);ctx.restore();
 }
 
 function draw(){
-  if(!canvas) return;
+  if(!canvas)return;
   const W=canvas.width,H=canvas.height;
   frameT+=16;
   const wp=worldPlayers[myId]||me;
   if(wp){camX+=(wp.x-W/2-camX)*.1;camY+=(wp.y-H/2-camY)*.1;}
-  ctx.save(); ctx.translate(-camX,-camY);
+  ctx.save();ctx.translate(-camX,-camY);
   const mw=mapData?.w||MAP_W,mh=mapData?.h||MAP_H;
   ctx.fillStyle='#07080f';ctx.fillRect(camX,camY,W,H);
   const gx0=Math.floor(camX/TILE)*TILE,gy0=Math.floor(camY/TILE)*TILE;
@@ -900,21 +899,37 @@ function draw(){
   });
   mapData?.trees?.forEach(t=>{ctx.beginPath();ctx.arc(t.x,t.y,t.r*1.1,0,Math.PI*2);ctx.fillStyle='rgba(10,30,15,.75)';ctx.fill();ctx.font=`${t.r*1.5}px serif`;ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText('🌲',t.x,t.y);});
   mapData?.rocks?.forEach(r=>{ctx.font=`${r.r*1.5}px serif`;ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText('🪨',r.x,r.y);});
-  drawLobby(); drawLyko();
+  drawLobby();drawLyko();
   Object.values(worldDrops).forEach(d=>{const def=itemDefs[d.itemId];if(!def)return;ctx.save();ctx.shadowColor='#00e5ff';ctx.shadowBlur=10;ctx.font='18px serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(def.icon,d.x,d.y);ctx.restore();});
   Object.values(worldAnimals).forEach(a=>{const bw=a.r*2.2;ctx.fillStyle='#1e2240';ctx.fillRect(a.x-bw/2,a.y-a.r-16,bw,4);ctx.fillStyle='#e94560';ctx.fillRect(a.x-bw/2,a.y-a.r-16,bw*(a.hp/a.maxHp),4);ctx.font=`${a.r*1.7}px serif`;ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(a.icon,a.x,a.y);ctx.fillStyle='#5a6a90';ctx.font='9px DM Mono';ctx.fillText(a.name,a.x,a.y-a.r-20);});
   Object.values(worldPlayers).forEach(p=>drawP(p,p.id===myId));
   hits=hits.filter(h=>h.a>0);hits.forEach(h=>{h.r+=1.2;h.a-=.055;ctx.save();ctx.beginPath();ctx.arc(h.x,h.y,h.r,0,Math.PI*2);ctx.strokeStyle=`rgba(233,69,96,${h.a})`;ctx.lineWidth=2;ctx.stroke();ctx.restore();});
   floats=floats.filter(f=>f.life>0);floats.forEach(f=>{f.life-=16;f.y+=f.vy;ctx.save();ctx.globalAlpha=Math.min(1,f.life/(f.maxLife*.4));ctx.fillStyle=f.col;ctx.font='bold 13px DM Mono';ctx.textAlign='center';ctx.fillText(f.txt,f.x,f.y);ctx.restore();});
-  ctx.restore();
-  drawMM();
+  ctx.restore();drawMM();
 }
 
 function renderLoop(){
-  // Only render if game has launched
-  if(document.getElementById('gameUI').style.display!=='none') draw();
+  if(document.getElementById('gameWrap').style.display!=='none') draw();
   requestAnimationFrame(renderLoop);
 }
 </script>
+
+<!--
+  ╔══════════════════════════════════════════════════════════╗
+  ║  WISPBYTE CONNECTION FIX                                 ║
+  ║                                                          ║
+  ║  Your server runs fine on port 3000.                     ║
+  ║  The problem: game.lillyko.space hits port 443 (HTTPS)   ║
+  ║  but Wispbyte isn't proxying that subdomain yet.         ║
+  ║                                                          ║
+  ║  FIX — In Wispbyte panel:                                ║
+  ║  1. Go to Network → Domains / Custom Domains             ║
+  ║  2. Find game.lillyko.space → set "Internal Port" = 3000 ║
+  ║  3. Make sure SSL is enabled for that domain             ║
+  ║  4. Save & restart server                                ║
+  ║                                                          ║
+  ║  That's it. DNS is already correct (212.132.120.102 ✓)   ║
+  ╚══════════════════════════════════════════════════════════╝
+-->
 </body>
 </html>
