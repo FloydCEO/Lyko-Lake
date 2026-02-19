@@ -1,637 +1,434 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lyko | Portfolio</title>
-    <link rel="icon" type="image/webp" href="avatar.webp">
-    <link rel="apple-touch-icon" href="avatar.webp">
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lyko's Space — LilLyko.space</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=DM+Mono:ital,wght@0,300;0,400;1,300&display=swap');
 
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
-            min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            overflow: hidden;
-            position: relative;
-            background: #0a0a0a;
-        }
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-        /* Background video/image container */
-        .background-container {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: -1;
-        }
+:root {
+  --void: #07080f;
+  --deep: #0d0f1e;
+  --surface: #121428;
+  --border: #1e2240;
+  --accent: #e94560;
+  --gold: #f5a623;
+  --cyan: #00e5ff;
+  --text: #dce8ff;
+  --dim: #5a6a90;
+}
 
-        .background-video {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            filter: blur(4px) brightness(0.7);
-        }
+html, body {
+  width: 100%; min-height: 100%;
+  background: var(--void);
+  color: var(--text);
+  font-family: 'DM Mono', monospace;
+  overflow-x: hidden;
+  cursor: none;
+}
 
-        /* Dark overlay */
-        .overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(135deg, rgba(88, 28, 135, 0.3), rgba(0, 0, 0, 0.7));
-            z-index: -1;
-        }
+/* ── CUSTOM CURSOR ── */
+#cursor {
+  position: fixed; top: 0; left: 0;
+  width: 12px; height: 12px;
+  background: var(--accent);
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 99999;
+  transform: translate(-50%, -50%);
+  transition: transform 0.08s, background 0.2s, width 0.2s, height 0.2s;
+  mix-blend-mode: difference;
+}
+#cursor.big { width: 40px; height: 40px; background: var(--cyan); }
 
-        /* Ash particles */
-        .ash-container {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-            z-index: 0;
-        }
+/* ── STAR CANVAS ── */
+#stars {
+  position: fixed; inset: 0;
+  pointer-events: none;
+  z-index: 0;
+}
 
-        .ash {
-            position: absolute;
-            background: rgba(200, 200, 200, 0.4);
-            border-radius: 50%;
-            animation: fall linear infinite;
-        }
+/* ── NOISE OVERLAY ── */
+body::before {
+  content: '';
+  position: fixed; inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+  opacity: 0.4;
+  pointer-events: none;
+  z-index: 1;
+}
 
-        @keyframes fall {
-            0% {
-                transform: translateY(-10px) translateX(0);
-                opacity: 0.8;
-            }
-            50% {
-                opacity: 0.4;
-            }
-            100% {
-                transform: translateY(100vh) translateX(var(--drift));
-                opacity: 0;
-            }
-        }
+/* ── LAYOUT ── */
+#app {
+  position: relative; z-index: 2;
+  min-height: 100vh;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  padding: 60px 24px;
+  gap: 64px;
+}
 
-        /* Volume control */
-        .volume-control {
-            position: fixed;
-            top: 20px;
-            left: 20px;
-            background: rgba(88, 28, 135, 0.3);
-            border: 2px solid rgba(139, 92, 246, 0.3);
-            border-radius: 14px;
-            padding: 12px;
-            backdrop-filter: blur(20px);
-            z-index: 1000;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
+/* ── HEADER ── */
+header {
+  text-align: center;
+  animation: fadeDown 0.9s cubic-bezier(0.16,1,0.3,1) both;
+}
 
-        .volume-control:hover {
-            background: rgba(88, 28, 135, 0.5);
-            border-color: rgba(139, 92, 246, 0.5);
-            transform: scale(1.05);
-        }
+.eyebrow {
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 4px;
+  color: var(--dim);
+  text-transform: uppercase;
+  margin-bottom: 16px;
+}
+.eyebrow span { color: var(--gold); }
 
-        .volume-icon {
-            color: white;
-            font-size: 24px;
-        }
+h1 {
+  font-family: 'Orbitron', sans-serif;
+  font-weight: 900;
+  font-size: clamp(42px, 8vw, 90px);
+  line-height: 1;
+  letter-spacing: -1px;
+  position: relative;
+  display: inline-block;
+}
+.h1-lyko { color: #fff; }
+.h1-apos { color: var(--accent); }
+.h1-s { color: #fff; }
+.h1-space {
+  display: block;
+  color: transparent;
+  -webkit-text-stroke: 1.5px var(--cyan);
+  text-shadow: 0 0 40px rgba(0,229,255,0.25);
+}
 
-        /* Profile views counter */
-        .profile-views {
-            position: fixed;
-            bottom: 20px;
-            left: 20px;
-            background: rgba(88, 28, 135, 0.3);
-            border: 2px solid rgba(139, 92, 246, 0.3);
-            border-radius: 14px;
-            padding: 10px 16px;
-            backdrop-filter: blur(20px);
-            color: white;
-            font-size: 14px;
-            font-weight: 550;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            z-index: 1000;
-        }
+/* glitch effect on hover */
+h1:hover .h1-space {
+  animation: glitch 0.4s steps(2) both;
+}
+@keyframes glitch {
+  0%   { text-shadow: -3px 0 var(--accent), 3px 0 var(--cyan); }
+  25%  { text-shadow: 3px 0 var(--accent), -3px 0 var(--cyan); clip-path: inset(20% 0 50% 0); }
+  50%  { text-shadow: -3px 0 var(--accent), 3px 0 var(--cyan); clip-path: inset(60% 0 10% 0); }
+  100% { text-shadow: 0 0 40px rgba(0,229,255,0.25); clip-path: none; }
+}
 
-        /* Main profile container */
-        .profile-container {
-            background: linear-gradient(135deg, rgba(88, 28, 135, 0.4), rgba(30, 20, 50, 0.6));
-            border: 2px solid rgba(139, 92, 246, 0.3);
-            border-radius: 24px;
-            padding: 40px 30px;
-            width: 90%;
-            max-width: 500px;
-            backdrop-filter: blur(20px);
-            text-align: center;
-            animation: fadeIn 0.6s ease-in;
-            position: relative;
-            z-index: 1;
-            box-shadow: 0 8px 32px rgba(139, 92, 246, 0.2);
-        }
+.subtitle {
+  margin-top: 20px;
+  font-size: 12px;
+  letter-spacing: 3px;
+  color: var(--dim);
+}
+.subtitle a { color: var(--gold); text-decoration: none; }
+.subtitle a:hover { color: #fff; }
 
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(30px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
+/* ── DIVIDER ── */
+.divider {
+  width: 120px; height: 1px;
+  background: linear-gradient(90deg, transparent, var(--accent), transparent);
+  margin: 0 auto;
+  animation: fadeDown 1s 0.2s both;
+}
 
-        /* Avatar with glow */
-        .avatar-container {
-            margin-bottom: 24px;
-            position: relative;
-            display: inline-block;
-        }
+/* ── GRID ── */
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 20px;
+  width: 100%;
+  max-width: 800px;
+  animation: fadeUp 1s 0.3s cubic-bezier(0.16,1,0.3,1) both;
+}
 
-        .avatar-glow {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 140px;
-            height: 140px;
-            border-radius: 50%;
-            background: radial-gradient(circle, rgba(139, 92, 246, 0.6), transparent 70%);
-            filter: blur(20px);
-            animation: pulse 3s ease-in-out infinite;
-        }
+/* ── CARD ── */
+.card {
+  position: relative;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  padding: 36px 32px;
+  cursor: none;
+  overflow: hidden;
+  transition: border-color 0.3s, transform 0.3s;
+  text-decoration: none;
+  display: block;
+  group: true;
+}
+.card::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: radial-gradient(circle at var(--mx,50%) var(--my,50%), rgba(233,69,96,0.08), transparent 60%);
+  opacity: 0;
+  transition: opacity 0.4s;
+}
+.card:hover::before { opacity: 1; }
+.card:hover { border-color: var(--accent); transform: translateY(-4px); }
 
-        @keyframes pulse {
-            0%, 100% {
-                transform: translate(-50%, -50%) scale(1);
-                opacity: 0.8;
-            }
-            50% {
-                transform: translate(-50%, -50%) scale(1.1);
-                opacity: 1;
-            }
-        }
+/* corner accents */
+.card::after {
+  content: '';
+  position: absolute; top: 0; right: 0;
+  width: 40px; height: 40px;
+  border-top: 2px solid var(--accent);
+  border-right: 2px solid var(--accent);
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+.card:hover::after { opacity: 1; }
+.card-corner-bl {
+  position: absolute; bottom: 0; left: 0;
+  width: 40px; height: 40px;
+  border-bottom: 2px solid var(--accent);
+  border-left: 2px solid var(--accent);
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+.card:hover .card-corner-bl { opacity: 1; }
 
-        .avatar {
-            width: 120px;
-            height: 120px;
-            border-radius: 50%;
-            border: 3px solid rgba(139, 92, 246, 0.6);
-            object-fit: cover;
-            position: relative;
-            z-index: 1;
-            box-shadow: 0 0 30px rgba(139, 92, 246, 0.5);
-        }
+.card-tag {
+  font-size: 9px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--dim);
+  margin-bottom: 16px;
+  display: flex; align-items: center; gap: 8px;
+}
+.card-tag::before {
+  content: '';
+  width: 20px; height: 1px;
+  background: var(--dim);
+}
 
-        /* Username */
-        .username {
-            color: #ffffff;
-            font-size: 36px;
-            font-weight: 700;
-            margin-bottom: 8px;
-            text-shadow: 0 0 20px rgba(139, 92, 246, 0.8), 0 0 40px rgba(139, 92, 246, 0.4);
-            letter-spacing: 0.5px;
-        }
+.card-icon {
+  font-size: 36px;
+  margin-bottom: 18px;
+  display: block;
+  transition: transform 0.3s;
+}
+.card:hover .card-icon { transform: scale(1.12) rotate(-4deg); }
 
-        /* Location */
-        .location {
-            color: rgba(255, 255, 255, 0.7);
-            font-size: 15px;
-            font-weight: 450;
-            margin-bottom: 28px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 6px;
-        }
+.card-title {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 18px;
+  font-weight: 700;
+  color: #fff;
+  letter-spacing: 1px;
+  margin-bottom: 10px;
+}
+.card-title .accent { color: var(--gold); }
 
-        .location svg {
-            opacity: 0.7;
-        }
+.card-desc {
+  font-size: 11px;
+  line-height: 1.7;
+  color: var(--dim);
+  margin-bottom: 24px;
+}
 
-        /* Social icons */
-        .social-icons {
-            display: flex;
-            justify-content: center;
-            gap: 12px;
-            margin-bottom: 24px;
-            flex-wrap: wrap;
-        }
+.card-cta {
+  font-size: 10px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--accent);
+  display: flex; align-items: center; gap: 8px;
+  transition: gap 0.2s, color 0.2s;
+}
+.card:hover .card-cta { gap: 14px; color: #fff; }
+.card-cta::after { content: '→'; }
 
-        .social-icon {
-            width: 50px;
-            height: 50px;
-            background: rgba(88, 28, 135, 0.3);
-            border: 2px solid rgba(139, 92, 246, 0.3);
-            border-radius: 14px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            color: #ffffff;
-            font-size: 24px;
-            text-decoration: none;
-        }
+/* Coming soon card variant */
+.card.soon { cursor: not-allowed; }
+.card.soon:hover { border-color: var(--dim); transform: none; }
+.card.soon::after { border-color: var(--dim); }
+.card.soon:hover .card-corner-bl { border-color: var(--dim); opacity: 0.4; }
+.card.soon::before { background: radial-gradient(circle at var(--mx,50%) var(--my,50%), rgba(90,106,144,0.06), transparent 60%); }
+.card.soon .card-cta { color: var(--dim); }
+.card.soon:hover .card-cta { color: var(--dim); gap: 8px; }
 
-        .social-icon:hover {
-            background: rgba(88, 28, 135, 0.5);
-            border-color: rgba(139, 92, 246, 0.6);
-            transform: translateY(-4px);
-            box-shadow: 0 8px 20px rgba(139, 92, 246, 0.4);
-        }
+.badge {
+  display: inline-block;
+  font-size: 8px; letter-spacing: 2px;
+  padding: 3px 8px;
+  border: 1px solid var(--dim);
+  color: var(--dim);
+  text-transform: uppercase;
+  margin-bottom: 10px;
+  border-radius: 2px;
+}
 
-        /* Business Email Section */
-        .business-email {
-            margin: 20px 0 0 0;
-            padding: 18px;
-            background: rgba(88, 28, 135, 0.2);
-            border: 2px solid rgba(139, 92, 246, 0.25);
-            border-radius: 14px;
-            text-align: center;
-        }
+/* ── FOOTER ── */
+footer {
+  font-size: 10px;
+  letter-spacing: 2px;
+  color: var(--dim);
+  text-align: center;
+  animation: fadeUp 1s 0.6s both;
+}
+footer span { color: var(--accent); }
 
-        .email-label {
-            display: block;
-            color: rgba(255, 255, 255, 0.6);
-            font-size: 12px;
-            font-weight: 600;
-            margin-bottom: 8px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
+/* ── ANIMATIONS ── */
+@keyframes fadeDown {
+  from { opacity: 0; transform: translateY(-20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
 
-        .email-link {
-            color: #a78bfa;
-            text-decoration: none;
-            font-size: 14px;
-            font-weight: 500;
-            transition: all 0.3s ease;
-            display: inline-block;
-        }
+/* ── ORBIT DECORATION ── */
+.orbit-wrap {
+  position: fixed; top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  width: 600px; height: 600px;
+  pointer-events: none; z-index: 0;
+  opacity: 0.04;
+}
+.orbit {
+  position: absolute; inset: 0;
+  border: 1px solid #fff;
+  border-radius: 50%;
+  animation: spin 40s linear infinite;
+}
+.orbit:nth-child(2) { inset: 60px; border-color: var(--accent); animation-duration: 60s; animation-direction: reverse; }
+.orbit:nth-child(3) { inset: 130px; animation-duration: 80s; }
+@keyframes spin { to { transform: rotate(360deg); } }
 
-        .email-link:hover {
-            color: #c4b5fd;
-            transform: scale(1.05);
-        }
-
-        /* Audio player */
-        .audio-player {
-            background: rgba(88, 28, 135, 0.2);
-            border: 2px solid rgba(139, 92, 246, 0.25);
-            border-radius: 16px;
-            padding: 16px;
-            margin-top: 24px;
-            display: flex;
-            align-items: center;
-            gap: 14px;
-        }
-
-        .audio-cover {
-            width: 55px;
-            height: 55px;
-            border-radius: 10px;
-            object-fit: cover;
-            border: 2px solid rgba(139, 92, 246, 0.3);
-        }
-
-        .audio-info {
-            flex: 1;
-            text-align: left;
-        }
-
-        .audio-title {
-            color: white;
-            font-size: 14px;
-            font-weight: 600;
-            margin-bottom: 10px;
-        }
-
-        .audio-progress {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .progress-bar {
-            flex: 1;
-            height: 5px;
-            background: rgba(139, 92, 246, 0.3);
-            border-radius: 10px;
-            position: relative;
-            cursor: pointer;
-            overflow: hidden;
-        }
-
-        .progress-fill {
-            height: 100%;
-            background: linear-gradient(90deg, #a78bfa, #8b5cf6);
-            border-radius: 10px;
-            width: 30%;
-            box-shadow: 0 0 10px rgba(139, 92, 246, 0.6);
-        }
-
-        .time {
-            color: rgba(255, 255, 255, 0.6);
-            font-size: 11px;
-            min-width: 35px;
-            font-weight: 500;
-        }
-
-        .audio-controls {
-            display: flex;
-            gap: 10px;
-            align-items: center;
-        }
-
-        .control-btn {
-            background: none;
-            border: none;
-            color: rgba(255, 255, 255, 0.6);
-            cursor: pointer;
-            font-size: 18px;
-            transition: all 0.3s;
-            padding: 4px;
-        }
-
-        .control-btn.play {
-            color: #a78bfa;
-            font-size: 24px;
-        }
-
-        .control-btn:hover {
-            color: #ffffff;
-            transform: scale(1.1);
-        }
-
-        /* Responsive */
-        @media (max-width: 768px) {
-            .profile-container {
-                width: 95%;
-                padding: 30px 20px;
-            }
-
-            .username {
-                font-size: 30px;
-            }
-
-            .social-icon {
-                width: 46px;
-                height: 46px;
-            }
-        }
-    </style>
+/* ── SCANLINE ── */
+.scanline {
+  position: fixed; inset: 0;
+  background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.03) 2px, rgba(0,0,0,0.03) 4px);
+  pointer-events: none; z-index: 3;
+}
+</style>
 </head>
 <body>
-    <!-- Background Video -->
-    <div class="background-container">
-        <video class="background-video" autoplay loop muted playsinline>
-            <source src="background-video.mp4" type="video/mp4">
-        </video>
-    </div>
-    <div class="overlay"></div>
 
-    <!-- Ash particles container -->
-    <div class="ash-container" id="ashContainer"></div>
+<div id="cursor"></div>
+<canvas id="stars"></canvas>
 
-    <!-- Volume Control -->
-    <div class="volume-control" onclick="toggleMute()">
-        <span class="volume-icon" id="volumeIcon">🔊</span>
-    </div>
+<!-- bg decoration -->
+<div class="orbit-wrap">
+  <div class="orbit"></div>
+  <div class="orbit"></div>
+  <div class="orbit"></div>
+</div>
+<div class="scanline"></div>
 
-    <!-- Profile Views -->
-    <div class="profile-views">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-            <path d="M12 9a3 3 0 0 0-3 3a3 3 0 0 0 3 3a3 3 0 0 0 3-3a3 3 0 0 0-3-3m0 8a5 5 0 0 1-5-5a5 5 0 0 1 5-5a5 5 0 0 1 5 5a5 5 0 0 1-5 5m0-12.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5"/>
-        </svg>
-        <span id="viewCount">27</span>
-    </div>
+<div id="app">
 
-    <!-- Main Profile Container -->
-    <div class="profile-container">
-        <!-- Avatar with glow effect -->
-        <div class="avatar-container">
-            <div class="avatar-glow"></div>
-            <img src="avatar.webp" alt="Profile Avatar" class="avatar">
-        </div>
+  <header>
+    <p class="eyebrow">Welcome to <span>LilLyko.space</span></p>
+    <h1>
+      <span class="h1-lyko">LYKO</span><span class="h1-apos">'</span><span class="h1-s">S</span>
+      <span class="h1-space">SPACE</span>
+    </h1>
+    <p class="subtitle">hover over a card to explore · <a href="https://LilLyko.space">LilLyko.space</a></p>
+  </header>
 
-        <!-- Username -->
-        <h1 class="username">Lyko</h1>
+  <div class="divider"></div>
 
-        <!-- Location -->
-        <div class="location">
-            <svg width="16" height="16" viewBox="4 2 16 20" fill="currentColor">
-                <path d="M12 12q.825 0 1.413-.587T14 10t-.587-1.412T12 8t-1.412.588T10 10t.588 1.413T12 12m0 10q-4.025-3.425-6.012-6.362T4 10.2q0-3.75 2.413-5.975T12 2t5.588 2.225T20 10.2q0 2.5-1.987 5.438T12 22"/>
-            </svg>
-            Riga, Latvia
-        </div>
+  <div class="cards">
 
-        <!-- Social Icons -->
-        <div class="social-icons">
-            <a href="https://youtube.com/LilLyko" class="social-icon" target="_blank" title="YouTube">
-                <svg width="24" height="24" viewBox="1.99 5 20.01 14.01" fill="currentColor">
-                    <path d="M21.593 7.203a2.506 2.506 0 0 0-1.762-1.766C18.265 5.007 12 5 12 5s-6.264-.007-7.831.404a2.56 2.56 0 0 0-1.766 1.778c-.413 1.566-.417 4.814-.417 4.814s-.004 3.264.406 4.814c.23.857.905 1.534 1.763 1.765c1.582.43 7.83.437 7.83.437s6.265.007 7.831-.403a2.515 2.515 0 0 0 1.767-1.763c.414-1.565.417-4.812.417-4.812s.02-3.265-.407-4.831zM9.996 15.005l.005-6l5.207 3.005l-5.212 2.995z"/>
-                </svg>
-            </a>
-            <a href="https://instagram.com/itslyko" class="social-icon" target="_blank" title="Instagram">
-                <svg width="24" height="24" viewBox="3 2.98 18.01 18.04" fill="currentColor">
-                    <path d="M20.947 8.305a6.53 6.53 0 0 0-.419-2.216a4.61 4.61 0 0 0-2.633-2.633a6.606 6.606 0 0 0-2.186-.42c-.962-.043-1.267-.055-3.709-.055s-2.755 0-3.71.055a6.606 6.606 0 0 0-2.185.42a4.607 4.607 0 0 0-2.633 2.633a6.554 6.554 0 0 0-.419 2.185c-.043.963-.056 1.268-.056 3.71s0 2.754.056 3.71c.015.748.156 1.486.419 2.187a4.61 4.61 0 0 0 2.634 2.632a6.584 6.584 0 0 0 2.185.45c.963.043 1.268.056 3.71.056s2.755 0 3.71-.056a6.59 6.59 0 0 0 2.186-.419a4.615 4.615 0 0 0 2.633-2.633c.263-.7.404-1.438.419-2.187c.043-.962.056-1.267.056-3.71c-.002-2.442-.002-2.752-.058-3.709zm-8.953 8.297c-2.554 0-4.623-2.069-4.623-4.623s2.069-4.623 4.623-4.623a4.623 4.623 0 0 1 0 9.246zm4.807-8.339a1.077 1.077 0 0 1-1.078-1.078a1.077 1.077 0 1 1 2.155 0c0 .596-.482 1.078-1.077 1.078z"/>
-                    <circle cx="11.994" cy="11.979" r="3.003"/>
-                </svg>
-            </a>
-            <a href="https://tiktok.com/@whoslyko" class="social-icon" target="_blank" title="TikTok">
-                <svg width="24" height="24" viewBox="3.2 2 17.43 19.99" fill="currentColor">
-                    <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74a2.89 2.89 0 0 1 2.31-4.64a2.93 2.93 0 0 1 .88.13V9.4a6.84 6.84 0 0 0-1-.05A6.33 6.33 0 0 0 5 20.1a6.34 6.34 0 0 0 10.86-4.43v-7a8.16 8.16 0 0 0 4.77 1.52v-3.4a4.85 4.85 0 0 1-1-.1z"/>
-                </svg>
-            </a>
-            <a href="https://soundcloud.com/itslyko" class="social-icon" target="_blank" title="SoundCloud">
-                <svg width="24" height="24" viewBox="1.99 7.64 20.02 8.72" fill="currentColor">
-                    <path d="M2.971 12.188c-.041 0-.078.038-.083.082l-.194 1.797l.194 1.756c.005.049.042.082.083.082s.075-.033.084-.082l.211-1.756l-.225-1.797c0-.046-.037-.082-.074-.082m-.75.691c-.051 0-.076.03-.088.079l-.138 1.109l.138 1.092c0 .046.037.078.075.078c.039 0 .073-.038.087-.087l.176-1.1l-.176-1.112c0-.051-.037-.076-.075-.076m1.526-1.025c-.052 0-.1.039-.1.087l-.176 2.139l.188 2.051c0 .049.037.1.099.1c.052 0 .089-.051.102-.1l.211-2.064l-.211-2.126c-.013-.049-.052-.1-.102-.1m.79-.075c-.063 0-.114.051-.126.113l-.161 2.201l.177 2.123c.012.063.061.114.122.114c.064 0 .113-.051.125-.124l.201-2.113l-.201-2.187a.11.11 0 0 0-.111-.112l-.026-.015zm.962.301a.128.128 0 0 0-.133-.125a.134.134 0 0 0-.137.125l-.182 2.026l.169 2.138a.13.13 0 0 0 .132.131c.062 0 .123-.055.123-.132l.189-2.139l-.189-2.036l.028.012zm.674-1.426a.154.154 0 0 0-.148.15l-.176 3.3l.156 2.139c0 .077.066.137.15.137c.078 0 .145-.074.15-.15l.174-2.137l-.173-3.313c-.007-.088-.074-.152-.15-.152m.8-.762a.178.178 0 0 0-.17.163l-.15 4.063l.138 2.125c0 .1.075.174.163.174c.086 0 .161-.074.174-.174l.162-2.125l-.161-4.052c-.013-.1-.088-.175-.175-.175m.826-.372c-.102 0-.176.073-.188.173l-.139 4.4l.139 2.102c.012.1.086.188.188.188a.193.193 0 0 0 .187-.188l.163-2.102l-.164-4.4c0-.1-.087-.188-.188-.188m1.038.038a.196.196 0 0 0-.199-.199a.205.205 0 0 0-.201.199l-.125 4.538l.124 2.089c.015.111.101.199.214.199s.201-.088.201-.199l.136-2.089l-.136-4.55l-.014.012zm.625-.111c-.113 0-.213.1-.213.211l-.125 4.439l.125 2.063c0 .125.1.213.213.213a.221.221 0 0 0 .214-.224l.125-2.064l-.14-4.428c0-.122-.1-.225-.225-.225m.838.139a.236.236 0 0 0-.237.237l-.086 4.29l.113 2.063c0 .124.1.231.236.231c.125 0 .227-.1.237-.237l.101-2.038l-.112-4.265c-.01-.137-.113-.238-.237-.238m.988-.786a.27.27 0 0 0-.139-.037c-.05 0-.1.013-.137.037a.25.25 0 0 0-.125.214v.05l-.086 5.044l.096 2.043v.007c.006.05.024.112.06.15c.05.051.12.086.196.086a.28.28 0 0 0 .175-.074a.262.262 0 0 0 .076-.188l.013-.201l.097-1.838l-.113-5.075a.24.24 0 0 0-.111-.199l-.002-.019zm.837-.457a.155.155 0 0 0-.124-.052a.283.283 0 0 0-.174.052a.265.265 0 0 0-.1.201v.023l-.114 5.513l.063 1.014l.052.988a.274.274 0 0 0 .548-.012l.125-2.013l-.125-5.536a.273.273 0 0 0-.138-.231m7.452 3.15c-.336 0-.663.072-.949.193a4.34 4.34 0 0 0-5.902-3.651c-.188.075-.227.151-.238.301v7.812a.31.31 0 0 0 .275.29h6.827a2.428 2.428 0 0 0 2.45-2.438a2.457 2.457 0 0 0-2.45-2.463"/>
-                </svg>
-            </a>
-            <a href="mailto:lillykobusiness69@gmail.com" class="social-icon" target="_blank" title="Business Email">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5l-8-5V6l8 5l8-5v2z"/>
-                </svg>
-            </a>
-        </div>
+    <!-- Lykos Paint -->
+    <a class="card" href="paint.html">
+      <div class="card-corner-bl"></div>
+      <span class="card-tag">App</span>
+      <span class="card-icon">🎨</span>
+      <div class="card-title">LYK<span class="accent">O</span>S PAINT</div>
+      <p class="card-desc">A full browser-based paint editor with layers, tools, and native .lyko project files. Draw, import images, and export your work.</p>
+      <div class="card-cta">Open App</div>
+    </a>
 
-        <!-- Business Email Display -->
-        <div class="business-email">
-            <span class="email-label">Business Inquiries</span>
-            <a href="mailto:lillykobusiness69@gmail.com" class="email-link">lillykobusiness69@gmail.com</a>
-        </div>
-
-        <!-- Audio Player -->
-        <div class="audio-player">
-            <img src="audio-cover.webp" alt="Audio Cover" class="audio-cover">
-            <div class="audio-info">
-                <div class="audio-title">You Are Welcome Here....</div>
-                <div class="audio-progress">
-                    <span class="time">0:19</span>
-                    <div class="progress-bar" onclick="seekAudio(event)">
-                        <div class="progress-fill" id="progressFill"></div>
-                    </div>
-                    <span class="time">0:56</span>
-                </div>
-            </div>
-            <div class="audio-controls">
-                <button class="control-btn" onclick="previousTrack()">⏮</button>
-                <button class="control-btn play" onclick="togglePlay()" id="playBtn">⏸</button>
-                <button class="control-btn" onclick="nextTrack()">⏭</button>
-            </div>
-        </div>
+    <!-- Coming Soon -->
+    <div class="card soon">
+      <div class="card-corner-bl"></div>
+      <span class="card-tag">Upcoming</span>
+      <span class="card-icon">🚀</span>
+      <span class="badge">Coming Soon</span>
+      <div class="card-title">??? <span class="accent">???</span></div>
+      <p class="card-desc">Something new is being built in the lab. Check back soon to see what Lyko ships next.</p>
+      <div class="card-cta">Stay Tuned</div>
     </div>
 
-    <!-- Hidden audio element -->
-    <audio id="audioPlayer" loop>
-        <source src="audio-track.mp3" type="audio/mpeg">
-    </audio>
+  </div>
 
-    <script>
-        const audio = document.getElementById('audioPlayer');
-        const playBtn = document.getElementById('playBtn');
-        const progressFill = document.getElementById('progressFill');
-        const bgVideo = document.querySelector('.background-video');
-        let isPlaying = false;
-        let isMuted = false;
+  <footer>
+    &copy; <span>LilLyko.space</span> — built by Lyko
+  </footer>
 
-        // View counter - increments on each page load
-        function updateViewCount() {
-            const viewCountElement = document.getElementById('viewCount');
-            let currentViews = localStorage.getItem('profileViews');
-            
-            if (!currentViews) {
-                currentViews = 27;
-            } else {
-                currentViews = parseInt(currentViews);
-            }
-            
-            currentViews++;
-            localStorage.setItem('profileViews', currentViews);
-            viewCountElement.textContent = currentViews;
-        }
+</div>
 
-        updateViewCount();
+<script>
+// ── CURSOR ──
+const cursor = document.getElementById('cursor');
+document.addEventListener('mousemove', e => {
+  cursor.style.left = e.clientX + 'px';
+  cursor.style.top  = e.clientY + 'px';
+});
+document.querySelectorAll('a, .card:not(.soon), button').forEach(el => {
+  el.addEventListener('mouseenter', () => cursor.classList.add('big'));
+  el.addEventListener('mouseleave', () => cursor.classList.remove('big'));
+});
 
-        // Create ash particles (Silent Hill style)
-        function createAsh() {
-            const ashContainer = document.getElementById('ashContainer');
-            const ash = document.createElement('div');
-            ash.className = 'ash';
-            
-            // Random size between 1-4px
-            const size = Math.random() * 3 + 1;
-            ash.style.width = size + 'px';
-            ash.style.height = size + 'px';
-            
-            // Random starting position
-            ash.style.left = Math.random() * 100 + '%';
-            
-            // Random animation duration between 8-15 seconds
-            const duration = Math.random() * 7 + 8;
-            ash.style.animationDuration = duration + 's';
-            
-            // Random horizontal drift
-            const drift = (Math.random() - 0.5) * 100;
-            ash.style.setProperty('--drift', drift + 'px');
-            
-            ashContainer.appendChild(ash);
-            
-            // Remove ash after animation completes
-            setTimeout(() => {
-                ash.remove();
-            }, duration * 1000);
-        }
+// ── CARD MOUSE TRACKING (radial gradient) ──
+document.querySelectorAll('.card').forEach(card => {
+  card.addEventListener('mousemove', e => {
+    const r = card.getBoundingClientRect();
+    const x = ((e.clientX - r.left) / r.width * 100).toFixed(1);
+    const y = ((e.clientY - r.top)  / r.height * 100).toFixed(1);
+    card.style.setProperty('--mx', x + '%');
+    card.style.setProperty('--my', y + '%');
+  });
+});
 
-        // Create ash particles continuously
-        setInterval(createAsh, 200);
+// ── STAR FIELD ──
+const canvas = document.getElementById('stars');
+const ctx = canvas.getContext('2d');
+let stars = [];
+let W, H;
 
-        // Create initial batch
-        for (let i = 0; i < 30; i++) {
-            setTimeout(createAsh, i * 100);
-        }
+function resize() {
+  W = canvas.width  = window.innerWidth;
+  H = canvas.height = window.innerHeight;
+}
+function initStars() {
+  stars = [];
+  const count = Math.floor((W * H) / 4000);
+  for (let i = 0; i < count; i++) {
+    stars.push({
+      x: Math.random() * W,
+      y: Math.random() * H,
+      r: Math.random() * 1.4 + 0.2,
+      a: Math.random(),
+      speed: Math.random() * 0.004 + 0.001,
+      twinkleOffset: Math.random() * Math.PI * 2
+    });
+  }
+}
+function drawStars(t) {
+  ctx.clearRect(0, 0, W, H);
+  stars.forEach(s => {
+    const alpha = s.a * (0.5 + 0.5 * Math.sin(t * s.speed * 60 + s.twinkleOffset));
+    ctx.beginPath();
+    ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+    ctx.fillStyle = `rgba(200,220,255,${alpha})`;
+    ctx.fill();
+  });
+}
 
-        // Auto-play audio when page loads
-        window.addEventListener('load', () => {
-            audio.play().catch(e => {
-                console.log('Auto-play prevented. User interaction required.');
-                playBtn.textContent = '▶';
-                isPlaying = false;
-            });
-        });
+let then = 0;
+function loop(t) {
+  if (t - then > 30) { drawStars(t); then = t; }
+  requestAnimationFrame(loop);
+}
 
-        function togglePlay() {
-            if (isPlaying) {
-                audio.pause();
-                playBtn.textContent = '▶';
-            } else {
-                audio.play();
-                playBtn.textContent = '⏸';
-            }
-            isPlaying = !isPlaying;
-        }
-
-        function toggleMute() {
-            const volumeIcon = document.getElementById('volumeIcon');
-            if (isMuted) {
-                bgVideo.muted = true;
-                audio.muted = false;
-                volumeIcon.textContent = '🔊';
-            } else {
-                bgVideo.muted = true;
-                audio.muted = true;
-                volumeIcon.textContent = '🔇';
-            }
-            isMuted = !isMuted;
-        }
-
-        function seekAudio(e) {
-            const bar = e.currentTarget;
-            const clickX = e.offsetX;
-            const width = bar.offsetWidth;
-            const percentage = (clickX / width);
-            audio.currentTime = audio.duration * percentage;
-        }
-
-        function previousTrack() {
-            audio.currentTime = 0;
-        }
-
-        function nextTrack() {
-            audio.currentTime = 0;
-        }
-
-        // Update progress bar
-        audio.addEventListener('timeupdate', () => {
-            const percentage = (audio.currentTime / audio.duration) * 100;
-            progressFill.style.width = percentage + '%';
-            
-            const currentMin = Math.floor(audio.currentTime / 60);
-            const currentSec = Math.floor(audio.currentTime % 60);
-            document.querySelectorAll('.time')[0].textContent = 
-                `${currentMin}:${currentSec.toString().padStart(2, '0')}`;
-        });
-
-        audio.addEventListener('ended', () => {
-            playBtn.textContent = '▶';
-            isPlaying = false;
-        });
-    </script>
+resize();
+initStars();
+loop(0);
+window.addEventListener('resize', () => { resize(); initStars(); });
+</script>
 </body>
 </html>
