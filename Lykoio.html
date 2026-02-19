@@ -2,858 +2,164 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>LykoIO – LilLyko.space</title>
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=DM+Mono:wght@300;400&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=DM+Mono&display=swap');
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-:root{
-  --void:#07080f;--surf:#121428;--bord:#1e2240;
-  --red:#e94560;--gold:#f5a623;--cyan:#00e5ff;
-  --green:#39ff8f;--text:#dce8ff;--dim:#5a6a90;
-  --grass:#1a3a1a;--grass2:#1f4422;
+html,body{width:100%;height:100%;background:#07080f;overflow:hidden;
+  font-family:'DM Mono',monospace;color:#dce8ff}
+
+#gameFrame{
+  position:fixed;inset:0;width:100%;height:100%;border:none;
+  opacity:0;transition:opacity .5s;z-index:1
 }
-html,body{width:100%;height:100%;background:var(--void);color:var(--text);
-  font-family:'DM Mono',monospace;overflow:hidden;user-select:none}
 
-/* ── LOADING SCREEN ── */
-#loadScreen{position:fixed;inset:0;background:var(--void);z-index:200;
-  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px}
-#loadScreen h1{font-family:'Orbitron',sans-serif;font-size:clamp(44px,8vw,88px);color:#fff;letter-spacing:2px}
-#loadScreen h1 .io{color:var(--cyan)}
-#loadStatus{font-size:11px;letter-spacing:3px;color:var(--dim);text-transform:uppercase}
+#overlay{
+  position:fixed;inset:0;background:#07080f;z-index:10;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;
+  transition:opacity .4s
+}
+#overlay.fade{opacity:0;pointer-events:none}
+
 .owrap{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);
-  width:600px;height:600px;pointer-events:none;opacity:.04}
+  width:580px;height:580px;pointer-events:none;opacity:.05}
 .orb{position:absolute;inset:0;border:1px solid #fff;border-radius:50%;animation:spin 40s linear infinite}
-.orb:nth-child(2){inset:60px;border-color:var(--cyan);animation-duration:60s;animation-direction:reverse}
-.orb:nth-child(3){inset:130px;animation-duration:80s}
+.orb:nth-child(2){inset:55px;border-color:#00e5ff;animation-duration:58s;animation-direction:reverse}
+.orb:nth-child(3){inset:120px;animation-duration:75s}
 @keyframes spin{to{transform:rotate(360deg)}}
+.scanlines{position:fixed;inset:0;pointer-events:none;
+  background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,.025) 2px,rgba(0,0,0,.025) 4px)}
 
-/* ── NAME ENTRY ── */
-#nameScreen{position:fixed;inset:0;background:var(--void);z-index:150;
-  display:none;flex-direction:column;align-items:center;justify-content:center;gap:22px}
-#nameScreen::before{content:'';position:fixed;inset:0;
-  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
-  opacity:.4;pointer-events:none}
-.scanl{position:fixed;inset:0;pointer-events:none;
-  background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,.03) 2px,rgba(0,0,0,.03) 4px)}
-.ni{position:relative;z-index:2;display:flex;flex-direction:column;align-items:center;gap:22px}
-.leyebrow{font-size:11px;letter-spacing:4px;color:var(--dim);text-transform:uppercase}
-.leyebrow span{color:var(--gold)}
-#nameScreen h1{font-family:'Orbitron',sans-serif;font-size:clamp(44px,8vw,88px);color:#fff;letter-spacing:2px;line-height:1}
-#nameScreen h1 .io{color:var(--cyan)}
-.ldiv{width:120px;height:1px;background:linear-gradient(90deg,transparent,var(--cyan),transparent)}
-#connStatus{font-size:10px;letter-spacing:3px;padding:6px 18px;border:1px solid var(--bord);
-  color:var(--dim);text-transform:uppercase;transition:color .3s,border-color .3s}
-#connStatus.ok{color:var(--green);border-color:var(--green)}
-#connStatus.err{color:var(--red);border-color:var(--red)}
-#nameIn{background:var(--surf);border:1px solid var(--bord);color:var(--text);
-  font-family:'DM Mono',monospace;font-size:16px;padding:13px 24px;width:290px;
-  outline:none;letter-spacing:2px;text-align:center;transition:border-color .3s}
-#nameIn:focus{border-color:var(--cyan)}
-#playBtn{background:var(--cyan);color:var(--void);font-family:'Orbitron',sans-serif;
-  font-size:13px;font-weight:700;letter-spacing:3px;border:none;
-  padding:14px 52px;cursor:pointer;transition:background .2s,transform .1s}
-#playBtn:hover:not(:disabled){background:#fff;transform:scale(1.04)}
-#playBtn:disabled{opacity:.4;cursor:not-allowed}
-.lhints{font-size:10px;letter-spacing:1px;color:var(--dim);text-align:center;line-height:2.2}
-.lhints span{color:var(--gold)}
-.bklink{font-size:10px;letter-spacing:2px;color:var(--dim);text-decoration:none;transition:color .2s}
-.bklink:hover{color:var(--cyan)}
+.inner{position:relative;z-index:2;display:flex;flex-direction:column;align-items:center;gap:0;text-align:center}
+.logo{font-family:'Orbitron',sans-serif;font-size:clamp(52px,9vw,90px);
+  color:#fff;letter-spacing:2px;line-height:1;margin-bottom:20px}
+.logo .io{color:#00e5ff}
 
-/* ── NPC DIALOGUE ── */
-#npcDialogue{position:fixed;bottom:90px;left:50%;transform:translateX(-50%);
-  background:rgba(7,8,15,.97);border:1px solid var(--bord);
-  padding:18px 28px;max-width:420px;width:90%;z-index:30;display:none;
-  animation:dIn .3s ease}
-@keyframes dIn{from{opacity:0;transform:translateX(-50%) translateY(10px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}
-#npcDialogue .npcName{font-family:'Orbitron',sans-serif;font-size:11px;color:var(--cyan);letter-spacing:3px;margin-bottom:8px}
-#npcDialogue .npcText{font-size:13px;color:var(--text);line-height:1.7;letter-spacing:.5px}
-#npcDialogue .npcClose{margin-top:12px;font-size:9px;letter-spacing:2px;color:var(--dim);text-align:right}
-#npcDialogue .npcClose span{color:var(--cyan);cursor:pointer}
-#npcDialogue .npcClose span:hover{color:#fff}
+#statusLine{font-size:10px;letter-spacing:3px;color:#5a6a90;text-transform:uppercase;
+  margin-bottom:14px;transition:color .3s}
+#statusLine.ok{color:#39ff8f}
+#statusLine.err{color:#e94560}
 
-/* ── CANVAS ── */
-canvas{display:block;position:fixed;inset:0;z-index:0}
+.pbar{width:200px;height:2px;background:#1e2240;overflow:hidden;margin-bottom:20px}
+.pfill{height:100%;width:35%;
+  background:linear-gradient(90deg,transparent,#00e5ff,transparent);
+  animation:sweep 1.5s ease-in-out infinite}
+@keyframes sweep{from{transform:translateX(-200%)}to{transform:translateX(500%)}}
+.pbar.hidden{opacity:0}
 
-/* ── HUD ── */
-#hud{position:fixed;inset:0;pointer-events:none;z-index:10;display:none}
-#stats{position:absolute;top:14px;left:14px;background:rgba(7,8,15,.9);
-  border:1px solid var(--bord);padding:14px 18px;min-width:205px}
-#sName{font-family:'Orbitron',sans-serif;font-size:12px;color:#fff;letter-spacing:2px;margin-bottom:10px}
-.brow{display:flex;align-items:center;gap:8px;margin-bottom:6px}
-.blbl{font-size:9px;letter-spacing:2px;color:var(--dim);width:24px}
-.bar{flex:1;height:5px;background:var(--bord)}
-.bfill{height:100%;transition:width .3s}
-.bfill.hp{background:var(--red)}.bfill.xp{background:var(--cyan)}
-.bval{font-size:9px;color:var(--dim);width:56px;text-align:right}
-#sLvl{font-family:'Orbitron',sans-serif;font-size:11px;color:var(--gold);letter-spacing:2px;margin-top:8px}
-#sKills{font-size:9px;color:var(--dim);letter-spacing:1px;margin-top:3px}
-#mm{position:absolute;top:14px;right:14px;width:158px;height:158px;
-  background:rgba(7,8,15,.9);border:1px solid var(--bord);overflow:hidden}
-#invBar{position:absolute;bottom:14px;left:50%;transform:translateX(-50%);
-  display:flex;gap:5px;pointer-events:all}
-.isl{width:52px;height:52px;background:rgba(7,8,15,.92);border:1px solid var(--bord);
-  display:flex;flex-direction:column;align-items:center;justify-content:center;
-  cursor:pointer;position:relative;transition:border-color .2s;font-size:22px}
-.isl:hover{border-color:var(--cyan)}.isl.eq{border-color:var(--gold)}
-.isl .sn{position:absolute;bottom:2px;font-size:7px;letter-spacing:.5px;color:var(--dim);
-  white-space:nowrap;overflow:hidden;max-width:48px;text-align:center}
-.iempty{opacity:.2;font-size:16px;color:var(--dim)}
-#tip{position:fixed;background:rgba(7,8,15,.96);border:1px solid var(--bord);
-  padding:10px 14px;font-size:11px;z-index:200;pointer-events:none;display:none;
-  max-width:190px;line-height:1.7}
-#tip .tn{font-family:'Orbitron',sans-serif;font-size:12px;color:#fff}
-.rc{color:var(--dim)}.ru{color:var(--green)}.rr{color:var(--cyan)}
-#tip .th{color:var(--gold);font-size:9px;letter-spacing:1px;margin-top:5px}
-#kf{position:absolute;top:14px;left:50%;transform:translateX(-50%);
-  display:flex;flex-direction:column;align-items:center;gap:5px;pointer-events:none}
-.kfe{background:rgba(7,8,15,.9);border:1px solid var(--bord);padding:5px 14px;
-  font-size:10px;letter-spacing:2px;animation:kfi .3s both,kfo .4s 3.6s both}
-.kk{color:var(--cyan)}.kv{color:var(--red)}
-@keyframes kfi{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:translateY(0)}}
-@keyframes kfo{to{opacity:0}}
-#ctrl{position:absolute;bottom:80px;left:14px;font-size:9px;letter-spacing:1px;
-  color:var(--dim);line-height:2;pointer-events:none}
-#ctrl span{color:var(--text)}
+.btn-row{display:flex;gap:10px;margin-top:4px}
+.btn{background:transparent;font-family:'DM Mono',monospace;font-size:9px;
+  letter-spacing:3px;text-transform:uppercase;padding:10px 22px;
+  cursor:pointer;transition:all .2s;display:none}
+.btn.show{display:block}
+.btn-retry{border:1px solid #1e2240;color:#5a6a90}
+.btn-retry:hover{border-color:#00e5ff;color:#00e5ff}
+.btn-offline{border:1px solid #1e2240;color:#5a6a90}
+.btn-offline:hover{border-color:#f5a623;color:#f5a623}
 
-/* ── DEATH ── */
-#death{position:fixed;inset:0;background:rgba(7,8,15,.93);z-index:50;
-  display:none;flex-direction:column;align-items:center;justify-content:center;gap:18px;
-  font-family:'Orbitron',sans-serif}
-#death h2{font-size:52px;color:var(--red);letter-spacing:4px}
-#death p{font-size:12px;color:var(--dim);letter-spacing:3px}
-.drow{display:flex;gap:44px;margin-top:6px}
-.ds{text-align:center}.dv{font-size:34px;color:#fff;display:block}
-.dl{font-size:9px;letter-spacing:3px;color:var(--dim)}
-#rbtn{background:var(--red);color:#fff;font-family:'Orbitron',sans-serif;
-  font-size:12px;font-weight:700;letter-spacing:3px;border:none;
-  padding:14px 40px;cursor:pointer;margin-top:14px;transition:background .2s}
-#rbtn:hover{background:#fff;color:var(--void)}
-
-/* ── DISCONNECTED ── */
-#dcScreen{position:fixed;inset:0;background:rgba(7,8,15,.96);z-index:60;
-  display:none;flex-direction:column;align-items:center;justify-content:center;gap:16px;
-  font-family:'Orbitron',sans-serif}
-#dcScreen h2{font-size:32px;color:var(--gold);letter-spacing:3px}
-#dcScreen p{font-size:11px;color:var(--dim);letter-spacing:2px}
-.dcbtn{background:var(--cyan);color:var(--void);font-family:'Orbitron',sans-serif;
-  font-size:11px;font-weight:700;letter-spacing:2px;border:none;
-  padding:10px 28px;cursor:pointer;margin-top:8px}
-
-/* ── LEVEL UP FLASH ── */
-#lvlFlash{position:fixed;inset:0;pointer-events:none;z-index:40;
-  display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity .2s}
-#lvlFlash.on{opacity:1}
-#lvlFlash span{font-family:'Orbitron',sans-serif;font-size:58px;font-weight:900;
-  color:var(--gold);text-shadow:0 0 60px var(--gold)}
-
-/* ── ISLAND UNLOCK BANNER ── */
-#islBanner{position:fixed;inset:0;background:rgba(7,8,15,.93);z-index:48;
-  display:none;flex-direction:column;align-items:center;justify-content:center;gap:16px;
-  font-family:'Orbitron',sans-serif}
-#islBanner h2{font-size:36px;color:var(--gold);letter-spacing:3px}
-#islBanner p{font-size:11px;color:var(--dim);letter-spacing:2px;text-align:center;line-height:1.9}
-.islbtn{background:var(--gold);color:var(--void);font-family:'Orbitron',sans-serif;
-  font-size:11px;font-weight:700;letter-spacing:2px;border:none;
-  padding:10px 28px;cursor:pointer;margin-top:8px}
-
-/* ── INTERACT PROMPT ── */
-#interactPrompt{position:fixed;bottom:160px;left:50%;transform:translateX(-50%);
-  font-size:10px;letter-spacing:2px;color:var(--dim);pointer-events:none;display:none;z-index:20;
-  background:rgba(7,8,15,.85);border:1px solid var(--bord);padding:5px 14px}
+#errDetail{font-size:9px;letter-spacing:1px;color:#2a3050;margin-top:6px;max-width:340px;
+  line-height:1.8;display:none}
+#errDetail.show{display:block}
 </style>
 </head>
 <body>
 
-<!-- Loading Screen -->
-<div id="loadScreen">
+<div id="overlay">
   <div class="owrap"><div class="orb"></div><div class="orb"></div><div class="orb"></div></div>
-  <div class="scanl"></div>
-  <div style="position:relative;z-index:2;display:flex;flex-direction:column;align-items:center;gap:16px">
-    <h1>LYKO<span class="io">IO</span></h1>
-    <div id="loadStatus">CONNECTING TO SERVER...</div>
-  </div>
-</div>
-
-<!-- Name Entry Screen -->
-<div id="nameScreen">
-  <div class="owrap"><div class="orb"></div><div class="orb"></div><div class="orb"></div></div>
-  <div class="scanl"></div>
-  <div class="ni">
-    <p class="leyebrow">Welcome to <span>LilLyko.space</span></p>
-    <h1>LYKO<span class="io">IO</span></h1>
-    <div class="ldiv"></div>
-    <div id="connStatus">✓ SERVER ONLINE</div>
-    <input id="nameIn" type="text" placeholder="ENTER YOUR NAME" maxlength="16" spellcheck="false">
-    <button id="playBtn">ENTER THE ISLAND</button>
-    <div class="lhints">
-      <span>WASD</span> move &nbsp;·&nbsp; <span>Click</span> enemy to attack<br>
-      <span>Click</span> item to use / equip &nbsp;·&nbsp; <span>Right-click</span> to drop<br>
-      Kill animals for XP &nbsp;·&nbsp; Kill players for <span>+200 bonus XP</span><br>
-      Reach <span>Level 10</span> to unlock the next island
+  <div class="scanlines"></div>
+  <div class="inner">
+    <div class="logo">LYKO<span class="io">IO</span></div>
+    <div id="statusLine">Connecting to server...</div>
+    <div class="pbar" id="pbar"><div class="pfill"></div></div>
+    <div class="btn-row">
+      <button class="btn btn-retry" id="retryBtn" onclick="tryLoad()">↺ Retry</button>
+      <button class="btn btn-offline" id="offlineBtn" onclick="goOffline()">Play Offline</button>
     </div>
-    <a class="bklink" href="index.html">← Back to LilLyko.space</a>
+    <div id="errDetail"></div>
   </div>
 </div>
 
-<canvas id="c"></canvas>
-
-<div id="hud">
-  <div id="stats">
-    <div id="sName">—</div>
-    <div class="brow"><span class="blbl">HP</span><div class="bar"><div class="bfill hp" id="hpB" style="width:100%"></div></div><span class="bval" id="hpV">100/100</span></div>
-    <div class="brow"><span class="blbl">XP</span><div class="bar"><div class="bfill xp" id="xpB" style="width:0%"></div></div><span class="bval" id="xpV">0/100</span></div>
-    <div id="sLvl">LVL 1</div>
-    <div id="sKills">Kills: 0 | PvP: 0</div>
-  </div>
-  <div id="mm"><canvas id="mmc" width="158" height="158"></canvas></div>
-  <div id="invBar"></div>
-  <div id="kf"></div>
-  <div id="ctrl"><span>WASD</span> – Move<br><span>Click</span> enemy – Attack<br><span>Click</span> item – Use/Equip<br><span>Right-click</span> – Drop<br><span>E</span> – Interact</div>
-</div>
-
-<div id="tip"></div>
-<div id="interactPrompt">[ E ] Talk to LYKO</div>
-
-<!-- NPC Dialogue -->
-<div id="npcDialogue">
-  <div class="npcName">✦ LYKO</div>
-  <div class="npcText" id="npcText">Hello!</div>
-  <div class="npcClose"><span id="npcCloseBtn">[ E ] Close</span></div>
-</div>
-
-<div id="death">
-  <h2>YOU DIED</h2>
-  <p id="dBy">Killed by the void</p>
-  <div class="drow">
-    <div class="ds"><span class="dv" id="dK">0</span><span class="dl">KILLS</span></div>
-    <div class="ds"><span class="dv" id="dP">0</span><span class="dl">PVP</span></div>
-    <div class="ds"><span class="dv" id="dL">1</span><span class="dl">LEVEL</span></div>
-  </div>
-  <button id="rbtn">RESPAWN</button>
-</div>
-
-<div id="dcScreen">
-  <h2>DISCONNECTED</h2>
-  <p>Lost connection to the server.</p>
-  <button class="dcbtn" onclick="location.reload()">RECONNECT</button>
-</div>
-
-<div id="islBanner">
-  <h2>✦ ISLAND UNLOCKED ✦</h2>
-  <p>You've reached <b style="color:var(--gold)">MAX LEVEL</b> on Island 1.<br>Island 2 is under construction — check back soon.</p>
-  <button class="islbtn" onclick="document.getElementById('islBanner').style.display='none'">KEEP PLAYING</button>
-</div>
-
-<div id="lvlFlash"><span>LEVEL UP!</span></div>
-
-<!--
-  IMPORTANT: To fix the Mixed Content (HTTPS) error, you need to either:
-  1. Set up an HTTPS subdomain on Wispbyte pointing to your server port, e.g. game.lillyko.space
-  2. Then replace SERVER_URL below with 'https://game.lillyko.space' (or whatever your Wispbyte gives you)
-  
-  For now, the socket.io script is loaded from the same origin as a fallback,
-  and we also try loading it from the server dynamically.
-  
-  On Wispbyte go to "Subdomains" tab -> create a subdomain -> it will give you a URL -> use that here.
--->
-<script>
-// ── SERVER CONFIG ──────────────────────────────────────────────────────────────
-// TODO: Replace this with your Wispbyte HTTPS subdomain URL!
-// Go to Subdomains tab in Wispbyte panel -> create one -> paste the URL here (with https://)
-// Example: const SERVER_URL = 'https://d0666df1.wispbyte.com';
-const SERVER_URL = 'https://d0666df1.wispbyte.com'; // <-- UPDATE THIS
-
-// ── Dynamic socket.io loader ───────────────────────────────────────────────────
-const loadScript = (src) => new Promise((res, rej) => {
-  const s = document.createElement('script');
-  s.src = src; s.onload = res; s.onerror = rej;
-  document.head.appendChild(s);
-});
-
-const loadScreen = document.getElementById('loadScreen');
-const loadStatus = document.getElementById('loadStatus');
-
-async function init() {
-  // Try loading socket.io from the server
-  try {
-    await loadScript(SERVER_URL + '/socket.io/socket.io.js');
-    loadStatus.textContent = 'SERVER FOUND — ENTER YOUR NAME';
-    loadStatus.style.color = '#39ff8f';
-    setTimeout(()=>{
-      loadScreen.style.display = 'none';
-      document.getElementById('nameScreen').style.display = 'flex';
-      document.getElementById('connStatus').textContent = '✓ SERVER ONLINE';
-      document.getElementById('connStatus').className = 'ok';
-    }, 600);
-  } catch(e) {
-    loadStatus.textContent = '✗ SERVER UNREACHABLE — CHECK WISPBYTE';
-    loadStatus.style.color = '#e94560';
-    // Still show name screen after 3s so they can at least see the UI
-    setTimeout(()=>{
-      loadScreen.style.display = 'none';
-      document.getElementById('nameScreen').style.display = 'flex';
-      document.getElementById('connStatus').textContent = '✗ SERVER UNREACHABLE';
-      document.getElementById('connStatus').className = 'err';
-    }, 3000);
-  }
-}
-init();
-</script>
+<iframe
+  id="gameFrame"
+  src="about:blank"
+  sandbox="allow-scripts allow-same-origin allow-forms allow-pointer-lock allow-popups allow-modals"
+  allowfullscreen
+></iframe>
 
 <script>
-const XP_TBL = [0,100,250,450,700,1050,1500,2100,2900,4000,5500];
+const SERVER   = 'http://212.132.120.102:13888';
+const GAME_URL = SERVER + '/Lykoio.html';
 
-// Canvas
-const canvas = document.getElementById('c');
-const ctx    = canvas.getContext('2d');
-const mmc    = document.getElementById('mmc');
-const mmx    = mmc.getContext('2d');
-function resize(){ canvas.width=innerWidth; canvas.height=innerHeight; }
-resize(); addEventListener('resize', resize);
+const frame      = document.getElementById('gameFrame');
+const overlay    = document.getElementById('overlay');
+const statusLine = document.getElementById('statusLine');
+const pbar       = document.getElementById('pbar');
+const retryBtn   = document.getElementById('retryBtn');
+const offlineBtn = document.getElementById('offlineBtn');
+const errDetail  = document.getElementById('errDetail');
 
-// State
-let socket, myId;
-let me=null, mapData=null, itemDefs={};
-let worldPlayers={}, worldAnimals={}, worldDrops={};
-let hits=[], floats=[];
-let keys={}, camX=0, camY=0, started=false;
+let loadAttempt = 0;
 
-// ── LOCAL MAP (used when server not connected or for lobby rendering) ──────────
-// Island 1 dimensions
-const MAP_W = 3200, MAP_H = 3200;
+function setLoading(msg) {
+  statusLine.textContent = msg || 'Connecting to server...';
+  statusLine.className = '';
+  pbar.classList.remove('hidden');
+  retryBtn.classList.remove('show');
+  offlineBtn.classList.remove('show');
+  errDetail.classList.remove('show');
+}
 
-// Lobby building position (center of map)
-const LOBBY_X = MAP_W/2, LOBBY_Y = MAP_H/2;
-const LOBBY_W = 220, LOBBY_H = 180;
+function setError(msg, detail) {
+  statusLine.textContent = msg;
+  statusLine.className = 'err';
+  pbar.classList.add('hidden');
+  retryBtn.classList.add('show');
+  offlineBtn.classList.add('show');
+  if (detail) { errDetail.textContent = detail; errDetail.classList.add('show'); }
+}
 
-// Lyko NPC position (inside lobby center)
-const LYKO_X = LOBBY_X;
-const LYKO_Y = LOBBY_Y - 20;
-const LYKO_INTERACT_DIST = 80;
+function tryLoad() {
+  loadAttempt++;
+  setLoading(loadAttempt > 1 ? 'Retrying...' : 'Connecting to server...');
 
-// Player state for offline/pre-join gameplay
-let localPlayer = {
-  x: LOBBY_X,
-  y: LOBBY_Y + 60, // spawn just inside lobby door
-  hp: 100, maxHp: 100,
-  xp: 0, level: 1, kills: 0, pvpKills: 0,
-  name: 'Player',
-  inv: [], equipped: {}
-};
+  const controller = new AbortController();
+  const killTimer  = setTimeout(() => controller.abort(), 7000);
 
-// Track whether Lyko dialogue is open
-let lykoDialogueOpen = false;
-let isOnline = false; // true once server connection established
-
-// Pre-generate grass tiles for rendering
-const grassTiles = [];
-for(let i=0;i<400;i++){
-  grassTiles.push({
-    x: Math.random()*MAP_W,
-    y: Math.random()*MAP_H,
-    type: Math.random() > 0.7 ? 1 : 0, // 0=short, 1=tall
-    seed: Math.random()
+  fetch(SERVER + '/socket.io/socket.io.js', {
+    method: 'HEAD', mode: 'no-cors', signal: controller.signal
+  })
+  .then(() => {
+    clearTimeout(killTimer);
+    statusLine.textContent = '✓ Server found — loading game...';
+    statusLine.className = 'ok';
+    setTimeout(() => { frame.src = GAME_URL; }, 400);
+  })
+  .catch(err => {
+    clearTimeout(killTimer);
+    setError('✗ Server down', err.name === 'AbortError'
+      ? 'Connection timed out.' : 'Could not reach the game server.');
   });
 }
 
-// ── Name Entry ────────────────────────────────────────────────────────────────
-const playBtn = document.getElementById('playBtn');
-playBtn.onclick = go;
-document.getElementById('nameIn').onkeydown = e=>{ if(e.key==='Enter') go(); };
-
-function go(){
-  if(started) return; started=true;
-  const name = document.getElementById('nameIn').value.trim()||'Wanderer';
-  localPlayer.name = name;
-  document.getElementById('nameScreen').style.display='none';
-  document.getElementById('hud').style.display='block';
-
-  // Try to connect to server
-  if(typeof io !== 'undefined'){
-    connect(name);
-    isOnline = true;
-  } else {
-    // Offline mode — local-only game for now
-    isOnline = false;
-    me = {...localPlayer};
-    mapData = {w:MAP_W, h:MAP_H, trees:[], rocks:[]};
-    updateHUD(); buildInv();
-    // Show Lyko greeting automatically after a moment
-    setTimeout(showLykoGreeting, 800);
-  }
-  requestAnimationFrame(loop);
-}
-
-// ── Lyko NPC dialogue ─────────────────────────────────────────────────────────
-function showLykoGreeting(){
-  document.getElementById('npcText').textContent = 'Hello!';
-  document.getElementById('npcDialogue').style.display = 'block';
-  document.getElementById('interactPrompt').style.display = 'none';
-  lykoDialogueOpen = true;
-}
-
-function closeLykoDialogue(){
-  document.getElementById('npcDialogue').style.display = 'none';
-  lykoDialogueOpen = false;
-}
-
-document.getElementById('npcCloseBtn').onclick = closeLykoDialogue;
-
-// ── Socket (online mode) ──────────────────────────────────────────────────────
-function connect(name){
-  socket = io(SERVER_URL, {reconnection:true, reconnectionAttempts:10});
-  socket.on('connect', ()=>{
-    myId=socket.id;
-    socket.emit('join',{name});
-  });
-  socket.on('disconnect', ()=> document.getElementById('dcScreen').style.display='flex');
-
-  socket.on('init', d=>{
-    me=d.me; itemDefs=d.items; mapData=d.map;
-    updateHUD(); buildInv();
-    setTimeout(showLykoGreeting, 800);
-  });
-  socket.on('state', d=>{
-    worldPlayers={}; d.players.forEach(p=>worldPlayers[p.id]=p);
-    worldAnimals={}; d.animals.forEach(a=>worldAnimals[a.id]=a);
-    worldDrops={};   d.drops.forEach(g=>worldDrops[g.id]=g);
-    const wp=worldPlayers[myId];
-    if(wp&&me){me.x=wp.x;me.y=wp.y;me.hp=wp.hp;me.level=wp.level;}
-  });
-  socket.on('xpGain', d=>{
-    if(me){me.xp=d.xp;me.level=d.level;}
-    fl(me?.x||0,(me?.y||0)-28,`+${d.amt} XP`,'#00e5ff',1100); updateHUD();
-  });
-  socket.on('levelUp', d=>{
-    if(me) me.level=d.level;
-    fl(me?.x||0,(me?.y||0)-50,'LEVEL UP!','#f5a623',1600);
-    const f=document.getElementById('lvlFlash');
-    f.classList.add('on'); setTimeout(()=>f.classList.remove('on'),700);
-    updateHUD();
-    if(d.level>=10) document.getElementById('islBanner').style.display='flex';
-  });
-  socket.on('hpUpdate', d=>{ if(me){me.hp=d.hp;me.maxHp=d.maxHp;} updateHUD(); });
-  socket.on('hit', d=>{ hits.push({x:d.x,y:d.y,r:5,a:1}); fl(d.x,d.y-14,`-${d.dmg}`,'#e94560',800); });
-  socket.on('invUpdate', d=>{ if(me){me.inv=d.inv;me.equipped=d.equipped;me.hp=d.hp;} buildInv();updateHUD(); });
-  socket.on('killfeed', d=>addKf(d.killer,d.victim));
-  socket.on('youDied', d=>{
-    document.getElementById('dBy').textContent=`Killed by ${d.by}`;
-    document.getElementById('dK').textContent=me?.kills||0;
-    document.getElementById('dP').textContent=me?.pvpKills||0;
-    document.getElementById('dL').textContent=me?.level||1;
-    document.getElementById('death').style.display='flex';
-    if(me) me.dead=true;
-  });
-  socket.on('respawned', d=>{ me=d; document.getElementById('death').style.display='none'; buildInv();updateHUD(); });
-  socket.on('animalDied',  id=>delete worldAnimals[id]);
-  socket.on('dropRemoved', id=>delete worldDrops[id]);
-  socket.on('dropAdded',   g=>{ if(g) worldDrops[g.id]=g; });
-  document.getElementById('rbtn').onclick=()=>socket.emit('respawn');
-}
-
-// ── Input ─────────────────────────────────────────────────────────────────────
-addEventListener('keydown', e=>{
-  keys[e.code]=true;
-  // E to interact / close dialogue
-  if(e.code==='KeyE'){
-    if(lykoDialogueOpen){
-      closeLykoDialogue();
-    } else {
-      // Check if near Lyko
-      const px = isOnline ? (worldPlayers[myId]?.x||me?.x||0) : localPlayer.x;
-      const py = isOnline ? (worldPlayers[myId]?.y||me?.y||0) : localPlayer.y;
-      const dist = Math.hypot(px - LYKO_X, py - LYKO_Y);
-      if(dist < LYKO_INTERACT_DIST){
-        showLykoGreeting();
-      }
-    }
-  }
-});
-addEventListener('keyup', e=>keys[e.code]=false);
-
-// Movement tick — online sends to server, offline moves locally
-setInterval(()=>{
-  if(!started) return;
-  if(lykoDialogueOpen) return;
-
-  let vx=0,vy=0;
-  if(keys['KeyW']||keys['ArrowUp'])   vy=-1;
-  if(keys['KeyS']||keys['ArrowDown']) vy= 1;
-  if(keys['KeyA']||keys['ArrowLeft']) vx=-1;
-  if(keys['KeyD']||keys['ArrowRight'])vx= 1;
-  if(vx&&vy){vx*=.707;vy*=.707;}
-
-  if(isOnline){
-    if(!socket||!me||me.dead) return;
-    socket.emit('move',{vx,vy});
-  } else {
-    // Local movement
-    const speed = 3.5;
-    localPlayer.x = Math.max(10, Math.min(MAP_W-10, localPlayer.x + vx*speed));
-    localPlayer.y = Math.max(10, Math.min(MAP_H-10, localPlayer.y + vy*speed));
-    if(me){ me.x=localPlayer.x; me.y=localPlayer.y; }
-  }
-
-  // Update interact prompt
-  const px = isOnline ? (worldPlayers[myId]?.x||me?.x||0) : localPlayer.x;
-  const py = isOnline ? (worldPlayers[myId]?.y||me?.y||0) : localPlayer.y;
-  const distToLyko = Math.hypot(px - LYKO_X, py - LYKO_Y);
-  const promptEl = document.getElementById('interactPrompt');
-  if(!lykoDialogueOpen && distToLyko < LYKO_INTERACT_DIST){
-    promptEl.style.display = 'block';
-  } else if(!lykoDialogueOpen){
-    promptEl.style.display = 'none';
-  }
-}, 33);
-
-canvas.addEventListener('click', e=>{
-  if(!isOnline||!socket||!me||me.dead) return;
-  const wx=e.clientX+camX,wy=e.clientY+camY;
-  for(const a of Object.values(worldAnimals)){
-    if(Math.hypot(a.x-wx,a.y-wy)<a.r+14){socket.emit('atkAnimal',{id:a.id});return;}
-  }
-  for(const p of Object.values(worldPlayers)){
-    if(p.id===myId) continue;
-    if(Math.hypot(p.x-wx,p.y-wy)<24){socket.emit('atkPlayer',{id:p.id});return;}
-  }
+frame.addEventListener('load', () => {
+  if (!frame.src || frame.src === 'about:blank') return;
+  overlay.classList.add('fade');
+  frame.style.opacity = '1';
+  setTimeout(() => overlay.style.display = 'none', 450);
 });
 
-// ── HUD ───────────────────────────────────────────────────────────────────────
-function updateHUD(){
-  if(!me) return;
-  document.getElementById('sName').textContent=(me.name||'').toUpperCase();
-  const hp=Math.max(0,me.hp);
-  document.getElementById('hpB').style.width=(hp/me.maxHp*100)+'%';
-  document.getElementById('hpV').textContent=`${Math.ceil(hp)}/${me.maxHp}`;
-  const nx=XP_TBL[Math.min(me.level,10)]||5500;
-  document.getElementById('xpB').style.width=Math.min(100,me.xp/nx*100)+'%';
-  document.getElementById('xpV').textContent=`${me.xp}/${nx}`;
-  document.getElementById('sLvl').textContent=`LVL ${me.level}${me.level>=10?' ✦ MAX':''}`;
-  document.getElementById('sKills').textContent=`Kills: ${me.kills||0} | PvP: ${me.pvpKills||0}`;
+function goOffline() {
+  setLoading('Loading offline mode...');
+  setTimeout(() => {
+    frame.src = 'Lykoio_offline.html';
+    overlay.classList.add('fade');
+    frame.style.opacity = '1';
+    setTimeout(() => overlay.style.display = 'none', 450);
+  }, 300);
 }
 
-// ── Inventory ─────────────────────────────────────────────────────────────────
-function buildInv(){
-  const bar=document.getElementById('invBar'); bar.innerHTML='';
-  const inv=me?.inv||[], eq=me?.equipped||{};
-  const eqSet=new Set(Object.values(eq).filter(Boolean));
-  for(let i=0;i<10;i++){
-    const sl=document.createElement('div'); sl.className='isl';
-    if(inv[i]){
-      const def=itemDefs[inv[i].itemId];
-      if(def){
-        if(eqSet.has(inv[i].itemId)) sl.classList.add('eq');
-        sl.textContent=def.icon;
-        const nm=document.createElement('span'); nm.className='sn'; nm.textContent=def.name; sl.appendChild(nm);
-        sl.dataset.iid=inv[i].id; sl.dataset.itemId=inv[i].itemId;
-        sl.addEventListener('mouseenter',showTip); sl.addEventListener('mouseleave',hideTip); sl.addEventListener('mousemove',movTip);
-        sl.addEventListener('click',()=>{if(socket)socket.emit('useItem',{invId:inv[i].id});hideTip();});
-        sl.addEventListener('contextmenu',e=>{e.preventDefault();if(socket)socket.emit('dropItem',{invId:inv[i].id});hideTip();});
-      }
-    } else { sl.innerHTML='<span class="iempty">+</span>'; }
-    bar.appendChild(sl);
-  }
-}
-function showTip(e){
-  const def=itemDefs[e.currentTarget.dataset.itemId]; if(!def) return;
-  const rc={common:'rc',uncommon:'ru',rare:'rr'}[def.rarity]||'rc';
-  document.getElementById('tip').innerHTML=`
-    <div class="tn">${def.icon} ${def.name}</div><div class="${rc}">${(def.rarity||'').toUpperCase()}</div>
-    ${def.dmg?`<div style="color:#e94560;font-size:10px">⚔ DMG ${def.dmg}</div>`:''}
-    ${def.def?`<div style="color:#00e5ff;font-size:10px">🛡 DEF ${def.def}</div>`:''}
-    ${def.heal?`<div style="color:#39ff8f;font-size:10px">❤ HEAL ${def.heal>=999?'Full HP':def.heal}</div>`:''}
-    <div class="th">Click: Use/Equip · Right-click: Drop</div>`;
-  document.getElementById('tip').style.display='block'; movTip(e);
-}
-function hideTip(){document.getElementById('tip').style.display='none';}
-function movTip(e){const t=document.getElementById('tip');t.style.left=(e.clientX+14)+'px';t.style.top=(e.clientY-10)+'px';}
-
-// ── Kill feed ─────────────────────────────────────────────────────────────────
-function addKf(killer,victim){
-  const el=document.createElement('div'); el.className='kfe';
-  el.innerHTML=`<span class="kk">${killer}</span> slew <span class="kv">${victim}</span>`;
-  document.getElementById('kf').appendChild(el); setTimeout(()=>el.remove(),4000);
-}
-
-// ── Float text ────────────────────────────────────────────────────────────────
-function fl(x,y,txt,col,life){floats.push({x,y,txt,col,life,maxLife:life,vy:-0.85});}
-
-// ── Minimap ───────────────────────────────────────────────────────────────────
-function drawMM(){
-  if(!me) return;
-  const mw = mapData?.w||MAP_W, mh = mapData?.h||MAP_H;
-  const W=158,H=158,sx=W/mw,sy=H/mh;
-  mmx.clearRect(0,0,W,H);
-  mmx.fillStyle='#0d1a0d'; mmx.fillRect(0,0,W,H);
-
-  // Draw lobby building on minimap
-  mmx.fillStyle='rgba(0,229,255,.15)';
-  mmx.fillRect((LOBBY_X - LOBBY_W/2)*sx, (LOBBY_Y - LOBBY_H/2)*sy, LOBBY_W*sx, LOBBY_H*sy);
-
-  if(mapData?.trees){
-    mmx.fillStyle='rgba(39,80,45,.6)';
-    mapData.trees.forEach(t=>mmx.fillRect(t.x*sx-1,t.y*sy-1,2,2));
-  }
-  if(mapData?.rocks){
-    mmx.fillStyle='rgba(80,80,100,.5)';
-    mapData.rocks.forEach(r=>mmx.fillRect(r.x*sx-1,r.y*sy-1,2,2));
-  }
-  mmx.fillStyle='#e94560';
-  Object.values(worldAnimals).forEach(a=>mmx.fillRect(a.x*sx-1.5,a.y*sy-1.5,3,3));
-  mmx.fillStyle='#00e5ff';
-  Object.values(worldPlayers).forEach(p=>{if(p.id===myId)return;mmx.fillRect(p.x*sx-2,p.y*sy-2,4,4);});
-  // Draw self
-  const selfX = isOnline ? (worldPlayers[myId]?.x||me?.x||0) : localPlayer.x;
-  const selfY = isOnline ? (worldPlayers[myId]?.y||me?.y||0) : localPlayer.y;
-  mmx.fillStyle='#fff';
-  mmx.fillRect(selfX*sx-3,selfY*sy-3,6,6);
-}
-
-// ── Grass rendering helpers ───────────────────────────────────────────────────
-let grassPatternCanvas = null;
-function getGrassPattern(){
-  if(grassPatternCanvas) return grassPatternCanvas;
-  grassPatternCanvas = document.createElement('canvas');
-  grassPatternCanvas.width = 80; grassPatternCanvas.height = 80;
-  const gc = grassPatternCanvas.getContext('2d');
-  // Base grass color
-  gc.fillStyle = '#162b14';
-  gc.fillRect(0,0,80,80);
-  // Add subtle variation
-  for(let i=0;i<30;i++){
-    const x=Math.random()*80, y=Math.random()*80;
-    gc.fillStyle = Math.random()>0.5 ? 'rgba(30,60,20,0.4)' : 'rgba(20,50,15,0.3)';
-    gc.fillRect(x,y,2+Math.random()*3,2+Math.random()*3);
-  }
-  return grassPatternCanvas;
-}
-
-// ── Render ────────────────────────────────────────────────────────────────────
-const TILE=80;
-let frameT = 0;
-
-function drawLobbyBuilding(cx, cy){
-  // Shadow
-  ctx.fillStyle='rgba(0,0,0,0.35)';
-  ctx.fillRect(cx-LOBBY_W/2+8, cy-LOBBY_H/2+8, LOBBY_W, LOBBY_H);
-
-  // Floor (inside building)
-  ctx.fillStyle='#0d1520';
-  ctx.fillRect(cx-LOBBY_W/2, cy-LOBBY_H/2, LOBBY_W, LOBBY_H);
-
-  // Walls
-  ctx.fillStyle='#1a2a40';
-  ctx.fillRect(cx-LOBBY_W/2, cy-LOBBY_H/2, LOBBY_W, 14); // top
-  ctx.fillRect(cx-LOBBY_W/2, cy+LOBBY_H/2-14, LOBBY_W, 14); // bottom
-  ctx.fillRect(cx-LOBBY_W/2, cy-LOBBY_H/2, 14, LOBBY_H); // left
-  ctx.fillRect(cx+LOBBY_W/2-14, cy-LOBBY_H/2, 14, LOBBY_H); // right
-
-  // Door opening (bottom center)
-  ctx.fillStyle='#162b14';
-  ctx.fillRect(cx-24, cy+LOBBY_H/2-14, 48, 14);
-
-  // Border glow
-  ctx.strokeStyle='rgba(0,229,255,0.25)';
-  ctx.lineWidth=1.5;
-  ctx.strokeRect(cx-LOBBY_W/2, cy-LOBBY_H/2, LOBBY_W, LOBBY_H);
-
-  // Interior details — floor tiles
-  ctx.strokeStyle='rgba(30,40,64,0.4)';
-  ctx.lineWidth=0.5;
-  for(let tx=cx-LOBBY_W/2+14;tx<cx+LOBBY_W/2-14;tx+=24){
-    ctx.beginPath();ctx.moveTo(tx,cy-LOBBY_H/2+14);ctx.lineTo(tx,cy+LOBBY_H/2-14);ctx.stroke();
-  }
-  for(let ty=cy-LOBBY_H/2+14;ty<cy+LOBBY_H/2-14;ty+=24){
-    ctx.beginPath();ctx.moveTo(cx-LOBBY_W/2+14,ty);ctx.lineTo(cx+LOBBY_W/2-14,ty);ctx.stroke();
-  }
-
-  // Building sign
-  ctx.fillStyle='rgba(0,229,255,0.8)';
-  ctx.font="bold 11px 'DM Mono', monospace";
-  ctx.textAlign='center'; ctx.textBaseline='middle';
-  ctx.fillText('[ LOBBY ]', cx, cy-LOBBY_H/2-12);
-}
-
-function drawLykoNPC(t){
-  const bobY = Math.sin(t * 0.002) * 2;
-  const lx = LYKO_X, ly = LYKO_Y + bobY;
-
-  // Glow aura
-  const pulse = 0.4 + Math.sin(t*0.003)*0.2;
-  const grad = ctx.createRadialGradient(lx,ly,5,lx,ly,34);
-  grad.addColorStop(0,`rgba(0,229,255,${pulse*0.3})`);
-  grad.addColorStop(1,'rgba(0,229,255,0)');
-  ctx.beginPath();ctx.arc(lx,ly,34,0,Math.PI*2);
-  ctx.fillStyle=grad;ctx.fill();
-
-  // Body
-  ctx.beginPath();ctx.arc(lx,ly,16,0,Math.PI*2);
-  ctx.fillStyle='#0a1f30';ctx.fill();
-  ctx.strokeStyle='#00e5ff';ctx.lineWidth=2;ctx.stroke();
-
-  // Eyes
-  ctx.fillStyle='#00e5ff';
-  ctx.beginPath();ctx.arc(lx-5,ly-3,3,0,Math.PI*2);ctx.fill();
-  ctx.beginPath();ctx.arc(lx+5,ly-3,3,0,Math.PI*2);ctx.fill();
-
-  // Name tag
-  ctx.font="bold 10px 'DM Mono',monospace";
-  ctx.fillStyle='#00e5ff';ctx.textAlign='center';
-  ctx.fillText('LYKO', lx, ly-24);
-
-  // Interaction hint (pulsing dot)
-  ctx.beginPath();ctx.arc(lx,ly-30+bobY*0.5,3,0,Math.PI*2);
-  ctx.fillStyle=`rgba(0,229,255,${0.5+Math.sin(t*0.005)*0.5})`;
-  ctx.fill();
-}
-
-function draw(){
-  const W=canvas.width,H=canvas.height;
-  frameT += 16;
-
-  // Get current player position
-  let px, py;
-  if(isOnline && me){
-    const wp=worldPlayers[myId]||me;
-    px=wp.x; py=wp.y;
-  } else {
-    px=localPlayer.x; py=localPlayer.y;
-  }
-
-  camX+=(px-W/2-camX)*.1;
-  camY+=(py-H/2-camY)*.1;
-
-  ctx.save();
-  ctx.translate(-camX,-camY);
-
-  const mw = mapData?.w||MAP_W, mh = mapData?.h||MAP_H;
-
-  // ── Grass background ──
-  // Tiled grass fill
-  const gx0=Math.floor(camX/TILE)*TILE, gy0=Math.floor(camY/TILE)*TILE;
-  for(let gx=gx0;gx<camX+W+TILE;gx+=TILE){
-    for(let gy=gy0;gy<camY+H+TILE;gy+=TILE){
-      // Clip to map bounds
-      if(gx+TILE<0||gx>mw||gy+TILE<0||gy>mh) continue;
-      // Alternate grass shades for checker texture
-      const even = ((Math.floor(gx/TILE)+Math.floor(gy/TILE))%2===0);
-      ctx.fillStyle = even ? '#162b14' : '#152914';
-      ctx.fillRect(gx,gy,TILE,TILE);
-    }
-  }
-
-  // Void outside map
-  ctx.fillStyle='#07080f';
-  ctx.fillRect(camX,camY,-camX+0,H); // left void
-  ctx.fillRect(mw,camY,W,H); // right void
-  ctx.fillRect(0,camY,mw,-camY+0); // top void
-  ctx.fillRect(0,mh,mw,H); // bottom void
-  ctx.fillRect(camX,camY,W,-camY+0); // top full
-  ctx.fillRect(camX,mh,W,H); // bottom full
-
-  // Map border glow
-  ctx.strokeStyle='rgba(0,229,255,.22)'; ctx.lineWidth=3;
-  ctx.strokeRect(0,0,mw,mh);
-
-  // Grass details (decorative blades)
-  grassTiles.forEach(g=>{
-    if(g.x<camX-10||g.x>camX+W+10||g.y<camY-10||g.y>camY+H+10) return;
-    ctx.strokeStyle=g.type===1?'rgba(45,100,30,0.5)':'rgba(35,80,25,0.4)';
-    ctx.lineWidth=0.8;
-    const h2=g.type===1?8:5;
-    const wob=Math.sin(frameT*0.001+g.seed*10)*1.5;
-    ctx.beginPath();ctx.moveTo(g.x,g.y);ctx.lineTo(g.x+wob,g.y-h2);ctx.stroke();
-  });
-
-  // Trees (from server map or none if not connected yet)
-  if(mapData?.trees){
-    mapData.trees.forEach(t=>{
-      ctx.beginPath();ctx.arc(t.x,t.y,t.r*1.1,0,Math.PI*2);
-      ctx.fillStyle='rgba(10,30,15,.75)';ctx.fill();
-      ctx.font=`${t.r*1.5}px serif`;ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText('🌲',t.x,t.y);
-    });
-  }
-  if(mapData?.rocks){
-    mapData.rocks.forEach(r=>{
-      ctx.font=`${r.r*1.5}px serif`;ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText('🪨',r.x,r.y);
-    });
-  }
-
-  // ── Lobby building ──
-  drawLobbyBuilding(LOBBY_X, LOBBY_Y);
-
-  // ── Lyko NPC (inside lobby) ──
-  drawLykoNPC(frameT);
-
-  // Ground drops
-  Object.values(worldDrops).forEach(d=>{
-    const def=itemDefs[d.itemId]; if(!def) return;
-    ctx.save();ctx.shadowColor='#00e5ff';ctx.shadowBlur=10;
-    ctx.font='18px serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(def.icon,d.x,d.y);ctx.restore();
-  });
-
-  // Animals
-  Object.values(worldAnimals).forEach(a=>{
-    const bw=a.r*2.2;
-    ctx.fillStyle='#1e2240';ctx.fillRect(a.x-bw/2,a.y-a.r-16,bw,4);
-    ctx.fillStyle='#e94560';ctx.fillRect(a.x-bw/2,a.y-a.r-16,bw*(a.hp/a.maxHp),4);
-    ctx.font=`${a.r*1.7}px serif`;ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(a.icon,a.x,a.y);
-    ctx.fillStyle='#5a6a90';ctx.font='9px DM Mono';ctx.fillText(a.name,a.x,a.y-a.r-20);
-  });
-
-  // Online players
-  Object.values(worldPlayers).forEach(p=>drawP(p,p.id===myId));
-
-  // Local player (offline mode or own char)
-  if(!isOnline && me){
-    drawP({...localPlayer, id:'local', equipped:{}, dead:false}, true);
-  }
-
-  // Hit ripples
-  hits=hits.filter(h=>h.a>0);
-  hits.forEach(h=>{
-    h.r+=1.2;h.a-=.055;ctx.save();ctx.beginPath();ctx.arc(h.x,h.y,h.r,0,Math.PI*2);
-    ctx.strokeStyle=`rgba(233,69,96,${h.a})`;ctx.lineWidth=2;ctx.stroke();ctx.restore();
-  });
-
-  // Floats
-  floats=floats.filter(f=>f.life>0);
-  floats.forEach(f=>{
-    f.life-=16;f.y+=f.vy;
-    ctx.save();ctx.globalAlpha=Math.min(1,f.life/(f.maxLife*.4));
-    ctx.fillStyle=f.col;ctx.font='bold 13px DM Mono';
-    ctx.textAlign='center';ctx.fillText(f.txt,f.x,f.y);ctx.restore();
-  });
-
-  ctx.restore();
-  drawMM();
-}
-
-function drawP(p,isMe){
-  const r=18; ctx.save();
-  const bw=50,hp=Math.max(0,p.hp)/p.maxHp;
-  ctx.fillStyle='#1e2240';ctx.fillRect(p.x-bw/2,p.y-r-24,bw,4);
-  ctx.fillStyle=hp>.5?'#39ff8f':hp>.25?'#f5a623':'#e94560';
-  ctx.fillRect(p.x-bw/2,p.y-r-24,bw*hp,4);
-  if(isMe){ctx.shadowColor='#00e5ff';ctx.shadowBlur=18;}
-  ctx.beginPath();ctx.arc(p.x,p.y,r,0,Math.PI*2);
-  ctx.fillStyle=isMe?'#0d1a2e':'#2a0d14';ctx.fill();
-  ctx.strokeStyle=isMe?'#00e5ff':'#e94560';ctx.lineWidth=isMe?2.5:1.5;ctx.stroke();
-  ctx.shadowBlur=0;
-  if(p.equipped?.weapon&&itemDefs[p.equipped.weapon]){
-    ctx.font='13px serif';ctx.textAlign='center';ctx.textBaseline='middle';
-    ctx.fillText(itemDefs[p.equipped.weapon].icon,p.x+10,p.y+9);
-  }
-  ctx.fillStyle=isMe?'#00e5ff':'#e94560';
-  ctx.font=`${isMe?'bold ':''}10px DM Mono`;
-  ctx.textAlign='center';
-  ctx.fillText(`${p.name||'?'} [${p.level||1}]`,p.x,p.y-r-28);
-  ctx.restore();
-}
-
-function loop(){draw();requestAnimationFrame(loop);}
+tryLoad();
 </script>
 </body>
 </html>
