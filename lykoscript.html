@@ -1,10 +1,8 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>LykoScript</title>
-  <style>
+<html lang="en"><head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>LykoScript</title>
+<style>
 /* ===== RESET & BASE ===== */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -19,14 +17,13 @@
   --text: #c8d0f0;
   --text-dim: #4a5070;
   --font-ui: 'Courier New', 'Lucida Console', monospace;
-  --font-display: 'Courier New', 'Lucida Console', monospace;
+  --font-display: 'Courier New', monospace;
 
-  /* Block colors */
   --motion: #4c97ff;
   --looks: #9966ff;
   --sound: #cf63cf;
   --events: #ffab19;
-  --control: #ffab19;
+  --control: #e6881a;
   --sensing: #5cb1d6;
   --operators: #59c059;
   --variables: #ff8c1a;
@@ -55,29 +52,20 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(-
 #topbar-controls { display: flex; align-items: center; gap: 8px; }
 
 #btn-flag {
-  background: #1a3a1a;
-  border: 1px solid #59c059;
-  color: #59c059;
-  border-radius: 6px;
-  width: 36px; height: 28px;
-  cursor: pointer; font-size: 13px;
-  transition: all 0.15s;
+  background: #1a3a1a; border: 1px solid #59c059; color: #59c059;
+  border-radius: 6px; width: 36px; height: 28px;
+  cursor: pointer; font-size: 13px; transition: all 0.15s;
 }
 #btn-flag:hover { background: #59c059; color: #000; }
 
 #btn-stop {
-  background: #3a1a1a;
-  border: 1px solid #ff4444;
-  color: #ff4444;
-  border-radius: 6px;
-  width: 36px; height: 28px;
-  cursor: pointer; font-size: 13px;
-  transition: all 0.15s;
+  background: #3a1a1a; border: 1px solid #ff4444; color: #ff4444;
+  border-radius: 6px; width: 36px; height: 28px;
+  cursor: pointer; font-size: 13px; transition: all 0.15s;
 }
 #btn-stop:hover { background: #ff4444; color: #000; }
 
 #run-status { font-size: 11px; color: var(--text-dim); }
-
 #topbar-right { margin-left: auto; }
 .nav-back { color: var(--text-dim); text-decoration: none; font-size: 12px; transition: color 0.2s; }
 .nav-back:hover { color: var(--accent); }
@@ -85,378 +73,398 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(-
 /* ===== MAIN LAYOUT ===== */
 #app {
   display: flex;
-  height: calc(100vh - 44px);
+  height: calc(100vh - 44px - 42px); /* minus topbar and footer */
   overflow: hidden;
 }
 
 /* ===== PALETTE PANEL ===== */
 #palette-panel {
-  width: 220px;
-  min-width: 220px;
+  width: 220px; min-width: 220px;
   background: var(--panel);
   border-right: 1px solid var(--border);
-  display: flex;
-  flex-direction: column;
+  display: flex; flex-direction: column;
   overflow: hidden;
 }
 
 #category-tabs {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  padding: 8px 6px;
+  display: flex; flex-direction: column;
+  gap: 2px; padding: 8px 6px;
   border-bottom: 1px solid var(--border);
 }
 
 .cat-tab {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 5px 8px;
-  border-radius: 6px;
-  cursor: pointer;
-  font-size: 11px;
+  display: flex; align-items: center; gap: 8px;
+  padding: 5px 8px; border-radius: 6px;
+  cursor: pointer; font-size: 11px;
   font-family: var(--font-ui);
-  border: none;
-  background: transparent;
-  color: var(--text);
-  transition: background 0.15s;
+  border: none; background: transparent;
+  color: var(--text); transition: background 0.15s;
   text-align: left;
 }
 .cat-tab:hover { background: var(--panel2); }
 .cat-tab.active { background: var(--panel2); }
+.cat-dot { width: 14px; height: 14px; border-radius: 50%; flex-shrink: 0; }
 
-.cat-dot {
-  width: 14px; height: 14px;
-  border-radius: 50%;
-  flex-shrink: 0;
-}
-
-#block-palette {
-  flex: 1;
-  overflow-y: auto;
-  padding: 8px 6px;
-}
-
+#block-palette { flex: 1; overflow-y: auto; padding: 8px 6px; }
 #block-palette::-webkit-scrollbar { width: 4px; }
-#block-palette::-webkit-scrollbar-track { background: transparent; }
 #block-palette::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
-
-.palette-section-title {
-  font-size: 10px;
-  color: var(--text-dim);
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  padding: 8px 4px 4px;
-}
 
 /* ===== BLOCKS ===== */
 .block {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  padding: 6px 10px;
-  border-radius: 6px;
-  font-size: 11px;
-  font-family: var(--font-ui);
-  cursor: grab;
-  user-select: none;
-  position: relative;
-  min-height: 28px;
-  flex-wrap: wrap;
-  border: none;
-  margin: 2px 0;
-  width: 100%;
-  color: #fff;
-  transition: filter 0.1s, transform 0.1s;
+  display: flex; align-items: center; gap: 4px; flex-wrap: wrap;
+  padding: 7px 10px; border-radius: 6px;
+  font-size: 11px; font-family: var(--font-ui);
+  cursor: grab; user-select: none;
+  position: relative; min-height: 30px;
+  border: none; margin: 3px 0;
+  width: 100%; color: #fff;
+  transition: filter 0.1s;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.15);
 }
 .block:hover { filter: brightness(1.15); }
-.block:active { cursor: grabbing; transform: scale(0.97); }
+.block.dragging { cursor: grabbing; }
 
-/* Hat blocks (events) have a rounded top notch */
-.block.hat { border-radius: 18px 18px 6px 6px; padding-top: 10px; }
-
-/* C-shaped control blocks */
-.block.c-block {
-  border-radius: 6px;
-  flex-direction: column;
-  align-items: flex-start;
-  padding: 0;
-  overflow: visible;
+/* Hat blocks */
+.block.hat {
+  border-radius: 18px 18px 6px 6px;
+  padding-top: 10px;
 }
-.c-block .block-top { display: flex; align-items: center; gap: 4px; padding: 6px 10px; width: 100%; }
-.c-block .block-mouth {
-  margin-left: 20px;
-  min-height: 28px;
-  border-left: 3px solid rgba(0,0,0,0.2);
-  padding: 4px;
-  width: calc(100% - 20px);
-}
-.c-block .block-bottom { padding: 6px 10px; width: 100%; }
+.block.hat::before { display: none !important; }
 
-/* Block notch/tab indicators */
+/* Terminator blocks */
+.block.terminator::after { display: none !important; }
+
+/* Notch/tab (connector nubs) */
 .block::before {
   content: '';
-  position: absolute;
-  left: 10px;
-  top: -4px;
-  width: 20px; height: 4px;
-  border-radius: 2px 2px 0 0;
-  background: inherit;
-  filter: brightness(0.85);
+  position: absolute; left: 12px; top: -5px;
+  width: 20px; height: 6px;
+  background: inherit; filter: brightness(0.8);
+  border-radius: 3px 3px 0 0;
 }
-.block.hat::before { display: none; }
 .block::after {
   content: '';
-  position: absolute;
-  left: 10px;
-  bottom: -4px;
-  width: 20px; height: 4px;
-  border-radius: 0 0 2px 2px;
-  background: inherit;
-  filter: brightness(0.85);
+  position: absolute; left: 12px; bottom: -5px;
+  width: 20px; height: 6px;
+  background: inherit; filter: brightness(0.8);
+  border-radius: 0 0 3px 3px;
 }
-.block.terminator::after { display: none; }
 
 /* Category colors */
-.block.motion { background: var(--motion); }
-.block.looks { background: var(--looks); }
-.block.sound { background: var(--sound); }
-.block.events { background: var(--events); }
-.block.control { background: var(--control); }
-.block.sensing { background: var(--sensing); }
-.block.operators { background: var(--operators); }
-.block.variables { background: var(--variables); }
-.block.myblocks { background: var(--myblocks); }
+.block.motion    { background: var(--motion); }
+.block.looks     { background: var(--looks); }
+.block.sound     { background: var(--sound); }
+.block.events    { background: var(--events); }
+.block.control   { background: var(--control); }
+.block.sensing   { background: var(--sensing); }
+.block.operators { background: var(--operators); border-radius: 14px; }
+.block.variables { background: var(--variables); border-radius: 14px; }
+.block.myblocks  { background: var(--myblocks); }
 
-/* Reporter blocks (oval) */
+/* Reporter (oval) */
 .block.reporter {
-  border-radius: 14px;
-  display: inline-flex;
-  width: auto;
-  padding: 4px 12px;
+  border-radius: 14px; display: inline-flex;
+  width: auto; padding: 4px 12px;
 }
+.block.reporter::before, .block.reporter::after { display: none; }
 
-/* Boolean blocks (hexagon-ish) */
+/* Boolean (hexagon) */
 .block.boolean {
-  border-radius: 14px;
-  display: inline-flex;
-  width: auto;
-  padding: 4px 14px;
-  clip-path: polygon(8px 0%, calc(100% - 8px) 0%, 100% 50%, calc(100% - 8px) 100%, 8px 100%, 0% 50%);
+  border-radius: 14px; display: inline-flex;
+  width: auto; padding: 4px 14px;
 }
+.block.boolean::before, .block.boolean::after { display: none; }
 
-/* Inputs inside blocks */
-.block-input {
-  background: rgba(255,255,255,0.25);
-  border: none;
-  border-radius: 4px;
-  padding: 1px 6px;
-  font-size: 11px;
-  font-family: var(--font-ui);
-  color: #fff;
-  width: 40px;
-  outline: none;
-  cursor: text;
+/* C-block */
+.block.c-block {
+  flex-direction: column; align-items: flex-start; padding: 0; overflow: visible;
 }
+.c-block .block-top { display: flex; align-items: center; gap: 4px; padding: 7px 10px; width: 100%; }
+.c-block .block-mouth {
+  margin-left: 22px; min-height: 32px;
+  border-left: 4px solid rgba(0,0,0,0.25);
+  padding: 4px 4px 4px 8px;
+  width: calc(100% - 22px);
+}
+.c-block .block-bottom { padding: 7px 10px; width: 100%; }
+
+/* Inputs */
+.block-input {
+  background: rgba(255,255,255,0.25); border: none;
+  border-radius: 4px; padding: 2px 6px;
+  font-size: 11px; font-family: var(--font-ui);
+  color: #fff; width: 44px; outline: none; cursor: text;
+}
+.block-input.wide { width: 90px; }
 .block-input:focus { background: rgba(255,255,255,0.4); }
-.block-input.wide { width: 80px; }
 
 .block-dropdown {
-  background: rgba(255,255,255,0.25);
-  border: none;
-  border-radius: 4px;
-  padding: 1px 4px;
-  font-size: 11px;
-  font-family: var(--font-ui);
-  color: #fff;
-  cursor: pointer;
-  outline: none;
+  background: rgba(255,255,255,0.25); border: none;
+  border-radius: 4px; padding: 2px 4px;
+  font-size: 11px; font-family: var(--font-ui);
+  color: #fff; cursor: pointer; outline: none; max-width: 120px;
 }
 .block-dropdown option { background: #1a1a2e; color: #fff; }
 
+.bool-slot {
+  display: inline-block; min-width: 44px; height: 20px;
+  background: rgba(0,0,0,0.2); border-radius: 10px;
+  vertical-align: middle; border: 1px dashed rgba(255,255,255,0.2);
+}
+
+/* ===== SCRIPT STACKS in workspace ===== */
+.script-stack {
+  position: absolute;
+  cursor: grab;
+  user-select: none;
+  display: inline-flex;
+  flex-direction: column;
+}
+.script-stack:active { cursor: grabbing; }
+.script-stack .block { width: auto; min-width: 140px; margin: 0; }
+/* Remove bottom/top margins to make blocks connect visually */
+.script-stack .block::after  { bottom: -6px; z-index: 1; }
+.script-stack .block::before { top: -6px; }
+.script-stack .block + .block { margin-top: -1px; }
+
 /* ===== EDITOR PANEL ===== */
 #editor-panel {
-  flex: 1;
-  background: var(--bg);
-  position: relative;
-  overflow: hidden;
+  flex: 1; background: var(--bg); position: relative; overflow: hidden;
 }
 
 #workspace {
-  width: 100%;
-  height: 100%;
-  position: relative;
-  overflow: hidden;
+  width: 100%; height: 100%; position: relative; overflow: hidden;
   background:
     radial-gradient(circle at 20% 50%, rgba(0,255,225,0.03) 0%, transparent 50%),
     radial-gradient(circle at 80% 20%, rgba(179,107,255,0.03) 0%, transparent 50%),
     var(--bg);
 }
-
-/* Dot grid background */
 #workspace::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background-image: radial-gradient(circle, rgba(255,255,255,0.07) 1px, transparent 1px);
-  background-size: 24px 24px;
-  pointer-events: none;
+  content: ''; position: absolute; inset: 0;
+  background-image: radial-gradient(circle, rgba(255,255,255,0.06) 1px, transparent 1px);
+  background-size: 24px 24px; pointer-events: none;
 }
 
-#script-area {
-  position: absolute;
-  inset: 0;
-  overflow: hidden;
-}
-
-/* Script stacks (groups of connected blocks) in workspace */
-.script-stack {
-  position: absolute;
-  cursor: grab;
-  user-select: none;
-}
-.script-stack:active { cursor: grabbing; z-index: 1000; }
-.script-stack .block { width: auto; min-width: 140px; }
-
-/* Drop highlight */
-.block.drop-target { outline: 2px solid rgba(255,255,255,0.6); }
+#script-area { position: absolute; inset: 0; overflow: hidden; }
 
 /* ===== RIGHT PANEL ===== */
 #right-panel {
-  width: 280px;
-  min-width: 280px;
+  width: 280px; min-width: 280px;
   background: var(--panel);
   border-left: 1px solid var(--border);
-  display: flex;
-  flex-direction: column;
+  display: flex; flex-direction: column;
 }
 
 #stage-container {
-  position: relative;
-  width: 100%;
-  aspect-ratio: 4/3;
-  background: #000;
-  border-bottom: 1px solid var(--border);
-  flex-shrink: 0;
+  position: relative; width: 100%;
+  aspect-ratio: 4/3; background: #000;
+  border-bottom: 1px solid var(--border); flex-shrink: 0;
 }
+#stage-canvas { width: 100%; height: 100%; display: block; }
 
-#stage-canvas {
-  width: 100%;
-  height: 100%;
-  display: block;
-}
-
-/* ===== SPRITE PANEL ===== */
 #sprite-panel {
-  flex: 1;
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
+  flex: 1; overflow: hidden; display: flex; flex-direction: column;
 }
-
 #sprite-list-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 8px 12px;
-  font-size: 11px;
-  color: var(--text-dim);
-  text-transform: uppercase;
-  letter-spacing: 1px;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 8px 12px; font-size: 11px; color: var(--text-dim);
+  text-transform: uppercase; letter-spacing: 1px;
   border-bottom: 1px solid var(--border);
 }
-
 #btn-add-sprite {
-  background: var(--panel2);
-  border: 1px solid var(--border);
-  color: var(--accent);
-  border-radius: 4px;
-  width: 22px; height: 22px;
-  cursor: pointer;
-  font-size: 16px;
-  line-height: 1;
-  transition: all 0.15s;
+  background: var(--panel2); border: 1px solid var(--border);
+  color: var(--accent); border-radius: 4px; width: 22px; height: 22px;
+  cursor: pointer; font-size: 16px; line-height: 1; transition: all 0.15s;
   display: flex; align-items: center; justify-content: center;
 }
 #btn-add-sprite:hover { background: var(--accent); color: #000; }
 
 #sprite-list {
-  flex: 1;
-  overflow-y: auto;
-  padding: 8px;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-  align-content: flex-start;
+  flex: 1; overflow-y: auto; padding: 8px;
+  display: flex; flex-wrap: wrap; gap: 6px; align-content: flex-start;
 }
-
 .sprite-thumb {
-  width: 72px;
-  background: var(--panel2);
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  padding: 6px;
-  cursor: pointer;
-  text-align: center;
-  transition: border-color 0.15s;
+  width: 72px; background: var(--panel2);
+  border: 1px solid var(--border); border-radius: 8px;
+  padding: 6px; cursor: pointer; text-align: center; transition: border-color 0.15s;
 }
 .sprite-thumb:hover { border-color: var(--accent2); }
 .sprite-thumb.selected { border-color: var(--accent); }
+.sprite-thumb canvas { width: 54px; height: 54px; display: block; margin: 0 auto 4px; border-radius: 4px; background: rgba(255,255,255,0.05); }
+.sprite-thumb-name { font-size: 9px; color: var(--text-dim); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
-.sprite-thumb canvas {
-  width: 54px; height: 54px;
-  display: block;
-  margin: 0 auto 4px;
-  border-radius: 4px;
-  background: rgba(255,255,255,0.05);
-}
-
-.sprite-thumb-name {
-  font-size: 9px;
-  color: var(--text-dim);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-/* ===== SPRITE PROPS ===== */
 #sprite-props {
-  padding: 8px 12px;
-  border-top: 1px solid var(--border);
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
+  padding: 8px 12px; border-top: 1px solid var(--border);
+  display: flex; flex-wrap: wrap; gap: 6px;
 }
-#sprite-props label {
-  font-size: 10px;
-  color: var(--text-dim);
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
+#sprite-props label { font-size: 10px; color: var(--text-dim); display: flex; flex-direction: column; gap: 2px; }
 #sprite-props input {
-  background: var(--panel2);
-  border: 1px solid var(--border);
-  border-radius: 4px;
-  color: var(--text);
-  font-family: var(--font-ui);
-  font-size: 11px;
-  padding: 2px 6px;
-  width: 64px;
-  outline: none;
+  background: var(--panel2); border: 1px solid var(--border);
+  border-radius: 4px; color: var(--text); font-family: var(--font-ui);
+  font-size: 11px; padding: 2px 6px; width: 64px; outline: none;
 }
 #sprite-props input:focus { border-color: var(--accent); }
 
+/* ===== FOOTER BAR ===== */
+#footer-bar {
+  height: 42px;
+  background: var(--panel);
+  border-top: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  padding: 0 12px;
+  gap: 10px;
+  z-index: 100;
+  flex-shrink: 0;
+}
+
+.footer-sep {
+  width: 1px; height: 22px;
+  background: var(--border);
+  margin: 0 4px;
+}
+
+#project-name {
+  background: var(--panel2); border: 1px solid var(--border);
+  border-radius: 5px; color: var(--text);
+  font-family: var(--font-ui); font-size: 12px;
+  padding: 4px 10px; width: 160px; outline: none;
+}
+#project-name:focus { border-color: var(--accent); }
+
+.footer-label {
+  font-size: 10px; color: var(--text-dim); letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+.footer-ext {
+  font-size: 11px; color: var(--accent2); font-weight: bold;
+}
+
+.btn-footer {
+  background: var(--panel2); border: 1px solid var(--border);
+  color: var(--text); border-radius: 5px;
+  padding: 4px 12px; font-size: 11px;
+  font-family: var(--font-ui); cursor: pointer;
+  transition: all 0.15s;
+}
+.btn-footer:hover { border-color: var(--accent); color: var(--accent); }
+
+#btn-textmode {
+  background: var(--panel2); border: 1px solid var(--accent2);
+  color: var(--accent2); border-radius: 5px;
+  padding: 4px 12px; font-size: 11px;
+  font-family: var(--font-ui); cursor: pointer;
+  transition: all 0.15s; margin-left: auto;
+  letter-spacing: 1px;
+}
+#btn-textmode:hover { background: var(--accent2); color: #000; }
+
+/* ===== LYKOSCRIPT TEXT MODAL ===== */
+#text-modal {
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.8);
+  z-index: 5000;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+#text-modal-inner {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  width: 100%; max-width: 860px;
+  max-height: 90vh;
+  display: flex; flex-direction: column;
+  overflow: hidden;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.6);
+}
+
+#text-modal-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border);
+}
+.modal-title {
+  font-size: 13px; font-weight: bold;
+  color: var(--accent2); letter-spacing: 2px;
+}
+
+.modal-header-btns { display: flex; gap: 8px; }
+.btn-modal {
+  background: var(--panel2); border: 1px solid var(--border);
+  color: var(--text); border-radius: 5px;
+  padding: 4px 12px; font-size: 11px;
+  font-family: var(--font-ui); cursor: pointer; transition: all 0.15s;
+}
+.btn-modal:hover { border-color: var(--accent); color: var(--accent); }
+.btn-modal.primary { border-color: #59c059; color: #59c059; }
+.btn-modal.primary:hover { background: #59c059; color: #000; }
+.btn-modal.close-btn { border-color: #ff4444; color: #ff4444; }
+.btn-modal.close-btn:hover { background: #ff4444; color: #000; }
+
+#text-modal-body {
+  flex: 1; display: flex; gap: 0; overflow: hidden;
+}
+
+#text-editor {
+  flex: 1;
+  background: #06070e;
+  border: none;
+  border-right: 1px solid var(--border);
+  color: #e8f0ff;
+  font-family: 'Courier New', monospace;
+  font-size: 13px;
+  line-height: 1.6;
+  padding: 16px;
+  resize: none;
+  outline: none;
+  tab-size: 2;
+  min-height: 400px;
+}
+#text-editor::placeholder { color: var(--text-dim); }
+
+#text-sidebar {
+  width: 260px; min-width: 260px;
+  background: var(--panel2);
+  overflow-y: auto;
+  padding: 12px;
+}
+
+#text-errors {
+  background: #2a0a0a;
+  border: 1px solid #ff4444;
+  border-radius: 5px;
+  color: #ff8888;
+  font-size: 11px;
+  padding: 8px 12px;
+  margin: 8px 12px;
+  white-space: pre-wrap;
+  display: none;
+}
+
+.help-section { margin-bottom: 16px; }
+.help-title {
+  font-size: 10px; letter-spacing: 2px; text-transform: uppercase;
+  color: var(--accent2); margin-bottom: 6px; padding-bottom: 4px;
+  border-bottom: 1px solid var(--border);
+}
+.help-line {
+  font-size: 10px; color: var(--text-dim);
+  line-height: 1.7; font-family: 'Courier New', monospace;
+}
+.help-code {
+  color: var(--accent);
+}
+.help-comment { color: #4a6050; }
+
 /* ===== DRAG GHOST ===== */
 #drag-ghost {
-  position: fixed;
-  pointer-events: none;
-  z-index: 9999;
-  display: none;
-  opacity: 0.85;
-  transform: rotate(3deg);
-  filter: drop-shadow(0 4px 12px rgba(0,0,0,0.5));
+  position: fixed; pointer-events: none; z-index: 9999;
+  display: none; opacity: 0.88; transform: rotate(2deg);
+  filter: drop-shadow(0 4px 12px rgba(0,0,0,0.6));
 }
 
 /* ===== SCROLLBARS ===== */
@@ -464,82 +472,56 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(-
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
 
-/* ===== TOASTS ===== */
+/* ===== TOAST ===== */
 #toast-container {
-  position: fixed;
-  bottom: 16px; left: 50%;
+  position: fixed; bottom: 56px; left: 50%;
   transform: translateX(-50%);
-  z-index: 9998;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
+  z-index: 9998; display: flex; flex-direction: column; gap: 6px;
   pointer-events: none;
 }
 .toast {
-  background: var(--panel2);
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  padding: 8px 16px;
-  font-size: 12px;
-  color: var(--text);
+  background: var(--panel2); border: 1px solid var(--accent);
+  border-radius: 8px; padding: 8px 20px;
+  font-size: 12px; color: var(--accent);
+  letter-spacing: 1px;
   animation: toastIn 0.2s ease;
 }
 @keyframes toastIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+</style></head><body>
 
-/* ===== SPEECH BUBBLE on stage ===== */
-.speech-bubble {
-  position: absolute;
-  background: white;
-  color: #333;
-  border-radius: 8px;
-  padding: 6px 10px;
-  font-family: sans-serif;
-  font-size: 13px;
-  max-width: 150px;
-  pointer-events: none;
-  z-index: 10;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.3);
-}
-.speech-bubble::after {
-  content: '';
-  position: absolute;
-  bottom: -8px; left: 12px;
-  border: 8px solid transparent;
-  border-top-color: white;
-  border-bottom: none;
-}
-  </style>
-</head>
-<body>
+  <!-- Top Bar -->
   <header id="topbar">
-    <div id="logo">
-      <span class="logo-lyko">LYKO</span><span class="logo-script">SCRIPT</span>
-    </div>
+    <div id="logo"><span class="logo-lyko">LYKO</span><span class="logo-script">SCRIPT</span></div>
     <div id="topbar-controls">
-      <button id="btn-flag" title="Run (Green Flag)">▶</button>
-      <button id="btn-stop" title="Stop">⏹</button>
+      <button id="btn-flag" title="Run (F5)">▶</button>
+      <button id="btn-stop" title="Stop (F6)">⏹</button>
       <span id="run-status"></span>
     </div>
     <div id="topbar-right">
-      <a href="index.html" class="nav-back">← Home</a>
+      <a href="../index.html" class="nav-back">← Home</a>
     </div>
   </header>
 
+  <!-- Main 3-panel layout -->
   <div id="app">
+
+    <!-- Left: Block Palette -->
     <aside id="palette-panel">
       <div id="category-tabs"></div>
       <div id="block-palette"></div>
     </aside>
+
+    <!-- Center: Script Editor -->
     <main id="editor-panel">
       <div id="workspace">
-        <canvas id="workspace-canvas"></canvas>
         <div id="script-area"></div>
       </div>
     </main>
+
+    <!-- Right: Stage + Sprites -->
     <aside id="right-panel">
       <div id="stage-container">
         <canvas id="stage-canvas" width="480" height="360"></canvas>
-        <div id="stage-overlay"></div>
       </div>
       <div id="sprite-panel">
         <div id="sprite-list-header">
@@ -548,19 +530,139 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(-
         </div>
         <div id="sprite-list"></div>
       </div>
-      <div id="sprite-props" style="display:none">
-        <label>Name <input id="prop-name" type="text" /></label>
-        <label>X <input id="prop-x" type="number" /></label>
-        <label>Y <input id="prop-y" type="number" /></label>
-        <label>Size <input id="prop-size" type="number" /></label>
-        <label>Dir <input id="prop-dir" type="number" /></label>
+      <div id="sprite-props">
+        <label>Name<input id="prop-name" type="text" /></label>
+        <label>X<input id="prop-x" type="number" /></label>
+        <label>Y<input id="prop-y" type="number" /></label>
+        <label>Size<input id="prop-size" type="number" /></label>
+        <label>Dir<input id="prop-dir" type="number" /></label>
       </div>
     </aside>
+
   </div>
 
+  <!-- Footer Bar -->
+  <footer id="footer-bar">
+    <span class="footer-label">Project</span>
+    <input id="project-name" type="text" placeholder="untitled" spellcheck="false" />
+    <span class="footer-ext">.ls</span>
+    <div class="footer-sep"></div>
+    <button class="btn-footer" id="btn-save">💾 Save</button>
+    <button class="btn-footer" id="btn-load">📂 Load</button>
+    <input type="file" id="load-input" accept=".ls" style="display:none" />
+    <button id="btn-textmode">{ } LykoScript</button>
+  </footer>
+
+  <!-- Drag Ghost -->
   <div id="drag-ghost"></div>
 
-  <script>
+  <!-- LykoScript Text Mode Modal -->
+  <div id="text-modal">
+    <div id="text-modal-inner">
+      <div id="text-modal-header">
+        <span class="modal-title">{ } LYKOSCRIPT — TEXT MODE</span>
+        <div class="modal-header-btns">
+          <button class="btn-modal" id="btn-text-help">? Help</button>
+          <button class="btn-modal primary" id="btn-text-run">▶ Compile & Apply</button>
+          <button class="btn-modal close-btn" id="btn-text-close">✕ Close</button>
+        </div>
+      </div>
+
+      <div id="text-errors"></div>
+
+      <div id="text-modal-body">
+        <textarea id="text-editor" placeholder="// LykoScript example:
+// SpriteName;
+// Green(Start): Say(&quot;Hello!&quot;, 2), Move(10);
+// Key(space): Jump, Wait(0.5);
+
+Sprite1;
+  Green(Start): Say(&quot;Hello World!&quot;, 2), Hide;
+"></textarea>
+
+        <div id="text-sidebar">
+          <div class="help-section">
+            <div class="help-title">Structure</div>
+            <div class="help-line"><span class="help-code">SpriteName;</span></div>
+            <div class="help-line"><span class="help-code">  Trigger: Cmd, Cmd;</span></div>
+            <div class="help-line"><span class="help-comment">// Multiple events per sprite</span></div>
+          </div>
+
+          <div class="help-section">
+            <div class="help-title">Triggers</div>
+            <div class="help-line"><span class="help-code">Green(Start)</span> — flag clicked</div>
+            <div class="help-line"><span class="help-code">Key(space)</span> — key pressed</div>
+            <div class="help-line"><span class="help-code">Click</span> — sprite clicked</div>
+            <div class="help-line"><span class="help-code">Clone(Start)</span> — when cloned</div>
+            <div class="help-line"><span class="help-code">Msg(name)</span> — message received</div>
+          </div>
+
+          <div class="help-section">
+            <div class="help-title">Motion</div>
+            <div class="help-line"><span class="help-code">Move(10)</span></div>
+            <div class="help-line"><span class="help-code">Turn(15)</span> / <span class="help-code">TurnL(15)</span></div>
+            <div class="help-line"><span class="help-code">GotoXY(x, y)</span></div>
+            <div class="help-line"><span class="help-code">GotoRandom</span> / <span class="help-code">GotoMouse</span></div>
+            <div class="help-line"><span class="help-code">Glide(1, x, y)</span></div>
+            <div class="help-line"><span class="help-code">ChangeX(10)</span> / <span class="help-code">SetX(0)</span></div>
+            <div class="help-line"><span class="help-code">ChangeY(10)</span> / <span class="help-code">SetY(0)</span></div>
+            <div class="help-line"><span class="help-code">PointDir(90)</span></div>
+            <div class="help-line"><span class="help-code">Bounce</span></div>
+          </div>
+
+          <div class="help-section">
+            <div class="help-title">Looks</div>
+            <div class="help-line"><span class="help-code">Say("text")</span></div>
+            <div class="help-line"><span class="help-code">Say("text", 2)</span> — timed</div>
+            <div class="help-line"><span class="help-code">Think("text")</span></div>
+            <div class="help-line"><span class="help-code">Show</span> / <span class="help-code">Hide</span></div>
+            <div class="help-line"><span class="help-code">SetSize(100)</span> / <span class="help-code">ChangeSize(10)</span></div>
+            <div class="help-line"><span class="help-code">SetEffect(ghost, 50)</span></div>
+            <div class="help-line"><span class="help-code">ClearEffects</span></div>
+            <div class="help-line"><span class="help-code">NextCostume</span></div>
+          </div>
+
+          <div class="help-section">
+            <div class="help-title">Control</div>
+            <div class="help-line"><span class="help-code">Wait(1)</span></div>
+            <div class="help-line"><span class="help-code">Repeat(10){ Cmd, Cmd }</span></div>
+            <div class="help-line"><span class="help-code">Forever{ Cmd, Cmd }</span></div>
+            <div class="help-line"><span class="help-code">If(cond){ Cmd }</span></div>
+            <div class="help-line"><span class="help-code">Stop(all)</span></div>
+            <div class="help-line"><span class="help-code">CreateClone</span></div>
+            <div class="help-line"><span class="help-code">DeleteClone</span></div>
+          </div>
+
+          <div class="help-section">
+            <div class="help-title">Variables & Events</div>
+            <div class="help-line"><span class="help-code">SetVar(name, 0)</span></div>
+            <div class="help-line"><span class="help-code">ChangeVar(name, 1)</span></div>
+            <div class="help-line"><span class="help-code">Broadcast(msg)</span></div>
+            <div class="help-line"><span class="help-code">BroadcastWait(msg)</span></div>
+            <div class="help-line"><span class="help-code">PlaySound(pop)</span></div>
+          </div>
+
+          <div class="help-section">
+            <div class="help-title">Example</div>
+            <div class="help-line" style="background:#0a0c1a;padding:8px;border-radius:4px;margin-top:4px">
+              <span class="help-code">Cat;<br>
+  Green(Start):<br>
+  &nbsp;&nbsp;Say("Go!", 1),<br>
+  &nbsp;&nbsp;Forever{<br>
+  &nbsp;&nbsp;&nbsp;&nbsp;Move(3), Bounce<br>
+  &nbsp;&nbsp;};<br><br>
+  Key(space):<br>
+  &nbsp;&nbsp;ChangeY(20);</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Scripts -->
+<script>
 // ===== BLOCK DEFINITIONS =====
 // Each block: { id, category, shape, label, inputs, fields }
 // shapes: 'stack' | 'hat' | 'c-block' | 'reporter' | 'boolean' | 'terminator'
@@ -1180,8 +1282,38 @@ const Stage = (() => {
     });
   }
 
+  // Load a sprite from saved data (for project load)
+  function addSpriteRaw(data) {
+    const sp = {
+      id: data.id || ('sprite_' + Date.now()),
+      name: data.name || 'Sprite',
+      x: data.x || 0,
+      y: data.y || 0,
+      direction: data.direction || 90,
+      size: data.size || 100,
+      visible: data.visible !== undefined ? data.visible : true,
+      rotationStyle: data.rotationStyle || 'all around',
+      costumes: [createDefaultCostume()],
+      currentCostume: 0,
+      sayText: null, sayTimeout: null, thinkText: null,
+      effects: { color:0, fisheye:0, whirl:0, pixelate:0, brightness:0, ghost:0 },
+      variables: data.variables || {},
+      scripts: [],
+    };
+    sprites.push(sp);
+    if (!selectedSpriteId) selectedSpriteId = sp.id;
+    return sp;
+  }
+
+  function selectSprite(id) {
+    selectedSpriteId = id;
+    updateSpriteList();
+    updateSpriteProps();
+  }
+
   return {
-    init, addSprite, getSprite, getSelected, getAllSprites,
+    init, addSprite, addSpriteRaw, selectSprite,
+    getSprite, getSelected, getAllSprites,
     updateSpriteList, updateSpriteProps, bindSpriteProps,
     stopAll,
     get mousePos() { return mousePos; },
@@ -1193,224 +1325,148 @@ const Stage = (() => {
 })();
 
 // ===== EDITOR =====
-// Handles workspace: block dragging from palette, snapping, script stacks per sprite
-
 const Editor = (() => {
-  // Map: spriteId -> array of script stack data
   const spriteScripts = {};
   let activeSpriteId = null;
-  let dragging = null; // { el, fromStack, fromIndex, originX, originY, offsetX, offsetY }
-  const ghost = document.getElementById('drag-ghost');
+  let dragging = null;
 
   function init() {
-    const workspace = document.getElementById('script-area');
-
-    // Drag start from palette
-    document.getElementById('block-palette').addEventListener('mousedown', onPaletteMousedown);
-    // Drag start from workspace
-    workspace.addEventListener('mousedown', onWorkspaceMousedown);
-
+    document.getElementById('block-palette').addEventListener('mousedown', onPaletteDown);
+    document.getElementById('script-area').addEventListener('mousedown', onWorkspaceDown);
     document.addEventListener('mousemove', onMouseMove);
     document.addEventListener('mouseup', onMouseUp);
   }
 
-  // ===== Palette drag =====
-  function onPaletteMousedown(e) {
+  // ===== PALETTE DRAG =====
+  function onPaletteDown(e) {
     const blockEl = e.target.closest('.block[data-block-id]');
-    if (!blockEl || !blockEl.dataset.fromPalette) return;
+    if (!blockEl) return;
+    if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT') return;
     e.preventDefault();
 
     const id = blockEl.dataset.blockId;
     const def = BLOCK_DEFS[id];
     if (!def) return;
 
-    // Clone block for ghost
-    const clone = buildBlockEl(id, def);
-    clone.style.cssText = `display:block;pointer-events:none;`;
-    ghost.innerHTML = '';
-    ghost.appendChild(clone);
-    ghost.style.display = 'block';
+    const ws = document.getElementById('script-area');
+    const wsRect = ws.getBoundingClientRect();
+    const bRect = blockEl.getBoundingClientRect();
 
-    const rect = blockEl.getBoundingClientRect();
+    const stack = createStack(
+      bRect.left - wsRect.left,
+      bRect.top  - wsRect.top
+    );
+    stack.appendChild(buildBlockEl(id, def));
+    stack.style.zIndex = 9000;
+    ws.appendChild(stack);
+
     dragging = {
-      blockId: id,
-      def,
-      fromPalette: true,
-      offsetX: e.clientX - rect.left,
-      offsetY: e.clientY - rect.top,
+      stack,
+      offsetX: e.clientX - bRect.left,
+      offsetY: e.clientY - bRect.top,
     };
-    positionGhost(e.clientX, e.clientY);
+    moveStack(e.clientX, e.clientY);
   }
 
-  // ===== Workspace drag =====
-  function onWorkspaceMousedown(e) {
-    const blockEl = e.target.closest('.block[data-block-id]');
-    const stackEl = e.target.closest('.script-stack');
-    if (blockEl && blockEl.dataset.fromPalette) return;
-    if (!stackEl && !blockEl) return;
+  // ===== WORKSPACE DRAG =====
+  function onWorkspaceDown(e) {
     if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT') return;
+    const stack = e.target.closest('.script-stack');
+    if (!stack) return;
     e.preventDefault();
+    e.stopPropagation();
 
-    const target = stackEl || blockEl;
-    const rect = target.getBoundingClientRect();
-
-    // Clone for ghost
-    const clone = target.cloneNode(true);
-    clone.style.cssText = 'pointer-events:none;';
-    ghost.innerHTML = '';
-    ghost.appendChild(clone);
-    ghost.style.display = 'block';
-
+    stack.style.zIndex = 9000;
+    const rect = stack.getBoundingClientRect();
     dragging = {
-      fromPalette: false,
-      stackEl: target,
-      originalParent: target.parentNode,
-      originalLeft: parseInt(target.style.left) || 0,
-      originalTop: parseInt(target.style.top) || 0,
+      stack,
       offsetX: e.clientX - rect.left,
       offsetY: e.clientY - rect.top,
     };
-
-    target.style.opacity = '0.4';
-    positionGhost(e.clientX, e.clientY);
   }
 
   function onMouseMove(e) {
     if (!dragging) return;
-    positionGhost(e.clientX, e.clientY);
+    moveStack(e.clientX, e.clientY);
   }
 
   function onMouseUp(e) {
     if (!dragging) return;
-    ghost.style.display = 'none';
-
-    const workspace = document.getElementById('script-area');
-    const wsRect = workspace.getBoundingClientRect();
-    const dropX = e.clientX - wsRect.left - dragging.offsetX;
-    const dropY = e.clientY - wsRect.top - dragging.offsetY;
-
-    const overWorkspace = e.clientX >= wsRect.left && e.clientX <= wsRect.right &&
-                          e.clientY >= wsRect.top && e.clientY <= wsRect.bottom;
-
-    if (dragging.fromPalette) {
-      if (overWorkspace) {
-        addBlockToWorkspace(dragging.blockId, dragging.def, dropX, dropY);
-      }
-    } else {
-      const el = dragging.stackEl;
-      el.style.opacity = '1';
-      if (overWorkspace) {
-        // Try snapping to nearby stack
-        const snapped = trySnap(el, e.clientX, e.clientY);
-        if (!snapped) {
-          el.style.left = dropX + 'px';
-          el.style.top = dropY + 'px';
-          if (el.parentNode !== workspace) {
-            workspace.appendChild(el);
-          }
-        }
-      }
-      saveScripts();
-    }
-
+    const { stack } = dragging;
+    stack.style.zIndex = '';
+    trySnap(stack);
+    saveScripts();
     dragging = null;
   }
 
-  function positionGhost(cx, cy) {
-    ghost.style.left = (cx - (dragging?.offsetX||0)) + 'px';
-    ghost.style.top = (cy - (dragging?.offsetY||0)) + 'px';
+  function moveStack(cx, cy) {
+    const ws = document.getElementById('script-area');
+    const wsRect = ws.getBoundingClientRect();
+    dragging.stack.style.left = (cx - wsRect.left - dragging.offsetX) + 'px';
+    dragging.stack.style.top  = (cy - wsRect.top  - dragging.offsetY) + 'px';
   }
 
-  // ===== Add block to workspace as new stack =====
-  function addBlockToWorkspace(id, def, x, y) {
-    if (!activeSpriteId) return;
-    const workspace = document.getElementById('script-area');
+  // ===== SNAP =====
+  function trySnap(draggedStack) {
+    const ws = document.getElementById('script-area');
+    const stacks = Array.from(ws.querySelectorAll('.script-stack'));
+    const SNAP = 30;
 
+    const dRect = draggedStack.getBoundingClientRect();
+
+    for (const other of stacks) {
+      if (other === draggedStack) continue;
+      const oRect = other.getBoundingClientRect();
+
+      const dx = Math.abs(dRect.left - oRect.left);
+      const dy = Math.abs(dRect.top  - oRect.bottom);
+
+      if (dx < SNAP * 4 && dy < SNAP) {
+        Array.from(draggedStack.children).forEach(b => other.appendChild(b));
+        draggedStack.remove();
+        return;
+      }
+    }
+  }
+
+  function createStack(x, y) {
     const stack = document.createElement('div');
     stack.className = 'script-stack';
     stack.style.left = x + 'px';
-    stack.style.top = y + 'px';
-
-    const blockEl = buildBlockEl(id, def);
-    stack.appendChild(blockEl);
-    workspace.appendChild(stack);
-
-    // Make stack itself draggable
-    makeStackDraggable(stack);
-    saveScripts();
+    stack.style.top  = y + 'px';
     return stack;
   }
 
-  function makeStackDraggable(stack) {
-    stack.addEventListener('mousedown', e => {
-      if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT') return;
-      e.stopPropagation();
-      // handled by workspace listener
-    });
-  }
-
-  // ===== Snap logic =====
-  function trySnap(draggedEl, mouseX, mouseY) {
-    const workspace = document.getElementById('script-area');
-    const stacks = Array.from(workspace.querySelectorAll('.script-stack'));
-    const SNAP_DIST = 30;
-
-    for (const stack of stacks) {
-      if (stack === draggedEl) continue;
-      const rect = stack.getBoundingClientRect();
-
-      // Snap to bottom of stack
-      const snapX = rect.left;
-      const snapY = rect.bottom;
-      const dist = Math.hypot(mouseX - snapX, mouseY - snapY);
-
-      if (dist < SNAP_DIST * 2) {
-        // Merge draggedEl blocks into this stack
-        const blocks = Array.from(draggedEl.querySelectorAll(':scope > .block'));
-        blocks.forEach(b => {
-          b.remove();
-          stack.appendChild(b);
-        });
-        draggedEl.remove();
-        saveScripts();
-        return true;
-      }
-    }
-    return false;
-  }
-
-  // ===== Script persistence per sprite =====
+  // ===== SAVE / LOAD =====
   function saveScripts() {
     if (!activeSpriteId) return;
-    const workspace = document.getElementById('script-area');
-    const stacks = workspace.querySelectorAll('.script-stack');
-    const data = Array.from(stacks).map(stack => {
-      const blocks = Array.from(stack.querySelectorAll(':scope > .block')).map(b => ({
+    const ws = document.getElementById('script-area');
+    spriteScripts[activeSpriteId] = Array.from(ws.querySelectorAll('.script-stack')).map(stack => ({
+      x: parseInt(stack.style.left) || 0,
+      y: parseInt(stack.style.top)  || 0,
+      blocks: Array.from(stack.children).map(b => ({
         id: b.dataset.blockId,
         inputs: readInputs(b),
-      }));
-      return { x: parseInt(stack.style.left)||0, y: parseInt(stack.style.top)||0, blocks };
-    });
-    spriteScripts[activeSpriteId] = data;
+      })).filter(b => b.id),
+    }));
   }
 
   function loadSpriteScripts(spriteId) {
     activeSpriteId = spriteId;
-    const workspace = document.getElementById('script-area');
-    workspace.innerHTML = '';
-    const scripts = spriteScripts[spriteId] || [];
+    renderScripts(spriteScripts[spriteId] || []);
+  }
+
+  function renderScripts(scripts) {
+    const ws = document.getElementById('script-area');
+    ws.innerHTML = '';
     scripts.forEach(sd => {
-      const stack = document.createElement('div');
-      stack.className = 'script-stack';
-      stack.style.left = sd.x + 'px';
-      stack.style.top = sd.y + 'px';
+      const stack = createStack(sd.x, sd.y);
       sd.blocks.forEach(bd => {
         const def = BLOCK_DEFS[bd.id];
         if (!def) return;
-        const el = buildBlockEl(bd.id, def, bd.inputs);
-        stack.appendChild(el);
+        stack.appendChild(buildBlockEl(bd.id, def, bd.inputs));
       });
-      workspace.appendChild(stack);
+      ws.appendChild(stack);
     });
   }
 
@@ -1418,7 +1474,332 @@ const Editor = (() => {
     return spriteScripts[spriteId] || [];
   }
 
-  return { init, loadSpriteScripts, getScripts, saveScripts, addBlockToWorkspace };
+  // ===== PROJECT SERIALIZATION =====
+  function getFullProject() {
+    saveScripts();
+    return {
+      version: 1,
+      sprites: Stage.getAllSprites().map(sp => ({
+        id: sp.id, name: sp.name,
+        x: sp.x, y: sp.y, direction: sp.direction,
+        size: sp.size, visible: sp.visible,
+        rotationStyle: sp.rotationStyle,
+        variables: sp.variables || {},
+      })),
+      scripts: JSON.parse(JSON.stringify(spriteScripts)),
+    };
+  }
+
+  function loadFullProject(data) {
+    if (!data || data.version !== 1) { alert('Invalid .ls project file'); return; }
+
+    const allSprites = Stage.getAllSprites();
+    allSprites.splice(0);
+
+    data.sprites.forEach(sd => Stage.addSpriteRaw(sd));
+    Stage.updateSpriteList();
+
+    Object.keys(spriteScripts).forEach(k => delete spriteScripts[k]);
+    Object.assign(spriteScripts, data.scripts || {});
+
+    const sprites = Stage.getAllSprites();
+    if (sprites.length > 0) {
+      Stage.selectSprite(sprites[0].id);
+      loadSpriteScripts(sprites[0].id);
+    }
+  }
+
+  function addBlockToWorkspace(id, def, x, y) {
+    if (!activeSpriteId) return;
+    const ws = document.getElementById('script-area');
+    const stack = createStack(x, y);
+    stack.appendChild(buildBlockEl(id, def));
+    ws.appendChild(stack);
+    saveScripts();
+    return stack;
+  }
+
+  // ===== LYKOSCRIPT COMPILER =====
+  function compileLykoScript(src) {
+    const errors = [];
+    const compiled = {};
+
+    const spriteMap = {};
+    Stage.getAllSprites().forEach(sp => {
+      spriteMap[sp.name.toLowerCase()] = sp.id;
+    });
+
+    // strip comments
+    const clean = src.replace(/\/\/[^\n]*/g, '').trim();
+
+    // Split into segments: "SpriteName; ...events...;" repeated
+    // Top-level structure: SPRITENAME ; EVENT : CMDS ; EVENT : CMDS ;
+    // We'll parse character by character at top depth
+    const segments = parseTopLevel(clean, spriteMap, errors, compiled);
+
+    if (errors.length > 0) return { ok: false, errors };
+    return { ok: true, scripts: compiled };
+  }
+
+  function parseTopLevel(src, spriteMap, errors, compiled) {
+    // Find all "SpriteName;" markers and extract their event bodies
+    // Pattern: word[word]* ; <events>* each as TRIGGER : body ;
+    let i = 0;
+    while (i < src.length) {
+      // skip whitespace
+      while (i < src.length && /\s/.test(src[i])) i++;
+      if (i >= src.length) break;
+
+      // Read sprite name up to ;
+      let spriteName = '';
+      while (i < src.length && src[i] !== ';') {
+        spriteName += src[i++];
+      }
+      spriteName = spriteName.trim();
+      i++; // skip ;
+
+      if (!spriteName) continue;
+      const spriteId = spriteMap[spriteName.toLowerCase()];
+      if (!spriteId) { errors.push(`Unknown sprite: "${spriteName}"`); continue; }
+      if (!compiled[spriteId]) compiled[spriteId] = [];
+
+      // Now read event blocks until we hit another sprite declaration
+      // Event block: TRIGGER : body ;
+      // "body" ends at ; but we need to track depth for { } blocks
+      while (i < src.length) {
+        while (i < src.length && /\s/.test(src[i])) i++;
+        if (i >= src.length) break;
+
+        // Peek: if this is another sprite name (word followed eventually by ;) vs event trigger
+        // Heuristic: check if next ; comes before next :
+        const nextColon = src.indexOf(':', i);
+        const nextSemi  = src.indexOf(';', i);
+        if (nextSemi < 0) break;
+        if (nextColon < 0 || nextSemi < nextColon) break; // next thing is a sprite separator
+
+        // Read trigger name
+        let trigger = '';
+        while (i < src.length && src[i] !== ':') trigger += src[i++];
+        trigger = trigger.trim();
+        i++; // skip :
+
+        // Read body up to ; at depth 0
+        let body = '';
+        let depth = 0;
+        while (i < src.length) {
+          const ch = src[i];
+          if (ch === '{' || ch === '(') depth++;
+          else if (ch === '}' || ch === ')') depth--;
+          else if (ch === ';' && depth === 0) { i++; break; }
+          body += ch; i++;
+        }
+        body = body.trim();
+
+        const hatBlock = parseTrigger(trigger, errors);
+        if (!hatBlock) continue;
+        const bodyBlocks = parseBlockList(body, errors);
+
+        compiled[spriteId].push({
+          x: 40 + compiled[spriteId].length * 24,
+          y: 40 + compiled[spriteId].length * 32,
+          blocks: [hatBlock, ...bodyBlocks],
+        });
+      }
+    }
+  }
+
+  function parseTrigger(trigger, errors) {
+    const t = trigger.toLowerCase().replace(/\s+/g,'');
+    if (t === 'green(start)' || t === 'start' || t === 'flag' || t === 'greenflag') {
+      return { id: 'when_flag', inputs: {} };
+    }
+    const keyM = t.match(/^key\((.+)\)$/);
+    if (keyM) return { id: 'when_key', inputs: { 'when_key_1': keyM[1] } };
+    if (t === 'click' || t === 'clicked' || t === 'spriteclicked') return { id: 'when_sprite_clicked', inputs: {} };
+    if (t === 'clone(start)' || t === 'clonestart' || t === 'whenclone') return { id: 'when_clone_start', inputs: {} };
+    const msgM = t.match(/^(?:msg|message|whenmsg)\((.+)\)$/);
+    if (msgM) return { id: 'when_msg', inputs: { 'when_msg_1': msgM[1] } };
+    const gtM = t.match(/^when(loudness|timer)>(\d+)$/);
+    if (gtM) return { id: 'when_gt', inputs: { 'when_gt_1': gtM[1], 'when_gt_2': gtM[2] } };
+    errors.push(`Unknown trigger: "${trigger}"`);
+    return null;
+  }
+
+  function parseBlockList(code, errors) {
+    if (!code.trim()) return [];
+    const parts = splitTopLevel(code, ',');
+    const blocks = [];
+    parts.forEach(part => {
+      const b = parseBlock(part.trim(), errors);
+      if (b) blocks.push(...(Array.isArray(b) ? b : [b]));
+    });
+    return blocks;
+  }
+
+  function parseBlock(cmd, errors) {
+    if (!cmd) return null;
+    cmd = cmd.trim();
+
+    // Extract optional {...} body at end
+    let body = null;
+    const braceIdx = cmd.indexOf('{');
+    if (braceIdx > -1) {
+      body = cmd.slice(braceIdx+1, cmd.lastIndexOf('}'));
+      cmd = cmd.slice(0, braceIdx).trim();
+    }
+
+    // Match FuncName(args) or FuncName
+    const fnMatch = cmd.match(/^(\w+)\s*\(([^)]*)\)$/);
+    const bareMatch = cmd.match(/^(\w+)$/);
+    const m = fnMatch || bareMatch;
+    if (!m) { errors.push(`Cannot parse block: "${cmd}"`); return null; }
+
+    const name = m[1].toLowerCase();
+    const argsRaw = fnMatch ? fnMatch[2] : '';
+    const args = argsRaw ? splitTopLevel(argsRaw, ',').map(a => a.trim().replace(/^["']|["']$/g, '')) : [];
+
+    const a  = (i, d='')  => (args[i] !== undefined ? args[i] : d);
+    const n  = (i, d=0)   => parseFloat(a(i,d)) || 0;
+    const s  = (i, d='')  => a(i,d);
+
+    switch (name) {
+      // Motion
+      case 'move':          return blk('move_steps',      { 'move_steps_1': n(0,10) });
+      case 'turn':          return blk('turn_right',      { 'turn_right_1': n(0,15) });
+      case 'turnleft':
+      case 'turnl':         return blk('turn_left',       { 'turn_left_1': n(0,15) });
+      case 'gotoxy':        return blk('goto_xy',         { 'goto_xy_1': n(0,0), 'goto_xy_2': n(1,0) });
+      case 'gotorandom':    return blk('goto_random',     { 'goto_random_1': 'random position' });
+      case 'gotomouse':     return blk('goto_random',     { 'goto_random_1': 'mouse-pointer' });
+      case 'glide':         return blk('glide_secs_xy',   { 'glide_secs_xy_1': n(0,1), 'glide_secs_xy_2': n(1,0), 'glide_secs_xy_3': n(2,0) });
+      case 'pointdir':      return blk('point_direction', { 'point_direction_1': n(0,90) });
+      case 'pointright':    return blk('point_direction', { 'point_direction_1': 90 });
+      case 'pointleft':     return blk('point_direction', { 'point_direction_1': -90 });
+      case 'pointup':       return blk('point_direction', { 'point_direction_1': 0 });
+      case 'pointdown':     return blk('point_direction', { 'point_direction_1': 180 });
+      case 'changex':       return blk('change_x',        { 'change_x_1': n(0,10) });
+      case 'setx':          return blk('set_x',           { 'set_x_1': n(0,0) });
+      case 'changey':       return blk('change_y',        { 'change_y_1': n(0,10) });
+      case 'sety':          return blk('set_y',           { 'set_y_1': n(0,0) });
+      case 'bounce':        return blk('if_on_edge_bounce', {});
+      case 'rotationstyle': return blk('set_rotation_style', { 'set_rotation_style_1': s(0,'all around') });
+
+      // Looks
+      case 'say': {
+        const txt = s(0,'Hello!'), secs = args[1];
+        return secs !== undefined
+          ? blk('say_timed',  { 'say_timed_1': txt,   'say_timed_2': parseFloat(secs)||2 })
+          : blk('say',        { 'say_1': txt });
+      }
+      case 'think': {
+        const txt = s(0,'Hmm...'), secs = args[1];
+        return secs !== undefined
+          ? blk('think_timed',{ 'think_timed_1': txt,  'think_timed_2': parseFloat(secs)||2 })
+          : blk('think',      { 'think_1': txt });
+      }
+      case 'show':           return blk('show', {});
+      case 'hide':           return blk('hide', {});
+      case 'setsize':        return blk('set_size',      { 'set_size_1': n(0,100) });
+      case 'changesize':     return blk('change_size',   { 'change_size_1': n(0,10) });
+      case 'seteffect':      return blk('set_effect',    { 'set_effect_1': s(0,'ghost'), 'set_effect_2': n(1,0) });
+      case 'changeeffect':   return blk('change_effect', { 'change_effect_1': s(0,'ghost'), 'change_effect_2': n(1,25) });
+      case 'cleareffects':   return blk('clear_effects', {});
+      case 'nextcostume':    return blk('next_costume',  {});
+      case 'prevcostume':    return blk('next_costume',  {});
+      case 'switchcostume':  return blk('switch_costume',{ 'switch_costume_1': s(0,'costume1') });
+      case 'nextbackdrop':   return blk('next_backdrop', {});
+      case 'gotolayer':      return blk('go_to_layer',   { 'go_to_layer_1': s(0,'front') });
+
+      // Sound
+      case 'playsound':      return blk('play_sound',    { 'play_sound_1': s(0,'pop') });
+      case 'playsoundwait':  return blk('play_sound_until',{ 'play_sound_until_1': s(0,'pop') });
+      case 'stopsounds':     return blk('stop_sounds',   {});
+      case 'setvolume':      return blk('set_volume',    { 'set_volume_1': n(0,100) });
+      case 'changevolume':   return blk('change_volume', { 'change_volume_1': n(0,-10) });
+
+      // Control
+      case 'wait':           return blk('wait_secs',     { 'wait_secs_1': n(0,1) });
+      case 'stop':           return blk('stop',          { 'stop_1': s(0,'all') });
+      case 'createclone':    return blk('create_clone',  { 'create_clone_1': s(0,'myself') });
+      case 'deleteclone':    return blk('delete_clone',  {});
+      case 'repeat': {
+        const b = blk('repeat', { 'repeat_1': n(0,10) });
+        b.inner = body ? parseBlockList(body, errors) : [];
+        return b;
+      }
+      case 'forever': {
+        const b = blk('forever', {});
+        b.inner = body ? parseBlockList(body, errors) : [];
+        return b;
+      }
+      case 'if': {
+        const b = blk('if', {});
+        b.inner = body ? parseBlockList(body, errors) : [];
+        return b;
+      }
+      case 'ifelse': {
+        const b = blk('if_else', {});
+        b.inner = body ? parseBlockList(body, errors) : [];
+        return b;
+      }
+      case 'waituntil':      return blk('wait_until',    {});
+      case 'repeatuntil':    return blk('repeat_until',  {});
+
+      // Sensing
+      case 'ask':            return blk('ask_wait',      { 'ask_wait_1': s(0,"What's your name?") });
+      case 'resettimer':     return blk('reset_timer',   {});
+
+      // Variables
+      case 'setvar':         return blk('set_var',       { 'set_var_0': s(0,'my variable'), 'set_var_2': s(1,'0') });
+      case 'changevar':      return blk('change_var',    { 'change_var_0': s(0,'my variable'), 'change_var_2': n(1,1) });
+      case 'showvar':        return blk('show_var',      { 'show_var_0': s(0,'my variable') });
+      case 'hidevar':        return blk('hide_var',      { 'hide_var_0': s(0,'my variable') });
+
+      // Events
+      case 'broadcast':      return blk('broadcast',     { 'broadcast_1': s(0,'message1') });
+      case 'broadcastwait':  return blk('broadcast_wait',{ 'broadcast_wait_1': s(0,'message1') });
+
+      default:
+        errors.push(`Unknown block: "${name}"`);
+        return null;
+    }
+  }
+
+  function blk(id, inputs) { return { id, inputs }; }
+
+  function splitTopLevel(str, sep) {
+    const parts = []; let depth = 0, cur = '';
+    for (const ch of str) {
+      if ('({['.includes(ch)) depth++;
+      else if (')}]'.includes(ch)) depth--;
+      else if (ch === sep && depth === 0) { parts.push(cur); cur = ''; continue; }
+      cur += ch;
+    }
+    if (cur.trim()) parts.push(cur);
+    return parts;
+  }
+
+  function applyCompiledScripts(compiled) {
+    Object.entries(compiled).forEach(([spriteId, scripts]) => {
+      spriteScripts[spriteId] = scripts;
+    });
+    if (activeSpriteId && compiled[activeSpriteId]) {
+      renderScripts(compiled[activeSpriteId]);
+    } else {
+      // load first sprite that has scripts
+      const first = Object.keys(compiled)[0];
+      if (first) {
+        Stage.selectSprite(first);
+        loadSpriteScripts(first);
+      }
+    }
+  }
+
+  return {
+    init, loadSpriteScripts, getScripts, saveScripts, renderScripts,
+    addBlockToWorkspace, getFullProject, loadFullProject,
+    compileLykoScript, applyCompiledScripts,
+  };
 })();
 
 // ===== RUNTIME =====
@@ -1803,126 +2184,175 @@ const Runtime = (() => {
 })();
 
 // ===== MAIN =====
-// Initializes the app and wires everything together
-
 document.addEventListener('DOMContentLoaded', () => {
-  // Init subsystems
   renderCategoryTabs();
   Stage.init();
   Editor.init();
   Stage.bindSpriteProps();
 
-  // Set first sprite as active in editor
   const sprites = Stage.getAllSprites();
   if (sprites.length > 0) {
     Editor.loadSpriteScripts(sprites[0].id);
   }
 
-  // Green flag
+  // ===== RUN / STOP =====
   document.getElementById('btn-flag').addEventListener('click', () => {
-    // Save any pending script changes first
     Editor.saveScripts();
     Runtime.start();
   });
-
-  // Stop button
-  document.getElementById('btn-stop').addEventListener('click', () => {
-    Runtime.stopAll();
-  });
-
-  // Add sprite button
-  document.getElementById('btn-add-sprite').addEventListener('click', () => {
-    const name = prompt('Sprite name:', 'Sprite' + (Stage.getAllSprites().length + 1));
-    if (name) {
-      Stage.addSprite(name);
-    }
-  });
-
-  // Keyboard shortcut: Enter/Space to run
+  document.getElementById('btn-stop').addEventListener('click', () => Runtime.stopAll());
   document.addEventListener('keydown', e => {
-    if (e.key === 'F5') { e.preventDefault(); Runtime.start(); }
+    if (e.key === 'F5') { e.preventDefault(); Editor.saveScripts(); Runtime.start(); }
     if (e.key === 'F6') { e.preventDefault(); Runtime.stopAll(); }
   });
 
-  // Workspace panning (middle mouse or right-click drag)
+  // ===== ADD SPRITE =====
+  document.getElementById('btn-add-sprite').addEventListener('click', () => {
+    const name = prompt('Sprite name:', 'Sprite' + (Stage.getAllSprites().length + 1));
+    if (name) Stage.addSprite(name);
+  });
+
+  // ===== FOOTER: SAVE/LOAD =====
+  document.getElementById('btn-save').addEventListener('click', () => {
+    Editor.saveScripts();
+    const project = Editor.getFullProject();
+    const json = JSON.stringify(project, null, 2);
+    const filename = (document.getElementById('project-name').value.trim() || 'project') + '.ls';
+    const blob = new Blob([json], { type: 'application/json' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = filename;
+    a.click();
+    URL.revokeObjectURL(a.href);
+    toast(`Saved as ${filename}`);
+  });
+
+  document.getElementById('btn-load').addEventListener('click', () => {
+    document.getElementById('load-input').click();
+  });
+
+  document.getElementById('load-input').addEventListener('change', e => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = ev => {
+      try {
+        const data = JSON.parse(ev.target.result);
+        Editor.loadFullProject(data);
+        // Set project name from filename
+        const name = file.name.replace(/\.ls$/, '');
+        document.getElementById('project-name').value = name;
+        toast(`Loaded ${file.name}`);
+      } catch(err) {
+        alert('Failed to load project: ' + err.message);
+      }
+    };
+    reader.readAsText(file);
+    e.target.value = '';
+  });
+
+  // ===== LYKOSCRIPT TEXT MODE =====
+  document.getElementById('btn-textmode').addEventListener('click', openTextMode);
+  document.getElementById('btn-text-close').addEventListener('click', closeTextMode);
+  document.getElementById('btn-text-run').addEventListener('click', compileAndApply);
+  document.getElementById('btn-text-help').addEventListener('click', toggleHelp);
+
+  function openTextMode() {
+    // Pre-populate with current sprite's scripts as a hint
+    const modal = document.getElementById('text-modal');
+    const ta = document.getElementById('text-editor');
+
+    // Generate LykoScript source from current scripts
+    const sprites = Stage.getAllSprites();
+    if (ta.value.trim() === '') {
+      let hint = '';
+      sprites.forEach(sp => {
+        hint += `${sp.name};\n`;
+        hint += `  // Green(Start): Say("Hello!", 2), Hide;\n\n`;
+      });
+      ta.value = hint;
+    }
+    modal.style.display = 'flex';
+    ta.focus();
+  }
+
+  function closeTextMode() {
+    document.getElementById('text-modal').style.display = 'none';
+  }
+
+  function compileAndApply() {
+    const src = document.getElementById('text-editor').value;
+    const result = Editor.compileLykoScript(src);
+    const errBox = document.getElementById('text-errors');
+    if (!result.ok) {
+      errBox.textContent = 'Errors:\n' + result.errors.join('\n');
+      errBox.style.display = 'block';
+      return;
+    }
+    errBox.style.display = 'none';
+    Editor.applyCompiledScripts(result.scripts);
+    toast('LykoScript compiled ✓');
+    closeTextMode();
+  }
+
+  function toggleHelp() {
+    const h = document.getElementById('text-help');
+    h.style.display = h.style.display === 'none' ? 'block' : 'none';
+  }
+
+  // ===== WORKSPACE PAN (middle mouse) =====
   const workspace = document.getElementById('script-area');
-  let panning = false, panStart = null, panOrigin = null;
+  let panning = false, panStart, panOrigin = {x:0,y:0};
   let panX = 0, panY = 0;
 
   workspace.addEventListener('mousedown', e => {
-    if (e.button === 1 || e.button === 2) {
-      e.preventDefault();
-      panning = true;
-      panStart = { x: e.clientX, y: e.clientY };
-      panOrigin = { x: panX, y: panY };
-      workspace.style.cursor = 'grabbing';
-    }
+    if (e.button !== 1) return;
+    e.preventDefault();
+    panning = true;
+    panStart = { x: e.clientX, y: e.clientY };
+    panOrigin = { x: panX, y: panY };
+    workspace.style.cursor = 'grabbing';
   });
-
   document.addEventListener('mousemove', e => {
     if (!panning) return;
     panX = panOrigin.x + (e.clientX - panStart.x);
     panY = panOrigin.y + (e.clientY - panStart.y);
-    workspace.style.setProperty('--pan-x', panX + 'px');
-    workspace.style.setProperty('--pan-y', panY + 'px');
+    workspace.style.backgroundPosition = `${panX}px ${panY}px`;
   });
-
   document.addEventListener('mouseup', e => {
-    if (e.button === 1 || e.button === 2) {
-      panning = false;
-      workspace.style.cursor = '';
-    }
+    if (e.button === 1) { panning = false; workspace.style.cursor = ''; }
   });
-
-  workspace.addEventListener('contextmenu', e => e.preventDefault());
-
-  // Toast helper (available globally)
-  window.toast = function(msg, duration = 2000) {
-    let tc = document.getElementById('toast-container');
-    if (!tc) {
-      tc = document.createElement('div');
-      tc.id = 'toast-container';
-      document.body.appendChild(tc);
-    }
-    const t = document.createElement('div');
-    t.className = 'toast';
-    t.textContent = msg;
-    tc.appendChild(t);
-    setTimeout(() => t.remove(), duration);
-  };
-
-  // Variable name dropdowns - populate with sprite variables
-  document.addEventListener('click', e => {
-    const sel = e.target.closest('select.var-select');
-    if (!sel) return;
-    const sp = Stage.getSelected();
-    const vars = sp ? Object.keys(sp.variables || {}) : [];
-    const existing = Array.from(sel.options).map(o => o.value);
-    vars.forEach(v => {
-      if (!existing.includes(v)) {
-        const opt = document.createElement('option');
-        opt.value = v; opt.textContent = v;
-        sel.appendChild(opt);
-      }
-    });
-  });
-
-  // Right-click on workspace block to delete
-  document.getElementById('script-area').addEventListener('contextmenu', e => {
+  workspace.addEventListener('contextmenu', e => {
     e.preventDefault();
     const block = e.target.closest('.block');
     const stack = e.target.closest('.script-stack');
-    if (block && !block.dataset.fromPalette) {
-      if (confirm('Delete this block?')) {
-        block.remove();
-        if (stack && stack.children.length === 0) stack.remove();
-        Editor.saveScripts();
+    if (stack) {
+      if (block) {
+        if (confirm('Delete this block?')) {
+          block.remove();
+          if (stack.children.length === 0) stack.remove();
+          Editor.saveScripts();
+        }
+      } else {
+        if (confirm('Delete this entire script?')) {
+          stack.remove();
+          Editor.saveScripts();
+        }
       }
     }
   });
 
-  console.log('%cLykoScript loaded ✓', 'color:#00ffe1;font-family:monospace;font-size:14px');
+  // ===== TOAST =====
+  window.toast = function(msg, dur = 2500) {
+    let tc = document.getElementById('toast-container');
+    if (!tc) { tc = document.createElement('div'); tc.id = 'toast-container'; document.body.appendChild(tc); }
+    const t = document.createElement('div');
+    t.className = 'toast'; t.textContent = msg;
+    tc.appendChild(t);
+    setTimeout(() => t.remove(), dur);
+  };
+
+  console.log('%cLykoScript ✓', 'color:#00ffe1;font-family:monospace;font-size:14px;font-weight:bold');
 });
-  </script>
-</body>
-</html>
+</script>
+</body></html>
