@@ -17,6 +17,7 @@
   --accent: #e94560;
   --gold: #f5a623;
   --cyan: #00e5ff;
+  --purple: #b36bff;
   --text: #dce8ff;
   --dim: #5a6a90;
 }
@@ -30,7 +31,6 @@ html, body {
   cursor: none;
 }
 
-/* ── CUSTOM CURSOR ── */
 #cursor {
   position: fixed; top: 0; left: 0;
   width: 12px; height: 12px;
@@ -44,72 +44,45 @@ html, body {
 }
 #cursor.big { width: 40px; height: 40px; background: var(--cyan); }
 
-/* ── STAR CANVAS ── */
-#stars {
-  position: fixed; inset: 0;
-  pointer-events: none;
-  z-index: 0;
-}
+#stars { position: fixed; inset: 0; pointer-events: none; z-index: 0; }
 
-/* ── NOISE OVERLAY ── */
 body::before {
   content: '';
   position: fixed; inset: 0;
   background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
-  opacity: 0.4;
-  pointer-events: none;
-  z-index: 1;
+  opacity: 0.4; pointer-events: none; z-index: 1;
 }
 
-/* ── LAYOUT ── */
 #app {
   position: relative; z-index: 2;
   min-height: 100vh;
   display: flex; flex-direction: column;
   align-items: center; justify-content: center;
-  padding: 60px 24px;
-  gap: 64px;
+  padding: 60px 24px; gap: 64px;
 }
 
-/* ── HEADER ── */
-header {
-  text-align: center;
-  animation: fadeDown 0.9s cubic-bezier(0.16,1,0.3,1) both;
-}
+header { text-align: center; animation: fadeDown 0.9s cubic-bezier(0.16,1,0.3,1) both; }
 
 .eyebrow {
-  font-family: 'DM Mono', monospace;
-  font-size: 11px;
-  letter-spacing: 4px;
-  color: var(--dim);
-  text-transform: uppercase;
-  margin-bottom: 16px;
+  font-size: 11px; letter-spacing: 4px; color: var(--dim);
+  text-transform: uppercase; margin-bottom: 16px;
 }
 .eyebrow span { color: var(--gold); }
 
 h1 {
-  font-family: 'Orbitron', sans-serif;
-  font-weight: 900;
-  font-size: clamp(42px, 8vw, 90px);
-  line-height: 1;
-  letter-spacing: -1px;
-  position: relative;
-  display: inline-block;
+  font-family: 'Orbitron', sans-serif; font-weight: 900;
+  font-size: clamp(42px, 8vw, 90px); line-height: 1;
+  letter-spacing: -1px; position: relative; display: inline-block;
 }
 .h1-lyko { color: #fff; }
 .h1-apos { color: var(--accent); }
 .h1-s { color: #fff; }
 .h1-space {
-  display: block;
-  color: transparent;
+  display: block; color: transparent;
   -webkit-text-stroke: 1.5px var(--cyan);
   text-shadow: 0 0 40px rgba(0,229,255,0.25);
 }
-
-/* glitch effect on hover */
-h1:hover .h1-space {
-  animation: glitch 0.4s steps(2) both;
-}
+h1:hover .h1-space { animation: glitch 0.4s steps(2) both; }
 @keyframes glitch {
   0%   { text-shadow: -3px 0 var(--accent), 3px 0 var(--cyan); }
   25%  { text-shadow: 3px 0 var(--accent), -3px 0 var(--cyan); clip-path: inset(20% 0 50% 0); }
@@ -117,128 +90,61 @@ h1:hover .h1-space {
   100% { text-shadow: 0 0 40px rgba(0,229,255,0.25); clip-path: none; }
 }
 
-.subtitle {
-  margin-top: 20px;
-  font-size: 12px;
-  letter-spacing: 3px;
-  color: var(--dim);
-}
+.subtitle { margin-top: 20px; font-size: 12px; letter-spacing: 3px; color: var(--dim); }
 .subtitle a { color: var(--gold); text-decoration: none; }
 .subtitle a:hover { color: #fff; }
 
-/* ── DIVIDER ── */
 .divider {
   width: 120px; height: 1px;
   background: linear-gradient(90deg, transparent, var(--accent), transparent);
-  margin: 0 auto;
-  animation: fadeDown 1s 0.2s both;
+  margin: 0 auto; animation: fadeDown 1s 0.2s both;
 }
 
-/* ── GRID ── */
 .cards {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 20px;
-  width: 100%;
-  max-width: 800px;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 20px; width: 100%; max-width: 1000px;
   animation: fadeUp 1s 0.3s cubic-bezier(0.16,1,0.3,1) both;
 }
 
-/* ── CARD ── */
 .card {
-  position: relative;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  padding: 36px 32px;
-  cursor: none;
-  overflow: hidden;
+  position: relative; background: var(--surface);
+  border: 1px solid var(--border); padding: 36px 32px;
+  cursor: none; overflow: hidden;
   transition: border-color 0.3s, transform 0.3s;
-  text-decoration: none;
-  display: block;
-  group: true;
+  text-decoration: none; display: block;
 }
 .card::before {
-  content: '';
-  position: absolute; inset: 0;
+  content: ''; position: absolute; inset: 0;
   background: radial-gradient(circle at var(--mx,50%) var(--my,50%), rgba(233,69,96,0.08), transparent 60%);
-  opacity: 0;
-  transition: opacity 0.4s;
+  opacity: 0; transition: opacity 0.4s;
 }
 .card:hover::before { opacity: 1; }
 .card:hover { border-color: var(--accent); transform: translateY(-4px); }
-
-/* corner accents */
 .card::after {
-  content: '';
-  position: absolute; top: 0; right: 0;
+  content: ''; position: absolute; top: 0; right: 0;
   width: 40px; height: 40px;
-  border-top: 2px solid var(--accent);
-  border-right: 2px solid var(--accent);
-  opacity: 0;
-  transition: opacity 0.3s;
+  border-top: 2px solid var(--accent); border-right: 2px solid var(--accent);
+  opacity: 0; transition: opacity 0.3s;
 }
 .card:hover::after { opacity: 1; }
 .card-corner-bl {
   position: absolute; bottom: 0; left: 0;
   width: 40px; height: 40px;
-  border-bottom: 2px solid var(--accent);
-  border-left: 2px solid var(--accent);
-  opacity: 0;
-  transition: opacity 0.3s;
+  border-bottom: 2px solid var(--accent); border-left: 2px solid var(--accent);
+  opacity: 0; transition: opacity 0.3s;
 }
 .card:hover .card-corner-bl { opacity: 1; }
 
-.card-tag {
-  font-size: 9px;
-  letter-spacing: 3px;
-  text-transform: uppercase;
-  color: var(--dim);
-  margin-bottom: 16px;
-  display: flex; align-items: center; gap: 8px;
-}
-.card-tag::before {
-  content: '';
-  width: 20px; height: 1px;
-  background: var(--dim);
-}
+/* LykoScript purple variant */
+.card.v-purple:hover { border-color: var(--purple); }
+.card.v-purple::before { background: radial-gradient(circle at var(--mx,50%) var(--my,50%), rgba(179,107,255,0.09), transparent 60%); }
+.card.v-purple::after { border-color: var(--purple); }
+.card.v-purple:hover .card-corner-bl { border-color: var(--purple); }
+.card.v-purple .card-cta { color: var(--purple); }
+.card.v-purple:hover .card-cta { color: #fff; }
 
-.card-icon {
-  font-size: 36px;
-  margin-bottom: 18px;
-  display: block;
-  transition: transform 0.3s;
-}
-.card:hover .card-icon { transform: scale(1.12) rotate(-4deg); }
-
-.card-title {
-  font-family: 'Orbitron', sans-serif;
-  font-size: 18px;
-  font-weight: 700;
-  color: #fff;
-  letter-spacing: 1px;
-  margin-bottom: 10px;
-}
-.card-title .accent { color: var(--gold); }
-
-.card-desc {
-  font-size: 11px;
-  line-height: 1.7;
-  color: var(--dim);
-  margin-bottom: 24px;
-}
-
-.card-cta {
-  font-size: 10px;
-  letter-spacing: 3px;
-  text-transform: uppercase;
-  color: var(--accent);
-  display: flex; align-items: center; gap: 8px;
-  transition: gap 0.2s, color 0.2s;
-}
-.card:hover .card-cta { gap: 14px; color: #fff; }
-.card-cta::after { content: '→'; }
-
-/* Coming soon card variant */
+/* Coming soon */
 .card.soon { cursor: not-allowed; }
 .card.soon:hover { border-color: var(--dim); transform: none; }
 .card.soon::after { border-color: var(--dim); }
@@ -247,56 +153,49 @@ h1:hover .h1-space {
 .card.soon .card-cta { color: var(--dim); }
 .card.soon:hover .card-cta { color: var(--dim); gap: 8px; }
 
+.card-tag {
+  font-size: 9px; letter-spacing: 3px; text-transform: uppercase;
+  color: var(--dim); margin-bottom: 16px; display: flex; align-items: center; gap: 8px;
+}
+.card-tag::before { content: ''; width: 20px; height: 1px; background: var(--dim); }
+.card-icon { font-size: 36px; margin-bottom: 18px; display: block; transition: transform 0.3s; }
+.card:hover .card-icon { transform: scale(1.12) rotate(-4deg); }
+.card-title {
+  font-family: 'Orbitron', sans-serif; font-size: 18px; font-weight: 700;
+  color: #fff; letter-spacing: 1px; margin-bottom: 10px;
+}
+.card-title .accent { color: var(--gold); }
+.card-title .accent-purple { color: var(--purple); }
+.card-desc { font-size: 11px; line-height: 1.7; color: var(--dim); margin-bottom: 24px; }
+.card-cta {
+  font-size: 10px; letter-spacing: 3px; text-transform: uppercase;
+  color: var(--accent); display: flex; align-items: center; gap: 8px;
+  transition: gap 0.2s, color 0.2s;
+}
+.card:hover .card-cta { gap: 14px; color: #fff; }
+.card-cta::after { content: '→'; }
+
 .badge {
-  display: inline-block;
-  font-size: 8px; letter-spacing: 2px;
-  padding: 3px 8px;
-  border: 1px solid var(--dim);
-  color: var(--dim);
-  text-transform: uppercase;
-  margin-bottom: 10px;
-  border-radius: 2px;
+  display: inline-block; font-size: 8px; letter-spacing: 2px;
+  padding: 3px 8px; border: 1px solid var(--dim); color: var(--dim);
+  text-transform: uppercase; margin-bottom: 10px; border-radius: 2px;
 }
 
-/* ── FOOTER ── */
-footer {
-  font-size: 10px;
-  letter-spacing: 2px;
-  color: var(--dim);
-  text-align: center;
-  animation: fadeUp 1s 0.6s both;
-}
+footer { font-size: 10px; letter-spacing: 2px; color: var(--dim); text-align: center; animation: fadeUp 1s 0.6s both; }
 footer span { color: var(--accent); }
 
-/* ── ANIMATIONS ── */
-@keyframes fadeDown {
-  from { opacity: 0; transform: translateY(-20px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-@keyframes fadeUp {
-  from { opacity: 0; transform: translateY(20px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
+@keyframes fadeDown { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes fadeUp   { from { opacity: 0; transform: translateY(20px);  } to { opacity: 1; transform: translateY(0); } }
 
-/* ── ORBIT DECORATION ── */
 .orbit-wrap {
-  position: fixed; top: 50%; left: 50%;
-  transform: translate(-50%, -50%);
-  width: 600px; height: 600px;
-  pointer-events: none; z-index: 0;
-  opacity: 0.04;
+  position: fixed; top: 50%; left: 50%; transform: translate(-50%,-50%);
+  width: 600px; height: 600px; pointer-events: none; z-index: 0; opacity: 0.04;
 }
-.orbit {
-  position: absolute; inset: 0;
-  border: 1px solid #fff;
-  border-radius: 50%;
-  animation: spin 40s linear infinite;
-}
+.orbit { position: absolute; inset: 0; border: 1px solid #fff; border-radius: 50%; animation: spin 40s linear infinite; }
 .orbit:nth-child(2) { inset: 60px; border-color: var(--accent); animation-duration: 60s; animation-direction: reverse; }
 .orbit:nth-child(3) { inset: 130px; animation-duration: 80s; }
 @keyframes spin { to { transform: rotate(360deg); } }
 
-/* ── SCANLINE ── */
 .scanline {
   position: fixed; inset: 0;
   background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.03) 2px, rgba(0,0,0,0.03) 4px);
@@ -308,13 +207,7 @@ footer span { color: var(--accent); }
 
 <div id="cursor"></div>
 <canvas id="stars"></canvas>
-
-<!-- bg decoration -->
-<div class="orbit-wrap">
-  <div class="orbit"></div>
-  <div class="orbit"></div>
-  <div class="orbit"></div>
-</div>
+<div class="orbit-wrap"><div class="orbit"></div><div class="orbit"></div><div class="orbit"></div></div>
 <div class="scanline"></div>
 
 <div id="app">
@@ -342,6 +235,16 @@ footer span { color: var(--accent); }
       <div class="card-cta">Open App</div>
     </a>
 
+    <!-- LykoScript -->
+    <a class="card v-purple" href="lykoscript.html">
+      <div class="card-corner-bl"></div>
+      <span class="card-tag">App</span>
+      <span class="card-icon">🧩</span>
+      <div class="card-title">LYKO<span class="accent-purple">SCRIPT</span></div>
+      <p class="card-desc">A browser-based block coding environment. Snap together blocks, animate sprites on a live stage, and build interactive programs — no setup needed.</p>
+      <div class="card-cta">Open App</div>
+    </a>
+
     <!-- Coming Soon -->
     <div class="card soon">
       <div class="card-corner-bl"></div>
@@ -355,14 +258,11 @@ footer span { color: var(--accent); }
 
   </div>
 
-  <footer>
-    &copy; <span>LilLyko.space</span> — built by Lyko
-  </footer>
+  <footer>&copy; <span>LilLyko.space</span> — built by Lyko</footer>
 
 </div>
 
 <script>
-// ── CURSOR ──
 const cursor = document.getElementById('cursor');
 document.addEventListener('mousemove', e => {
   cursor.style.left = e.clientX + 'px';
@@ -373,61 +273,37 @@ document.querySelectorAll('a, .card:not(.soon), button').forEach(el => {
   el.addEventListener('mouseleave', () => cursor.classList.remove('big'));
 });
 
-// ── CARD MOUSE TRACKING (radial gradient) ──
 document.querySelectorAll('.card').forEach(card => {
   card.addEventListener('mousemove', e => {
     const r = card.getBoundingClientRect();
-    const x = ((e.clientX - r.left) / r.width * 100).toFixed(1);
-    const y = ((e.clientY - r.top)  / r.height * 100).toFixed(1);
-    card.style.setProperty('--mx', x + '%');
-    card.style.setProperty('--my', y + '%');
+    card.style.setProperty('--mx', ((e.clientX - r.left) / r.width * 100).toFixed(1) + '%');
+    card.style.setProperty('--my', ((e.clientY - r.top)  / r.height * 100).toFixed(1) + '%');
   });
 });
 
-// ── STAR FIELD ──
 const canvas = document.getElementById('stars');
 const ctx = canvas.getContext('2d');
-let stars = [];
-let W, H;
+let stars = [], W, H;
 
-function resize() {
-  W = canvas.width  = window.innerWidth;
-  H = canvas.height = window.innerHeight;
-}
+function resize() { W = canvas.width = window.innerWidth; H = canvas.height = window.innerHeight; }
 function initStars() {
   stars = [];
-  const count = Math.floor((W * H) / 4000);
-  for (let i = 0; i < count; i++) {
-    stars.push({
-      x: Math.random() * W,
-      y: Math.random() * H,
-      r: Math.random() * 1.4 + 0.2,
-      a: Math.random(),
-      speed: Math.random() * 0.004 + 0.001,
-      twinkleOffset: Math.random() * Math.PI * 2
-    });
+  for (let i = 0; i < Math.floor((W*H)/4000); i++) {
+    stars.push({ x:Math.random()*W, y:Math.random()*H, r:Math.random()*1.4+0.2,
+      a:Math.random(), speed:Math.random()*0.004+0.001, twinkleOffset:Math.random()*Math.PI*2 });
   }
 }
 function drawStars(t) {
-  ctx.clearRect(0, 0, W, H);
+  ctx.clearRect(0,0,W,H);
   stars.forEach(s => {
     const alpha = s.a * (0.5 + 0.5 * Math.sin(t * s.speed * 60 + s.twinkleOffset));
-    ctx.beginPath();
-    ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
-    ctx.fillStyle = `rgba(200,220,255,${alpha})`;
-    ctx.fill();
+    ctx.beginPath(); ctx.arc(s.x, s.y, s.r, 0, Math.PI*2);
+    ctx.fillStyle = `rgba(200,220,255,${alpha})`; ctx.fill();
   });
 }
-
 let then = 0;
-function loop(t) {
-  if (t - then > 30) { drawStars(t); then = t; }
-  requestAnimationFrame(loop);
-}
-
-resize();
-initStars();
-loop(0);
+function loop(t) { if (t-then>30){drawStars(t);then=t;} requestAnimationFrame(loop); }
+resize(); initStars(); loop(0);
 window.addEventListener('resize', () => { resize(); initStars(); });
 </script>
 </body>

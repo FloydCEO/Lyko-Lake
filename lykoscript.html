@@ -1,0 +1,1928 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>LykoScript</title>
+  <style>
+/* ===== RESET & BASE ===== */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg: #07080f;
+  --panel: #0d0f1a;
+  --panel2: #12152a;
+  --border: #1e2240;
+  --accent: #00ffe1;
+  --accent2: #b36bff;
+  --accent3: #ff6b9d;
+  --text: #c8d0f0;
+  --text-dim: #4a5070;
+  --font-ui: 'Courier New', 'Lucida Console', monospace;
+  --font-display: 'Courier New', 'Lucida Console', monospace;
+
+  /* Block colors */
+  --motion: #4c97ff;
+  --looks: #9966ff;
+  --sound: #cf63cf;
+  --events: #ffab19;
+  --control: #ffab19;
+  --sensing: #5cb1d6;
+  --operators: #59c059;
+  --variables: #ff8c1a;
+  --myblocks: #ff6680;
+}
+
+html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(--text); font-family: var(--font-ui); }
+
+/* ===== TOP BAR ===== */
+#topbar {
+  height: 44px;
+  background: var(--panel);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  padding: 0 12px;
+  gap: 16px;
+  z-index: 100;
+  position: relative;
+}
+
+#logo { font-family: var(--font-display); font-size: 16px; font-weight: 900; letter-spacing: 2px; }
+.logo-lyko { color: var(--accent); }
+.logo-script { color: var(--accent2); }
+
+#topbar-controls { display: flex; align-items: center; gap: 8px; }
+
+#btn-flag {
+  background: #1a3a1a;
+  border: 1px solid #59c059;
+  color: #59c059;
+  border-radius: 6px;
+  width: 36px; height: 28px;
+  cursor: pointer; font-size: 13px;
+  transition: all 0.15s;
+}
+#btn-flag:hover { background: #59c059; color: #000; }
+
+#btn-stop {
+  background: #3a1a1a;
+  border: 1px solid #ff4444;
+  color: #ff4444;
+  border-radius: 6px;
+  width: 36px; height: 28px;
+  cursor: pointer; font-size: 13px;
+  transition: all 0.15s;
+}
+#btn-stop:hover { background: #ff4444; color: #000; }
+
+#run-status { font-size: 11px; color: var(--text-dim); }
+
+#topbar-right { margin-left: auto; }
+.nav-back { color: var(--text-dim); text-decoration: none; font-size: 12px; transition: color 0.2s; }
+.nav-back:hover { color: var(--accent); }
+
+/* ===== MAIN LAYOUT ===== */
+#app {
+  display: flex;
+  height: calc(100vh - 44px);
+  overflow: hidden;
+}
+
+/* ===== PALETTE PANEL ===== */
+#palette-panel {
+  width: 220px;
+  min-width: 220px;
+  background: var(--panel);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+#category-tabs {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 8px 6px;
+  border-bottom: 1px solid var(--border);
+}
+
+.cat-tab {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 8px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 11px;
+  font-family: var(--font-ui);
+  border: none;
+  background: transparent;
+  color: var(--text);
+  transition: background 0.15s;
+  text-align: left;
+}
+.cat-tab:hover { background: var(--panel2); }
+.cat-tab.active { background: var(--panel2); }
+
+.cat-dot {
+  width: 14px; height: 14px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+#block-palette {
+  flex: 1;
+  overflow-y: auto;
+  padding: 8px 6px;
+}
+
+#block-palette::-webkit-scrollbar { width: 4px; }
+#block-palette::-webkit-scrollbar-track { background: transparent; }
+#block-palette::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+.palette-section-title {
+  font-size: 10px;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  padding: 8px 4px 4px;
+}
+
+/* ===== BLOCKS ===== */
+.block {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 10px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-family: var(--font-ui);
+  cursor: grab;
+  user-select: none;
+  position: relative;
+  min-height: 28px;
+  flex-wrap: wrap;
+  border: none;
+  margin: 2px 0;
+  width: 100%;
+  color: #fff;
+  transition: filter 0.1s, transform 0.1s;
+}
+.block:hover { filter: brightness(1.15); }
+.block:active { cursor: grabbing; transform: scale(0.97); }
+
+/* Hat blocks (events) have a rounded top notch */
+.block.hat { border-radius: 18px 18px 6px 6px; padding-top: 10px; }
+
+/* C-shaped control blocks */
+.block.c-block {
+  border-radius: 6px;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: 0;
+  overflow: visible;
+}
+.c-block .block-top { display: flex; align-items: center; gap: 4px; padding: 6px 10px; width: 100%; }
+.c-block .block-mouth {
+  margin-left: 20px;
+  min-height: 28px;
+  border-left: 3px solid rgba(0,0,0,0.2);
+  padding: 4px;
+  width: calc(100% - 20px);
+}
+.c-block .block-bottom { padding: 6px 10px; width: 100%; }
+
+/* Block notch/tab indicators */
+.block::before {
+  content: '';
+  position: absolute;
+  left: 10px;
+  top: -4px;
+  width: 20px; height: 4px;
+  border-radius: 2px 2px 0 0;
+  background: inherit;
+  filter: brightness(0.85);
+}
+.block.hat::before { display: none; }
+.block::after {
+  content: '';
+  position: absolute;
+  left: 10px;
+  bottom: -4px;
+  width: 20px; height: 4px;
+  border-radius: 0 0 2px 2px;
+  background: inherit;
+  filter: brightness(0.85);
+}
+.block.terminator::after { display: none; }
+
+/* Category colors */
+.block.motion { background: var(--motion); }
+.block.looks { background: var(--looks); }
+.block.sound { background: var(--sound); }
+.block.events { background: var(--events); }
+.block.control { background: var(--control); }
+.block.sensing { background: var(--sensing); }
+.block.operators { background: var(--operators); }
+.block.variables { background: var(--variables); }
+.block.myblocks { background: var(--myblocks); }
+
+/* Reporter blocks (oval) */
+.block.reporter {
+  border-radius: 14px;
+  display: inline-flex;
+  width: auto;
+  padding: 4px 12px;
+}
+
+/* Boolean blocks (hexagon-ish) */
+.block.boolean {
+  border-radius: 14px;
+  display: inline-flex;
+  width: auto;
+  padding: 4px 14px;
+  clip-path: polygon(8px 0%, calc(100% - 8px) 0%, 100% 50%, calc(100% - 8px) 100%, 8px 100%, 0% 50%);
+}
+
+/* Inputs inside blocks */
+.block-input {
+  background: rgba(255,255,255,0.25);
+  border: none;
+  border-radius: 4px;
+  padding: 1px 6px;
+  font-size: 11px;
+  font-family: var(--font-ui);
+  color: #fff;
+  width: 40px;
+  outline: none;
+  cursor: text;
+}
+.block-input:focus { background: rgba(255,255,255,0.4); }
+.block-input.wide { width: 80px; }
+
+.block-dropdown {
+  background: rgba(255,255,255,0.25);
+  border: none;
+  border-radius: 4px;
+  padding: 1px 4px;
+  font-size: 11px;
+  font-family: var(--font-ui);
+  color: #fff;
+  cursor: pointer;
+  outline: none;
+}
+.block-dropdown option { background: #1a1a2e; color: #fff; }
+
+/* ===== EDITOR PANEL ===== */
+#editor-panel {
+  flex: 1;
+  background: var(--bg);
+  position: relative;
+  overflow: hidden;
+}
+
+#workspace {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 20% 50%, rgba(0,255,225,0.03) 0%, transparent 50%),
+    radial-gradient(circle at 80% 20%, rgba(179,107,255,0.03) 0%, transparent 50%),
+    var(--bg);
+}
+
+/* Dot grid background */
+#workspace::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(circle, rgba(255,255,255,0.07) 1px, transparent 1px);
+  background-size: 24px 24px;
+  pointer-events: none;
+}
+
+#script-area {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+
+/* Script stacks (groups of connected blocks) in workspace */
+.script-stack {
+  position: absolute;
+  cursor: grab;
+  user-select: none;
+}
+.script-stack:active { cursor: grabbing; z-index: 1000; }
+.script-stack .block { width: auto; min-width: 140px; }
+
+/* Drop highlight */
+.block.drop-target { outline: 2px solid rgba(255,255,255,0.6); }
+
+/* ===== RIGHT PANEL ===== */
+#right-panel {
+  width: 280px;
+  min-width: 280px;
+  background: var(--panel);
+  border-left: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+}
+
+#stage-container {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 4/3;
+  background: #000;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+#stage-canvas {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+/* ===== SPRITE PANEL ===== */
+#sprite-panel {
+  flex: 1;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+#sprite-list-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px;
+  font-size: 11px;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  border-bottom: 1px solid var(--border);
+}
+
+#btn-add-sprite {
+  background: var(--panel2);
+  border: 1px solid var(--border);
+  color: var(--accent);
+  border-radius: 4px;
+  width: 22px; height: 22px;
+  cursor: pointer;
+  font-size: 16px;
+  line-height: 1;
+  transition: all 0.15s;
+  display: flex; align-items: center; justify-content: center;
+}
+#btn-add-sprite:hover { background: var(--accent); color: #000; }
+
+#sprite-list {
+  flex: 1;
+  overflow-y: auto;
+  padding: 8px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-content: flex-start;
+}
+
+.sprite-thumb {
+  width: 72px;
+  background: var(--panel2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 6px;
+  cursor: pointer;
+  text-align: center;
+  transition: border-color 0.15s;
+}
+.sprite-thumb:hover { border-color: var(--accent2); }
+.sprite-thumb.selected { border-color: var(--accent); }
+
+.sprite-thumb canvas {
+  width: 54px; height: 54px;
+  display: block;
+  margin: 0 auto 4px;
+  border-radius: 4px;
+  background: rgba(255,255,255,0.05);
+}
+
+.sprite-thumb-name {
+  font-size: 9px;
+  color: var(--text-dim);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ===== SPRITE PROPS ===== */
+#sprite-props {
+  padding: 8px 12px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+#sprite-props label {
+  font-size: 10px;
+  color: var(--text-dim);
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+#sprite-props input {
+  background: var(--panel2);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  color: var(--text);
+  font-family: var(--font-ui);
+  font-size: 11px;
+  padding: 2px 6px;
+  width: 64px;
+  outline: none;
+}
+#sprite-props input:focus { border-color: var(--accent); }
+
+/* ===== DRAG GHOST ===== */
+#drag-ghost {
+  position: fixed;
+  pointer-events: none;
+  z-index: 9999;
+  display: none;
+  opacity: 0.85;
+  transform: rotate(3deg);
+  filter: drop-shadow(0 4px 12px rgba(0,0,0,0.5));
+}
+
+/* ===== SCROLLBARS ===== */
+::-webkit-scrollbar { width: 4px; height: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+/* ===== TOASTS ===== */
+#toast-container {
+  position: fixed;
+  bottom: 16px; left: 50%;
+  transform: translateX(-50%);
+  z-index: 9998;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  pointer-events: none;
+}
+.toast {
+  background: var(--panel2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 8px 16px;
+  font-size: 12px;
+  color: var(--text);
+  animation: toastIn 0.2s ease;
+}
+@keyframes toastIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+/* ===== SPEECH BUBBLE on stage ===== */
+.speech-bubble {
+  position: absolute;
+  background: white;
+  color: #333;
+  border-radius: 8px;
+  padding: 6px 10px;
+  font-family: sans-serif;
+  font-size: 13px;
+  max-width: 150px;
+  pointer-events: none;
+  z-index: 10;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+}
+.speech-bubble::after {
+  content: '';
+  position: absolute;
+  bottom: -8px; left: 12px;
+  border: 8px solid transparent;
+  border-top-color: white;
+  border-bottom: none;
+}
+  </style>
+</head>
+<body>
+  <header id="topbar">
+    <div id="logo">
+      <span class="logo-lyko">LYKO</span><span class="logo-script">SCRIPT</span>
+    </div>
+    <div id="topbar-controls">
+      <button id="btn-flag" title="Run (Green Flag)">▶</button>
+      <button id="btn-stop" title="Stop">⏹</button>
+      <span id="run-status"></span>
+    </div>
+    <div id="topbar-right">
+      <a href="index.html" class="nav-back">← Home</a>
+    </div>
+  </header>
+
+  <div id="app">
+    <aside id="palette-panel">
+      <div id="category-tabs"></div>
+      <div id="block-palette"></div>
+    </aside>
+    <main id="editor-panel">
+      <div id="workspace">
+        <canvas id="workspace-canvas"></canvas>
+        <div id="script-area"></div>
+      </div>
+    </main>
+    <aside id="right-panel">
+      <div id="stage-container">
+        <canvas id="stage-canvas" width="480" height="360"></canvas>
+        <div id="stage-overlay"></div>
+      </div>
+      <div id="sprite-panel">
+        <div id="sprite-list-header">
+          <span>Sprites</span>
+          <button id="btn-add-sprite" title="Add Sprite">+</button>
+        </div>
+        <div id="sprite-list"></div>
+      </div>
+      <div id="sprite-props" style="display:none">
+        <label>Name <input id="prop-name" type="text" /></label>
+        <label>X <input id="prop-x" type="number" /></label>
+        <label>Y <input id="prop-y" type="number" /></label>
+        <label>Size <input id="prop-size" type="number" /></label>
+        <label>Dir <input id="prop-dir" type="number" /></label>
+      </div>
+    </aside>
+  </div>
+
+  <div id="drag-ghost"></div>
+
+  <script>
+// ===== BLOCK DEFINITIONS =====
+// Each block: { id, category, shape, label, inputs, fields }
+// shapes: 'stack' | 'hat' | 'c-block' | 'reporter' | 'boolean' | 'terminator'
+
+const CATEGORIES = [
+  { id: 'motion',    label: 'Motion',    color: '#4c97ff' },
+  { id: 'looks',     label: 'Looks',     color: '#9966ff' },
+  { id: 'sound',     label: 'Sound',     color: '#cf63cf' },
+  { id: 'events',    label: 'Events',    color: '#ffab19' },
+  { id: 'control',   label: 'Control',   color: '#ffab19' },
+  { id: 'sensing',   label: 'Sensing',   color: '#5cb1d6' },
+  { id: 'operators', label: 'Operators', color: '#59c059' },
+  { id: 'variables', label: 'Variables', color: '#ff8c1a' },
+  { id: 'myblocks',  label: 'My Blocks', color: '#ff6680' },
+];
+
+const BLOCK_DEFS = {
+  // ===== MOTION =====
+  'move_steps':        { cat:'motion', shape:'stack',    parts:['move', {type:'num',val:'10'}, 'steps'] },
+  'turn_right':        { cat:'motion', shape:'stack',    parts:['turn ↻', {type:'num',val:'15'}, 'degrees'] },
+  'turn_left':         { cat:'motion', shape:'stack',    parts:['turn ↺', {type:'num',val:'15'}, 'degrees'] },
+  'goto_xy':           { cat:'motion', shape:'stack',    parts:['go to x:', {type:'num',val:'0'}, 'y:', {type:'num',val:'0'}] },
+  'goto_random':       { cat:'motion', shape:'stack',    parts:['go to', {type:'dropdown',val:'random position',opts:['random position','mouse-pointer']}] },
+  'glide_secs_xy':     { cat:'motion', shape:'stack',    parts:['glide', {type:'num',val:'1'}, 'secs to x:', {type:'num',val:'0'}, 'y:', {type:'num',val:'0'}] },
+  'point_direction':   { cat:'motion', shape:'stack',    parts:['point in direction', {type:'num',val:'90'}] },
+  'point_towards':     { cat:'motion', shape:'stack',    parts:['point towards', {type:'dropdown',val:'mouse-pointer',opts:['mouse-pointer']}] },
+  'change_x':          { cat:'motion', shape:'stack',    parts:['change x by', {type:'num',val:'10'}] },
+  'set_x':             { cat:'motion', shape:'stack',    parts:['set x to', {type:'num',val:'0'}] },
+  'change_y':          { cat:'motion', shape:'stack',    parts:['change y by', {type:'num',val:'10'}] },
+  'set_y':             { cat:'motion', shape:'stack',    parts:['set y to', {type:'num',val:'0'}] },
+  'if_on_edge_bounce': { cat:'motion', shape:'stack',    parts:['if on edge, bounce'] },
+  'set_rotation_style':{ cat:'motion', shape:'stack',    parts:['set rotation style', {type:'dropdown',val:'left-right',opts:['left-right','don\'t rotate','all around']}] },
+  'x_pos':             { cat:'motion', shape:'reporter', parts:['x position'] },
+  'y_pos':             { cat:'motion', shape:'reporter', parts:['y position'] },
+  'direction_rep':     { cat:'motion', shape:'reporter', parts:['direction'] },
+
+  // ===== LOOKS =====
+  'say_timed':         { cat:'looks',  shape:'stack',    parts:['say', {type:'str',val:'Hello!'}, 'for', {type:'num',val:'2'}, 'seconds'] },
+  'say':               { cat:'looks',  shape:'stack',    parts:['say', {type:'str',val:'Hello!'}] },
+  'think_timed':       { cat:'looks',  shape:'stack',    parts:['think', {type:'str',val:'Hmm...'}, 'for', {type:'num',val:'2'}, 'seconds'] },
+  'think':             { cat:'looks',  shape:'stack',    parts:['think', {type:'str',val:'Hmm...'}] },
+  'switch_costume':    { cat:'looks',  shape:'stack',    parts:['switch costume to', {type:'dropdown',val:'costume1',opts:['costume1','costume2']}] },
+  'next_costume':      { cat:'looks',  shape:'stack',    parts:['next costume'] },
+  'switch_backdrop':   { cat:'looks',  shape:'stack',    parts:['switch backdrop to', {type:'dropdown',val:'backdrop1',opts:['backdrop1']}] },
+  'next_backdrop':     { cat:'looks',  shape:'stack',    parts:['next backdrop'] },
+  'change_size':       { cat:'looks',  shape:'stack',    parts:['change size by', {type:'num',val:'10'}] },
+  'set_size':          { cat:'looks',  shape:'stack',    parts:['set size to', {type:'num',val:'100'}, '%'] },
+  'set_effect':        { cat:'looks',  shape:'stack',    parts:['set', {type:'dropdown',val:'color',opts:['color','fisheye','whirl','pixelate','mosaic','brightness','ghost']}, 'effect to', {type:'num',val:'0'}] },
+  'change_effect':     { cat:'looks',  shape:'stack',    parts:['change', {type:'dropdown',val:'color',opts:['color','fisheye','whirl','pixelate','mosaic','brightness','ghost']}, 'effect by', {type:'num',val:'25'}] },
+  'clear_effects':     { cat:'looks',  shape:'stack',    parts:['clear graphic effects'] },
+  'show':              { cat:'looks',  shape:'stack',    parts:['show'] },
+  'hide':              { cat:'looks',  shape:'stack',    parts:['hide'] },
+  'go_to_layer':       { cat:'looks',  shape:'stack',    parts:['go to', {type:'dropdown',val:'front',opts:['front','back']}, 'layer'] },
+  'go_layers':         { cat:'looks',  shape:'stack',    parts:['go', {type:'dropdown',val:'forward',opts:['forward','backward']}, {type:'num',val:'1'}, 'layers'] },
+  'costume_num':       { cat:'looks',  shape:'reporter', parts:['costume number'] },
+  'backdrop_name':     { cat:'looks',  shape:'reporter', parts:['backdrop name'] },
+  'size_rep':          { cat:'looks',  shape:'reporter', parts:['size'] },
+
+  // ===== SOUND =====
+  'play_sound_until':  { cat:'sound',  shape:'stack',    parts:['play sound', {type:'dropdown',val:'pop',opts:['pop']}, 'until done'] },
+  'play_sound':        { cat:'sound',  shape:'stack',    parts:['start sound', {type:'dropdown',val:'pop',opts:['pop']}] },
+  'stop_sounds':       { cat:'sound',  shape:'stack',    parts:['stop all sounds'] },
+  'change_volume':     { cat:'sound',  shape:'stack',    parts:['change volume by', {type:'num',val:'-10'}] },
+  'set_volume':        { cat:'sound',  shape:'stack',    parts:['set volume to', {type:'num',val:'100'}, '%'] },
+  'volume_rep':        { cat:'sound',  shape:'reporter', parts:['volume'] },
+
+  // ===== EVENTS =====
+  'when_flag':         { cat:'events', shape:'hat',      parts:['when 🚀 clicked'] },
+  'when_key':          { cat:'events', shape:'hat',      parts:['when', {type:'dropdown',val:'space',opts:['space','left arrow','right arrow','up arrow','down arrow','any','a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z','0','1','2','3','4','5','6','7','8','9']}, 'key pressed'] },
+  'when_sprite_clicked':{ cat:'events',shape:'hat',      parts:['when this sprite clicked'] },
+  'when_backdrop':     { cat:'events', shape:'hat',      parts:['when backdrop switches to', {type:'dropdown',val:'backdrop1',opts:['backdrop1']}] },
+  'when_gt':           { cat:'events', shape:'hat',      parts:['when', {type:'dropdown',val:'loudness',opts:['loudness','timer']}, '>', {type:'num',val:'10'}] },
+  'when_msg':          { cat:'events', shape:'hat',      parts:['when I receive', {type:'dropdown',val:'message1',opts:['message1']}] },
+  'broadcast':         { cat:'events', shape:'stack',    parts:['broadcast', {type:'dropdown',val:'message1',opts:['message1']}] },
+  'broadcast_wait':    { cat:'events', shape:'stack',    parts:['broadcast', {type:'dropdown',val:'message1',opts:['message1']}, 'and wait'] },
+
+  // ===== CONTROL =====
+  'wait_secs':         { cat:'control',shape:'stack',    parts:['wait', {type:'num',val:'1'}, 'seconds'] },
+  'repeat':            { cat:'control',shape:'c-block',  parts:['repeat', {type:'num',val:'10'}] },
+  'forever':           { cat:'control',shape:'c-block',  parts:['forever'], terminator:true },
+  'if':                { cat:'control',shape:'c-block',  parts:['if', {type:'bool'}] },
+  'if_else':           { cat:'control',shape:'c-block',  parts:['if', {type:'bool'}, 'then'], hasElse:true },
+  'wait_until':        { cat:'control',shape:'stack',    parts:['wait until', {type:'bool'}] },
+  'repeat_until':      { cat:'control',shape:'c-block',  parts:['repeat until', {type:'bool'}] },
+  'stop':              { cat:'control',shape:'terminator',parts:['stop', {type:'dropdown',val:'all',opts:['all','this script','other scripts in sprite']}] },
+  'when_clone_start':  { cat:'control',shape:'hat',      parts:['when I start as a clone'] },
+  'create_clone':      { cat:'control',shape:'stack',    parts:['create clone of', {type:'dropdown',val:'myself',opts:['myself']}] },
+  'delete_clone':      { cat:'control',shape:'terminator',parts:['delete this clone'] },
+
+  // ===== SENSING =====
+  'touching':          { cat:'sensing',shape:'boolean',  parts:['touching', {type:'dropdown',val:'mouse-pointer',opts:['mouse-pointer','edge']}] },
+  'touching_color':    { cat:'sensing',shape:'boolean',  parts:['touching color', {type:'color',val:'#00ff00'}] },
+  'color_touching':    { cat:'sensing',shape:'boolean',  parts:['color', {type:'color',val:'#ff0000'}, 'is touching', {type:'color',val:'#0000ff'}] },
+  'distance_to':       { cat:'sensing',shape:'reporter', parts:['distance to', {type:'dropdown',val:'mouse-pointer',opts:['mouse-pointer']}] },
+  'ask_wait':          { cat:'sensing',shape:'stack',    parts:['ask', {type:'str',val:"What's your name?"}, 'and wait'] },
+  'answer':            { cat:'sensing',shape:'reporter', parts:['answer'] },
+  'key_pressed':       { cat:'sensing',shape:'boolean',  parts:['key', {type:'dropdown',val:'space',opts:['space','left arrow','right arrow','up arrow','down arrow','any']}, 'pressed?'] },
+  'mouse_down':        { cat:'sensing',shape:'boolean',  parts:['mouse down?'] },
+  'mouse_x':           { cat:'sensing',shape:'reporter', parts:['mouse x'] },
+  'mouse_y':           { cat:'sensing',shape:'reporter', parts:['mouse y'] },
+  'set_drag':          { cat:'sensing',shape:'stack',    parts:['set drag mode', {type:'dropdown',val:'draggable',opts:['draggable','not draggable']}] },
+  'loudness':          { cat:'sensing',shape:'reporter', parts:['loudness'] },
+  'timer':             { cat:'sensing',shape:'reporter', parts:['timer'] },
+  'reset_timer':       { cat:'sensing',shape:'stack',    parts:['reset timer'] },
+  'current_time':      { cat:'sensing',shape:'reporter', parts:['current', {type:'dropdown',val:'year',opts:['year','month','date','day of week','hour','minute','second']}] },
+  'days_since_2000':   { cat:'sensing',shape:'reporter', parts:['days since 2000'] },
+  'username':          { cat:'sensing',shape:'reporter', parts:['username'] },
+
+  // ===== OPERATORS =====
+  'add':               { cat:'operators',shape:'reporter', parts:[{type:'num',val:''}, '+', {type:'num',val:''}] },
+  'subtract':          { cat:'operators',shape:'reporter', parts:[{type:'num',val:''}, '-', {type:'num',val:''}] },
+  'multiply':          { cat:'operators',shape:'reporter', parts:[{type:'num',val:''}, '*', {type:'num',val:''}] },
+  'divide':            { cat:'operators',shape:'reporter', parts:[{type:'num',val:''}, '/', {type:'num',val:''}] },
+  'random':            { cat:'operators',shape:'reporter', parts:['pick random', {type:'num',val:'1'}, 'to', {type:'num',val:'10'}] },
+  'gt':                { cat:'operators',shape:'boolean',  parts:[{type:'num',val:''}, '>', {type:'num',val:'50'}] },
+  'lt':                { cat:'operators',shape:'boolean',  parts:[{type:'num',val:''}, '<', {type:'num',val:'50'}] },
+  'eq':                { cat:'operators',shape:'boolean',  parts:[{type:'any',val:''}, '=', {type:'any',val:'50'}] },
+  'and':               { cat:'operators',shape:'boolean',  parts:[{type:'bool'}, 'and', {type:'bool'}] },
+  'or':                { cat:'operators',shape:'boolean',  parts:[{type:'bool'}, 'or', {type:'bool'}] },
+  'not':               { cat:'operators',shape:'boolean',  parts:['not', {type:'bool'}] },
+  'join':              { cat:'operators',shape:'reporter', parts:['join', {type:'str',val:'apple'}, {type:'str',val:'banana'}] },
+  'letter_of':         { cat:'operators',shape:'reporter', parts:['letter', {type:'num',val:'1'}, 'of', {type:'str',val:'apple'}] },
+  'length_of':         { cat:'operators',shape:'reporter', parts:['length of', {type:'str',val:'apple'}] },
+  'contains':          { cat:'operators',shape:'boolean',  parts:[{type:'str',val:'apple'}, 'contains', {type:'str',val:'a'}] },
+  'mod':               { cat:'operators',shape:'reporter', parts:[{type:'num',val:''}, 'mod', {type:'num',val:''}] },
+  'round':             { cat:'operators',shape:'reporter', parts:['round', {type:'num',val:''}] },
+  'math_op':           { cat:'operators',shape:'reporter', parts:[{type:'dropdown',val:'abs',opts:['abs','floor','ceiling','sqrt','sin','cos','tan','asin','acos','atan','ln','log','e^','10^']}, 'of', {type:'num',val:''}] },
+
+  // ===== VARIABLES =====
+  'set_var':           { cat:'variables',shape:'stack',   parts:['set', {type:'varname'}, 'to', {type:'any',val:'0'}] },
+  'change_var':        { cat:'variables',shape:'stack',   parts:['change', {type:'varname'}, 'by', {type:'num',val:'1'}] },
+  'show_var':          { cat:'variables',shape:'stack',   parts:['show variable', {type:'varname'}] },
+  'hide_var':          { cat:'variables',shape:'stack',   parts:['hide variable', {type:'varname'}] },
+};
+
+// ===== Block DOM Builder =====
+function buildBlockEl(id, def, values = {}) {
+  const el = document.createElement('div');
+  el.className = `block ${def.cat} ${def.shape}`;
+  el.dataset.blockId = id;
+
+  if (def.shape === 'c-block') {
+    // Top row
+    const top = document.createElement('div');
+    top.className = 'block-top';
+    def.parts.forEach((p, i) => top.appendChild(buildPart(p, id, i, values)));
+    el.appendChild(top);
+
+    // Mouth (inner drop zone)
+    const mouth = document.createElement('div');
+    mouth.className = 'block-mouth drop-zone';
+    mouth.dataset.dropType = 'inner';
+    el.appendChild(mouth);
+
+    // Bottom cap
+    const bottom = document.createElement('div');
+    bottom.className = 'block-bottom';
+    if (!def.terminator) {
+      const cap = document.createElement('span');
+      cap.textContent = def.hasElse ? 'end' : '';
+      bottom.appendChild(cap);
+    }
+    el.appendChild(bottom);
+  } else {
+    def.parts.forEach((p, i) => el.appendChild(buildPart(p, id, i, values)));
+  }
+
+  return el;
+}
+
+function buildPart(p, blockId, idx, values) {
+  if (typeof p === 'string') {
+    const span = document.createElement('span');
+    span.textContent = p;
+    return span;
+  }
+
+  const key = `${blockId}_${idx}`;
+  const val = values[key] !== undefined ? values[key] : p.val;
+
+  if (p.type === 'num' || p.type === 'str' || p.type === 'any') {
+    const inp = document.createElement('input');
+    inp.type = p.type === 'num' ? 'number' : 'text';
+    inp.className = 'block-input' + (p.type === 'str' ? ' wide' : '');
+    inp.value = val ?? '';
+    inp.dataset.inputKey = key;
+    inp.addEventListener('mousedown', e => e.stopPropagation());
+    return inp;
+  }
+
+  if (p.type === 'dropdown') {
+    const sel = document.createElement('select');
+    sel.className = 'block-dropdown';
+    sel.dataset.inputKey = key;
+    (p.opts || []).forEach(o => {
+      const opt = document.createElement('option');
+      opt.value = o; opt.textContent = o;
+      if (o === val) opt.selected = true;
+      sel.appendChild(opt);
+    });
+    sel.addEventListener('mousedown', e => e.stopPropagation());
+    return sel;
+  }
+
+  if (p.type === 'bool') {
+    const slot = document.createElement('div');
+    slot.className = 'bool-slot drop-zone';
+    slot.dataset.dropType = 'bool';
+    slot.style.cssText = 'display:inline-block;min-width:40px;height:20px;background:rgba(0,0,0,0.2);border-radius:10px;vertical-align:middle;';
+    return slot;
+  }
+
+  if (p.type === 'varname') {
+    const sel = document.createElement('select');
+    sel.className = 'block-dropdown var-select';
+    sel.dataset.inputKey = key;
+    // populated dynamically
+    return sel;
+  }
+
+  if (p.type === 'color') {
+    const inp = document.createElement('input');
+    inp.type = 'color';
+    inp.value = val || '#ff0000';
+    inp.dataset.inputKey = key;
+    inp.style.cssText = 'width:28px;height:20px;border:none;border-radius:3px;cursor:pointer;';
+    inp.addEventListener('mousedown', e => e.stopPropagation());
+    return inp;
+  }
+
+  const span = document.createElement('span');
+  span.textContent = JSON.stringify(p);
+  return span;
+}
+
+// ===== Read inputs from a block element =====
+function readInputs(el) {
+  const vals = {};
+  el.querySelectorAll('[data-input-key]').forEach(inp => {
+    vals[inp.dataset.inputKey] = inp.tagName === 'SELECT' ? inp.value : inp.value;
+  });
+  return vals;
+}
+
+// ===== Serialize a stack of blocks to JSON =====
+function serializeStack(stackEl) {
+  const blocks = [];
+  stackEl.querySelectorAll(':scope > .block, :scope > .block-top > .block').forEach(b => {
+    // simplified — full nesting handled elsewhere
+  });
+  return blocks;
+}
+
+// ===== Palette Renderer =====
+function renderPalette(categoryId) {
+  const palette = document.getElementById('block-palette');
+  palette.innerHTML = '';
+  Object.entries(BLOCK_DEFS).forEach(([id, def]) => {
+    if (def.cat !== categoryId) return;
+    const el = buildBlockEl(id, def);
+    el.style.marginBottom = '4px';
+    el.dataset.fromPalette = '1';
+    palette.appendChild(el);
+  });
+}
+
+function renderCategoryTabs() {
+  const tabs = document.getElementById('category-tabs');
+  tabs.innerHTML = '';
+  CATEGORIES.forEach(cat => {
+    const btn = document.createElement('button');
+    btn.className = 'cat-tab';
+    btn.dataset.cat = cat.id;
+    btn.innerHTML = `<span class="cat-dot" style="background:${cat.color}"></span>${cat.label}`;
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.cat-tab').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      renderPalette(cat.id);
+    });
+    tabs.appendChild(btn);
+  });
+  // Auto-select first
+  tabs.firstChild.classList.add('active');
+  renderPalette(CATEGORIES[0].id);
+}
+
+// ===== STAGE =====
+// Handles the stage canvas: drawing sprites, backgrounds, costume rendering
+
+const Stage = (() => {
+  let canvas, ctx;
+  let sprites = [];
+  let selectedSpriteId = null;
+  let animFrame = null;
+  let keys = {};
+  let mousePos = { x: 0, y: 0 };
+  let mouseDown = false;
+
+  // Stage is 480x360 logical, scaled to fit container
+  const W = 480, H = 360;
+
+  function init() {
+    canvas = document.getElementById('stage-canvas');
+    canvas.width = W;
+    canvas.height = H;
+    ctx = canvas.getContext('2d');
+
+    // Key tracking
+    window.addEventListener('keydown', e => { keys[e.key.toLowerCase()] = true; keys[e.code.toLowerCase()] = true; });
+    window.addEventListener('keyup', e => { keys[e.key.toLowerCase()] = false; keys[e.code.toLowerCase()] = false; });
+
+    // Mouse tracking (relative to stage)
+    canvas.addEventListener('mousemove', e => {
+      const rect = canvas.getBoundingClientRect();
+      const scaleX = W / rect.width;
+      const scaleY = H / rect.height;
+      // Scratch coords: center origin, y inverted
+      mousePos.x = Math.round((e.clientX - rect.left) * scaleX - W/2);
+      mousePos.y = Math.round(H/2 - (e.clientY - rect.top) * scaleY);
+    });
+    canvas.addEventListener('mousedown', () => mouseDown = true);
+    canvas.addEventListener('mouseup', () => mouseDown = false);
+    canvas.addEventListener('click', e => {
+      // Trigger sprite click events
+      const rect = canvas.getBoundingClientRect();
+      const scaleX = W / rect.width;
+      const scaleY = H / rect.height;
+      const cx = (e.clientX - rect.left) * scaleX;
+      const cy = (e.clientY - rect.top) * scaleY;
+      sprites.forEach(sp => {
+        if (sp.visible && pointInSprite(cx, cy, sp)) {
+          Runtime.triggerEvent('when_sprite_clicked', sp.id);
+        }
+      });
+    });
+
+    // Add default sprite
+    addSprite('Sprite1');
+    render();
+  }
+
+  function pointInSprite(cx, cy, sp) {
+    const sx = stageToCanvasX(sp.x);
+    const sy = stageToCanvasY(sp.y);
+    const hw = (sp.size / 100) * 48;
+    const hh = (sp.size / 100) * 48;
+    return cx >= sx - hw && cx <= sx + hw && cy >= sy - hh && cy <= sy + hh;
+  }
+
+  function stageToCanvasX(x) { return x + W / 2; }
+  function stageToCanvasY(y) { return H / 2 - y; }
+
+  function addSprite(name) {
+    const id = 'sprite_' + Date.now();
+    const sp = {
+      id, name,
+      x: 0, y: 0,
+      direction: 90, // Scratch: 90 = right
+      size: 100,
+      visible: true,
+      rotationStyle: 'all around',
+      costumes: [createDefaultCostume()],
+      currentCostume: 0,
+      sayText: null, sayTimeout: null,
+      thinkText: null,
+      effects: { color:0, fisheye:0, whirl:0, pixelate:0, brightness:0, ghost:0 },
+      variables: {},
+      scripts: [], // runtime script threads
+    };
+    sprites.push(sp);
+    if (!selectedSpriteId) selectedSpriteId = id;
+    updateSpriteList();
+    return sp;
+  }
+
+  function createDefaultCostume() {
+    // Draw Scratch cat-style sprite on an offscreen canvas
+    const oc = document.createElement('canvas');
+    oc.width = 96; oc.height = 96;
+    const c = oc.getContext('2d');
+
+    // Body
+    c.fillStyle = '#f5a623';
+    c.beginPath();
+    c.ellipse(48, 58, 26, 30, 0, 0, Math.PI*2);
+    c.fill();
+
+    // Head
+    c.beginPath();
+    c.ellipse(48, 30, 22, 20, 0, 0, Math.PI*2);
+    c.fill();
+
+    // Ears
+    c.fillStyle = '#e8951f';
+    c.beginPath(); c.moveTo(30,16); c.lineTo(22,4); c.lineTo(38,14); c.closePath(); c.fill();
+    c.beginPath(); c.moveTo(66,16); c.lineTo(74,4); c.lineTo(58,14); c.closePath(); c.fill();
+
+    // Eyes
+    c.fillStyle = '#fff';
+    c.beginPath(); c.ellipse(41,28,5,6,0,0,Math.PI*2); c.fill();
+    c.beginPath(); c.ellipse(55,28,5,6,0,0,Math.PI*2); c.fill();
+    c.fillStyle = '#333';
+    c.beginPath(); c.ellipse(41,29,3,4,0,0,Math.PI*2); c.fill();
+    c.beginPath(); c.ellipse(55,29,3,4,0,0,Math.PI*2); c.fill();
+
+    // Nose
+    c.fillStyle = '#ff8888';
+    c.beginPath(); c.ellipse(48,35,3,2,0,0,Math.PI*2); c.fill();
+
+    // Whiskers
+    c.strokeStyle = '#aaa'; c.lineWidth = 1;
+    [[28,34,42,35],[24,37,41,37],[27,40,41,39]].forEach(([x1,y1,x2,y2]) => {
+      c.beginPath(); c.moveTo(x1,y1); c.lineTo(x2,y2); c.stroke();
+      c.beginPath(); c.moveTo(W-x1+W/4,y1); c.lineTo(W-x2+W/4,y2); c.stroke();
+    });
+
+    // Arms
+    c.fillStyle = '#f5a623';
+    c.beginPath(); c.ellipse(26,65,8,18,-0.4,0,Math.PI*2); c.fill();
+    c.beginPath(); c.ellipse(70,65,8,18,0.4,0,Math.PI*2); c.fill();
+
+    // Legs
+    c.fillStyle = '#e8951f';
+    c.beginPath(); c.ellipse(38,85,10,10,0,0,Math.PI*2); c.fill();
+    c.beginPath(); c.ellipse(58,85,10,10,0,0,Math.PI*2); c.fill();
+
+    // Tail
+    c.strokeStyle = '#f5a623'; c.lineWidth = 6; c.lineCap = 'round';
+    c.beginPath();
+    c.moveTo(72,72); c.quadraticCurveTo(90,60,85,45);
+    c.stroke();
+
+    return { name: 'costume1', canvas: oc };
+  }
+
+  function getSprite(id) { return sprites.find(s => s.id === id); }
+  function getSelected() { return getSprite(selectedSpriteId); }
+  function getAllSprites() { return sprites; }
+
+  function render() {
+    ctx.clearRect(0, 0, W, H);
+
+    // Background
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(0, 0, W, H);
+
+    // Draw each sprite
+    sprites.forEach(sp => {
+      if (!sp.visible) return;
+      const costume = sp.costumes[sp.currentCostume] || sp.costumes[0];
+      if (!costume) return;
+
+      ctx.save();
+      const cx = stageToCanvasX(sp.x);
+      const cy = stageToCanvasY(sp.y);
+      ctx.translate(cx, cy);
+
+      // Rotation
+      if (sp.rotationStyle === 'all around') {
+        ctx.rotate(((sp.direction - 90) * Math.PI) / 180);
+      } else if (sp.rotationStyle === 'left-right') {
+        if (sp.direction < 0 || sp.direction > 180) ctx.scale(-1, 1);
+      }
+
+      const scale = sp.size / 100;
+      ctx.scale(scale, scale);
+
+      // Ghost effect
+      ctx.globalAlpha = Math.max(0, 1 - (sp.effects.ghost || 0) / 100);
+
+      // Draw costume canvas
+      const cw = costume.canvas.width;
+      const ch = costume.canvas.height;
+      ctx.drawImage(costume.canvas, -cw/2, -ch/2);
+
+      ctx.restore();
+
+      // Speech bubble
+      if (sp.sayText) {
+        drawSpeechBubble(ctx, sp.sayText, stageToCanvasX(sp.x) + 30, stageToCanvasY(sp.y) - 50);
+      }
+      if (sp.thinkText) {
+        drawThinkBubble(ctx, sp.thinkText, stageToCanvasX(sp.x) + 30, stageToCanvasY(sp.y) - 50);
+      }
+    });
+
+    animFrame = requestAnimationFrame(render);
+  }
+
+  function drawSpeechBubble(ctx, text, x, y) {
+    ctx.save();
+    ctx.font = '12px sans-serif';
+    const tw = Math.min(ctx.measureText(text).width + 16, 150);
+    const th = 28;
+    x = Math.min(x, W - tw - 4);
+    y = Math.max(y, 4);
+
+    ctx.fillStyle = '#fff';
+    ctx.strokeStyle = '#ccc';
+    ctx.lineWidth = 1.5;
+    roundRect(ctx, x, y, tw, th, 6);
+    ctx.fill(); ctx.stroke();
+
+    // Tail
+    ctx.beginPath();
+    ctx.moveTo(x + 10, y + th);
+    ctx.lineTo(x + 6, y + th + 8);
+    ctx.lineTo(x + 18, y + th);
+    ctx.fillStyle = '#fff'; ctx.fill();
+    ctx.stroke();
+
+    ctx.fillStyle = '#333';
+    ctx.fillText(text.slice(0, 20), x + 8, y + 18);
+    ctx.restore();
+  }
+
+  function drawThinkBubble(ctx, text, x, y) {
+    ctx.save();
+    ctx.font = '12px sans-serif';
+    const tw = Math.min(ctx.measureText(text).width + 16, 150);
+    const th = 28;
+    x = Math.min(x, W - tw - 4);
+    y = Math.max(y, 4);
+
+    ctx.fillStyle = '#fff';
+    ctx.strokeStyle = '#ccc';
+    ctx.lineWidth = 1.5;
+    roundRect(ctx, x, y, tw, th, 14);
+    ctx.fill(); ctx.stroke();
+
+    // Dots
+    [0,1,2].forEach(i => {
+      ctx.beginPath();
+      ctx.arc(x+10+i*8, y+th+4+i*3, 3-i*0.5, 0, Math.PI*2);
+      ctx.fillStyle='#fff'; ctx.fill(); ctx.stroke();
+    });
+
+    ctx.fillStyle = '#333';
+    ctx.fillText(text.slice(0, 20), x + 8, y + 18);
+    ctx.restore();
+  }
+
+  function roundRect(ctx, x, y, w, h, r) {
+    ctx.beginPath();
+    ctx.moveTo(x+r, y);
+    ctx.lineTo(x+w-r, y); ctx.arcTo(x+w,y,x+w,y+r,r);
+    ctx.lineTo(x+w,y+h-r); ctx.arcTo(x+w,y+h,x+w-r,y+h,r);
+    ctx.lineTo(x+r,y+h); ctx.arcTo(x,y+h,x,y+h-r,r);
+    ctx.lineTo(x,y+r); ctx.arcTo(x,y,x+r,y,r);
+    ctx.closePath();
+  }
+
+  function updateSpriteList() {
+    const list = document.getElementById('sprite-list');
+    if (!list) return;
+    list.innerHTML = '';
+    sprites.forEach(sp => {
+      const thumb = document.createElement('div');
+      thumb.className = 'sprite-thumb' + (sp.id === selectedSpriteId ? ' selected' : '');
+      thumb.dataset.spriteId = sp.id;
+
+      const tc = document.createElement('canvas');
+      tc.width = 54; tc.height = 54;
+      const costume = sp.costumes[sp.currentCostume] || sp.costumes[0];
+      if (costume) {
+        tc.getContext('2d').drawImage(costume.canvas, 0,0,54,54);
+      }
+
+      const name = document.createElement('div');
+      name.className = 'sprite-thumb-name';
+      name.textContent = sp.name;
+
+      thumb.appendChild(tc);
+      thumb.appendChild(name);
+      thumb.addEventListener('click', () => {
+        selectedSpriteId = sp.id;
+        updateSpriteList();
+        updateSpriteProps();
+        Editor.loadSpriteScripts(sp.id);
+      });
+      list.appendChild(thumb);
+    });
+
+    updateSpriteProps();
+  }
+
+  function updateSpriteProps() {
+    const sp = getSelected();
+    const panel = document.getElementById('sprite-props');
+    if (!sp || !panel) return;
+    panel.style.display = 'flex';
+    document.getElementById('prop-name').value = sp.name;
+    document.getElementById('prop-x').value = sp.x;
+    document.getElementById('prop-y').value = sp.y;
+    document.getElementById('prop-size').value = sp.size;
+    document.getElementById('prop-dir').value = sp.direction;
+  }
+
+  function bindSpriteProps() {
+    const bind = (id, prop, parse = v => v) => {
+      document.getElementById(id)?.addEventListener('change', e => {
+        const sp = getSelected();
+        if (sp) { sp[prop] = parse(e.target.value); }
+      });
+    };
+    bind('prop-name', 'name');
+    bind('prop-x', 'x', Number);
+    bind('prop-y', 'y', Number);
+    bind('prop-size', 'size', Number);
+    bind('prop-dir', 'direction', Number);
+  }
+
+  function stopAll() {
+    sprites.forEach(sp => {
+      sp.sayText = null; sp.thinkText = null;
+      if (sp.sayTimeout) clearTimeout(sp.sayTimeout);
+    });
+  }
+
+  return {
+    init, addSprite, getSprite, getSelected, getAllSprites,
+    updateSpriteList, updateSpriteProps, bindSpriteProps,
+    stopAll,
+    get mousePos() { return mousePos; },
+    get mouseDown() { return mouseDown; },
+    get keys() { return keys; },
+    stageToCanvasX, stageToCanvasY,
+    W, H
+  };
+})();
+
+// ===== EDITOR =====
+// Handles workspace: block dragging from palette, snapping, script stacks per sprite
+
+const Editor = (() => {
+  // Map: spriteId -> array of script stack data
+  const spriteScripts = {};
+  let activeSpriteId = null;
+  let dragging = null; // { el, fromStack, fromIndex, originX, originY, offsetX, offsetY }
+  const ghost = document.getElementById('drag-ghost');
+
+  function init() {
+    const workspace = document.getElementById('script-area');
+
+    // Drag start from palette
+    document.getElementById('block-palette').addEventListener('mousedown', onPaletteMousedown);
+    // Drag start from workspace
+    workspace.addEventListener('mousedown', onWorkspaceMousedown);
+
+    document.addEventListener('mousemove', onMouseMove);
+    document.addEventListener('mouseup', onMouseUp);
+  }
+
+  // ===== Palette drag =====
+  function onPaletteMousedown(e) {
+    const blockEl = e.target.closest('.block[data-block-id]');
+    if (!blockEl || !blockEl.dataset.fromPalette) return;
+    e.preventDefault();
+
+    const id = blockEl.dataset.blockId;
+    const def = BLOCK_DEFS[id];
+    if (!def) return;
+
+    // Clone block for ghost
+    const clone = buildBlockEl(id, def);
+    clone.style.cssText = `display:block;pointer-events:none;`;
+    ghost.innerHTML = '';
+    ghost.appendChild(clone);
+    ghost.style.display = 'block';
+
+    const rect = blockEl.getBoundingClientRect();
+    dragging = {
+      blockId: id,
+      def,
+      fromPalette: true,
+      offsetX: e.clientX - rect.left,
+      offsetY: e.clientY - rect.top,
+    };
+    positionGhost(e.clientX, e.clientY);
+  }
+
+  // ===== Workspace drag =====
+  function onWorkspaceMousedown(e) {
+    const blockEl = e.target.closest('.block[data-block-id]');
+    const stackEl = e.target.closest('.script-stack');
+    if (blockEl && blockEl.dataset.fromPalette) return;
+    if (!stackEl && !blockEl) return;
+    if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT') return;
+    e.preventDefault();
+
+    const target = stackEl || blockEl;
+    const rect = target.getBoundingClientRect();
+
+    // Clone for ghost
+    const clone = target.cloneNode(true);
+    clone.style.cssText = 'pointer-events:none;';
+    ghost.innerHTML = '';
+    ghost.appendChild(clone);
+    ghost.style.display = 'block';
+
+    dragging = {
+      fromPalette: false,
+      stackEl: target,
+      originalParent: target.parentNode,
+      originalLeft: parseInt(target.style.left) || 0,
+      originalTop: parseInt(target.style.top) || 0,
+      offsetX: e.clientX - rect.left,
+      offsetY: e.clientY - rect.top,
+    };
+
+    target.style.opacity = '0.4';
+    positionGhost(e.clientX, e.clientY);
+  }
+
+  function onMouseMove(e) {
+    if (!dragging) return;
+    positionGhost(e.clientX, e.clientY);
+  }
+
+  function onMouseUp(e) {
+    if (!dragging) return;
+    ghost.style.display = 'none';
+
+    const workspace = document.getElementById('script-area');
+    const wsRect = workspace.getBoundingClientRect();
+    const dropX = e.clientX - wsRect.left - dragging.offsetX;
+    const dropY = e.clientY - wsRect.top - dragging.offsetY;
+
+    const overWorkspace = e.clientX >= wsRect.left && e.clientX <= wsRect.right &&
+                          e.clientY >= wsRect.top && e.clientY <= wsRect.bottom;
+
+    if (dragging.fromPalette) {
+      if (overWorkspace) {
+        addBlockToWorkspace(dragging.blockId, dragging.def, dropX, dropY);
+      }
+    } else {
+      const el = dragging.stackEl;
+      el.style.opacity = '1';
+      if (overWorkspace) {
+        // Try snapping to nearby stack
+        const snapped = trySnap(el, e.clientX, e.clientY);
+        if (!snapped) {
+          el.style.left = dropX + 'px';
+          el.style.top = dropY + 'px';
+          if (el.parentNode !== workspace) {
+            workspace.appendChild(el);
+          }
+        }
+      }
+      saveScripts();
+    }
+
+    dragging = null;
+  }
+
+  function positionGhost(cx, cy) {
+    ghost.style.left = (cx - (dragging?.offsetX||0)) + 'px';
+    ghost.style.top = (cy - (dragging?.offsetY||0)) + 'px';
+  }
+
+  // ===== Add block to workspace as new stack =====
+  function addBlockToWorkspace(id, def, x, y) {
+    if (!activeSpriteId) return;
+    const workspace = document.getElementById('script-area');
+
+    const stack = document.createElement('div');
+    stack.className = 'script-stack';
+    stack.style.left = x + 'px';
+    stack.style.top = y + 'px';
+
+    const blockEl = buildBlockEl(id, def);
+    stack.appendChild(blockEl);
+    workspace.appendChild(stack);
+
+    // Make stack itself draggable
+    makeStackDraggable(stack);
+    saveScripts();
+    return stack;
+  }
+
+  function makeStackDraggable(stack) {
+    stack.addEventListener('mousedown', e => {
+      if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT') return;
+      e.stopPropagation();
+      // handled by workspace listener
+    });
+  }
+
+  // ===== Snap logic =====
+  function trySnap(draggedEl, mouseX, mouseY) {
+    const workspace = document.getElementById('script-area');
+    const stacks = Array.from(workspace.querySelectorAll('.script-stack'));
+    const SNAP_DIST = 30;
+
+    for (const stack of stacks) {
+      if (stack === draggedEl) continue;
+      const rect = stack.getBoundingClientRect();
+
+      // Snap to bottom of stack
+      const snapX = rect.left;
+      const snapY = rect.bottom;
+      const dist = Math.hypot(mouseX - snapX, mouseY - snapY);
+
+      if (dist < SNAP_DIST * 2) {
+        // Merge draggedEl blocks into this stack
+        const blocks = Array.from(draggedEl.querySelectorAll(':scope > .block'));
+        blocks.forEach(b => {
+          b.remove();
+          stack.appendChild(b);
+        });
+        draggedEl.remove();
+        saveScripts();
+        return true;
+      }
+    }
+    return false;
+  }
+
+  // ===== Script persistence per sprite =====
+  function saveScripts() {
+    if (!activeSpriteId) return;
+    const workspace = document.getElementById('script-area');
+    const stacks = workspace.querySelectorAll('.script-stack');
+    const data = Array.from(stacks).map(stack => {
+      const blocks = Array.from(stack.querySelectorAll(':scope > .block')).map(b => ({
+        id: b.dataset.blockId,
+        inputs: readInputs(b),
+      }));
+      return { x: parseInt(stack.style.left)||0, y: parseInt(stack.style.top)||0, blocks };
+    });
+    spriteScripts[activeSpriteId] = data;
+  }
+
+  function loadSpriteScripts(spriteId) {
+    activeSpriteId = spriteId;
+    const workspace = document.getElementById('script-area');
+    workspace.innerHTML = '';
+    const scripts = spriteScripts[spriteId] || [];
+    scripts.forEach(sd => {
+      const stack = document.createElement('div');
+      stack.className = 'script-stack';
+      stack.style.left = sd.x + 'px';
+      stack.style.top = sd.y + 'px';
+      sd.blocks.forEach(bd => {
+        const def = BLOCK_DEFS[bd.id];
+        if (!def) return;
+        const el = buildBlockEl(bd.id, def, bd.inputs);
+        stack.appendChild(el);
+      });
+      workspace.appendChild(stack);
+    });
+  }
+
+  function getScripts(spriteId) {
+    return spriteScripts[spriteId] || [];
+  }
+
+  return { init, loadSpriteScripts, getScripts, saveScripts, addBlockToWorkspace };
+})();
+
+// ===== RUNTIME =====
+// Executes block scripts. Uses async generator threads per stack.
+
+const Runtime = (() => {
+  let threads = []; // active running threads
+  let running = false;
+  let globalVars = {};
+  let answer = '';
+  let timer = 0;
+  let timerStart = Date.now();
+
+  // ===== Start / Stop =====
+  function start() {
+    stopAll();
+    running = true;
+    timer = 0;
+    timerStart = Date.now();
+    document.getElementById('run-status').textContent = '▶ running';
+    // Trigger green flag for all sprites
+    Stage.getAllSprites().forEach(sp => {
+      triggerEvent('when_flag', sp.id);
+    });
+    loop();
+  }
+
+  function stopAll() {
+    running = false;
+    threads = [];
+    Stage.stopAll();
+    document.getElementById('run-status').textContent = '';
+  }
+
+  function loop() {
+    if (!running) return;
+    // Tick all threads
+    threads = threads.filter(t => !t.done);
+    threads.forEach(t => { if (!t.waiting) tickThread(t); });
+    requestAnimationFrame(loop);
+  }
+
+  async function tickThread(thread) {
+    if (thread.done || thread.waiting) return;
+    try {
+      const result = await thread.gen.next();
+      if (result.done) thread.done = true;
+    } catch(e) {
+      console.warn('Thread error:', e);
+      thread.done = true;
+    }
+  }
+
+  // ===== Event triggering =====
+  function triggerEvent(eventType, spriteId, data = {}) {
+    const scripts = Editor.getScripts(spriteId);
+    const sprite = Stage.getSprite(spriteId);
+    if (!sprite) return;
+
+    scripts.forEach(sd => {
+      const firstBlock = sd.blocks[0];
+      if (!firstBlock) return;
+      const matches = {
+        'when_flag':           () => eventType === 'when_flag',
+        'when_sprite_clicked': () => eventType === 'when_sprite_clicked',
+        'when_key':            () => eventType === 'when_key' && data.key === getInput(firstBlock,'space',1),
+        'when_clone_start':    () => eventType === 'when_clone_start',
+        'when_msg':            () => eventType === 'broadcast' && data.msg === getInput(firstBlock,'message1',1),
+      };
+      const check = matches[firstBlock.id];
+      if (check && check()) {
+        const gen = executeScript(sd.blocks, sprite);
+        threads.push({ gen, done: false, waiting: false, sprite });
+      }
+    });
+  }
+
+  function getInput(block, def, idx) {
+    const key = `${block.id}_${idx}`;
+    return block.inputs?.[key] ?? def;
+  }
+
+  // ===== Script execution =====
+  async function* executeScript(blocks, sprite) {
+    for (let i = 0; i < blocks.length; i++) {
+      const block = blocks[i];
+      yield* executeBlock(block, sprite, blocks);
+    }
+  }
+
+  async function* executeBlock(block, sprite, allBlocks) {
+    const id = block.id;
+    const inp = (key, def, idx) => {
+      if (typeof key === 'number') {
+        const k = `${id}_${key}`;
+        const v = block.inputs?.[k];
+        return v !== undefined ? v : def;
+      }
+      return def;
+    };
+    const n = (idx, def=0) => parseFloat(inp(idx,def,idx)) || 0;
+    const s = (idx, def='') => String(inp(idx,def,idx) ?? def);
+
+    switch(id) {
+      // ===== MOTION =====
+      case 'move_steps': {
+        const steps = n(1, 10);
+        const rad = ((sprite.direction - 90) * Math.PI) / 180;
+        sprite.x += Math.cos(rad) * steps;
+        sprite.y += Math.sin(rad) * steps;
+        yield;
+        break;
+      }
+      case 'turn_right': sprite.direction = (sprite.direction + n(1,15)) % 360; yield; break;
+      case 'turn_left': sprite.direction = ((sprite.direction - n(1,15)) + 360) % 360; yield; break;
+      case 'goto_xy': sprite.x = n(1,0); sprite.y = n(2,0); yield; break;
+      case 'goto_random': {
+        const target = s(1,'random position');
+        if (target === 'random position') {
+          sprite.x = Math.random()*480-240;
+          sprite.y = Math.random()*360-180;
+        } else if (target === 'mouse-pointer') {
+          sprite.x = Stage.mousePos.x;
+          sprite.y = Stage.mousePos.y;
+        }
+        yield; break;
+      }
+      case 'glide_secs_xy': {
+        const dur = n(1,1) * 1000;
+        const tx = n(2,0), ty = n(3,0);
+        const sx = sprite.x, sy = sprite.y;
+        const start = Date.now();
+        while (Date.now() - start < dur) {
+          const t = (Date.now() - start) / dur;
+          sprite.x = sx + (tx-sx)*t;
+          sprite.y = sy + (ty-sy)*t;
+          yield;
+        }
+        sprite.x = tx; sprite.y = ty;
+        break;
+      }
+      case 'point_direction': sprite.direction = n(1,90); yield; break;
+      case 'point_towards': {
+        const target = s(1,'mouse-pointer');
+        let tx, ty;
+        if (target === 'mouse-pointer') { tx = Stage.mousePos.x; ty = Stage.mousePos.y; }
+        else { tx = 0; ty = 0; }
+        const angle = Math.atan2(ty - sprite.y, tx - sprite.x);
+        sprite.direction = (angle * 180 / Math.PI + 90 + 360) % 360;
+        yield; break;
+      }
+      case 'change_x': sprite.x += n(1,10); yield; break;
+      case 'set_x': sprite.x = n(1,0); yield; break;
+      case 'change_y': sprite.y += n(1,10); yield; break;
+      case 'set_y': sprite.y = n(1,0); yield; break;
+      case 'if_on_edge_bounce': {
+        const hw = (sprite.size/100)*48/2;
+        if (sprite.x + hw > Stage.W/2) { sprite.x = Stage.W/2 - hw; sprite.direction = -sprite.direction; }
+        if (sprite.x - hw < -Stage.W/2) { sprite.x = -Stage.W/2 + hw; sprite.direction = -sprite.direction; }
+        if (sprite.y + hw > Stage.H/2) { sprite.y = Stage.H/2 - hw; sprite.direction = 180 - sprite.direction; }
+        if (sprite.y - hw < -Stage.H/2) { sprite.y = -Stage.H/2 + hw; sprite.direction = 180 - sprite.direction; }
+        sprite.direction = ((sprite.direction % 360) + 360) % 360;
+        yield; break;
+      }
+      case 'set_rotation_style': sprite.rotationStyle = s(1,'all around'); yield; break;
+
+      // ===== LOOKS =====
+      case 'say': sprite.sayText = s(1,'Hello!'); sprite.thinkText=null; yield; break;
+      case 'say_timed': {
+        sprite.sayText = s(1,'Hello!'); sprite.thinkText=null;
+        yield* waitSecs(n(2,2));
+        sprite.sayText = null;
+        break;
+      }
+      case 'think': sprite.thinkText = s(1,'Hmm...'); sprite.sayText=null; yield; break;
+      case 'think_timed': {
+        sprite.thinkText = s(1,'Hmm...'); sprite.sayText=null;
+        yield* waitSecs(n(2,2));
+        sprite.thinkText = null;
+        break;
+      }
+      case 'switch_costume': sprite.currentCostume = 0; yield; break;
+      case 'next_costume': sprite.currentCostume = (sprite.currentCostume+1)%sprite.costumes.length; yield; break;
+      case 'change_size': sprite.size += n(1,10); yield; break;
+      case 'set_size': sprite.size = n(1,100); yield; break;
+      case 'set_effect': {
+        const eff = s(1,'color');
+        if (sprite.effects[eff] !== undefined) sprite.effects[eff] = n(2,0);
+        yield; break;
+      }
+      case 'change_effect': {
+        const eff = s(1,'color');
+        if (sprite.effects[eff] !== undefined) sprite.effects[eff] += n(2,25);
+        yield; break;
+      }
+      case 'clear_effects': Object.keys(sprite.effects).forEach(k => sprite.effects[k]=0); yield; break;
+      case 'show': sprite.visible = true; yield; break;
+      case 'hide': sprite.visible = false; yield; break;
+      case 'go_to_layer': yield; break; // visual layering TODO
+      case 'go_layers': yield; break;
+
+      // ===== EVENTS =====
+      case 'broadcast': {
+        const msg = s(1,'message1');
+        Stage.getAllSprites().forEach(sp => triggerEvent('broadcast', sp.id, {msg}));
+        yield; break;
+      }
+      case 'broadcast_wait': {
+        const msg = s(1,'message1');
+        Stage.getAllSprites().forEach(sp => triggerEvent('broadcast', sp.id, {msg}));
+        // Wait 2 frames
+        yield; yield; break;
+      }
+
+      // ===== CONTROL =====
+      case 'wait_secs': yield* waitSecs(n(1,1)); break;
+      case 'repeat': {
+        const times = n(1,10);
+        for (let i=0; i<times; i++) {
+          // execute inner blocks — captured from block.inner
+          if (block.inner) yield* executeScript(block.inner, sprite);
+          yield;
+        }
+        break;
+      }
+      case 'forever': {
+        while (running) {
+          if (block.inner) yield* executeScript(block.inner, sprite);
+          yield;
+        }
+        break;
+      }
+      case 'if': {
+        const cond = evalCondition(block.condition, sprite);
+        if (cond && block.inner) yield* executeScript(block.inner, sprite);
+        yield; break;
+      }
+      case 'if_else': {
+        const cond = evalCondition(block.condition, sprite);
+        if (cond && block.inner) yield* executeScript(block.inner, sprite);
+        else if (!cond && block.else) yield* executeScript(block.else, sprite);
+        yield; break;
+      }
+      case 'wait_until': {
+        while (!evalCondition(block.condition, sprite)) yield;
+        break;
+      }
+      case 'repeat_until': {
+        while (!evalCondition(block.condition, sprite)) {
+          if (block.inner) yield* executeScript(block.inner, sprite);
+          yield;
+        }
+        break;
+      }
+      case 'stop': {
+        const what = s(1,'all');
+        if (what === 'all') stopAll();
+        else if (what === 'this script') return;
+        break;
+      }
+      case 'create_clone': {
+        const original = Stage.getSprite(sprite.id) || sprite;
+        const clone = Stage.addSprite(original.name + '_clone');
+        clone.x = original.x; clone.y = original.y;
+        clone.direction = original.direction; clone.size = original.size;
+        clone.visible = original.visible;
+        triggerEvent('when_clone_start', clone.id);
+        yield; break;
+      }
+      case 'delete_clone': {
+        const sprites = Stage.getAllSprites();
+        const idx = sprites.indexOf(sprite);
+        if (idx > -1) sprites.splice(idx, 1);
+        Stage.updateSpriteList();
+        return; // end thread
+      }
+
+      // ===== SENSING =====
+      case 'ask_wait': {
+        const question = s(1, "What's your name?");
+        answer = await promptUser(question);
+        yield; break;
+      }
+      case 'reset_timer': timerStart = Date.now(); yield; break;
+      case 'set_drag': yield; break; // no-op in browser
+
+      // ===== VARIABLES =====
+      case 'set_var': {
+        const varName = getVarName(block, sprite);
+        const val = s(2,'0');
+        setVar(sprite, varName, isNaN(val) ? val : parseFloat(val));
+        yield; break;
+      }
+      case 'change_var': {
+        const varName = getVarName(block, sprite);
+        const cur = parseFloat(getVar(sprite, varName)) || 0;
+        setVar(sprite, varName, cur + n(2,1));
+        yield; break;
+      }
+      case 'show_var': yield; break; // TODO: on-stage variable display
+      case 'hide_var': yield; break;
+
+      // Hat blocks - skip (they're triggers, not run directly)
+      case 'when_flag':
+      case 'when_key':
+      case 'when_sprite_clicked':
+      case 'when_backdrop':
+      case 'when_gt':
+      case 'when_msg':
+      case 'when_clone_start':
+        break;
+
+      default:
+        yield;
+    }
+  }
+
+  // ===== Helpers =====
+  async function* waitSecs(secs) {
+    const end = Date.now() + secs * 1000;
+    while (Date.now() < end) yield;
+  }
+
+  function evalCondition(cond, sprite) {
+    if (!cond) return false;
+    const { id, inputs } = cond;
+    const n2 = (idx, def=0) => parseFloat(inputs?.[`${id}_${idx}`] ?? def) || 0;
+    const s2 = (idx, def='') => String(inputs?.[`${id}_${idx}`] ?? def);
+    switch(id) {
+      case 'touching': return s2(1,'mouse-pointer') === 'mouse-pointer' ? checkTouchingMouse(sprite) : false;
+      case 'key_pressed': return isKeyPressed(s2(1,'space'));
+      case 'mouse_down': return Stage.mouseDown;
+      case 'gt': return n2(0) > n2(1,50);
+      case 'lt': return n2(0) < n2(1,50);
+      case 'eq': return String(n2(0)) === String(s2(1,'50'));
+      case 'and': return evalCondition(cond.a, sprite) && evalCondition(cond.b, sprite);
+      case 'or': return evalCondition(cond.a, sprite) || evalCondition(cond.b, sprite);
+      case 'not': return !evalCondition(cond.a, sprite);
+      case 'contains': return s2(0,'apple').toLowerCase().includes(s2(1,'a').toLowerCase());
+      default: return false;
+    }
+  }
+
+  function checkTouchingMouse(sprite) {
+    const hw = (sprite.size/100)*48/2;
+    return Math.abs(sprite.x - Stage.mousePos.x) < hw && Math.abs(sprite.y - Stage.mousePos.y) < hw;
+  }
+
+  function isKeyPressed(key) {
+    const keys = Stage.keys;
+    if (key === 'any') return Object.values(keys).some(v=>v);
+    if (key === 'space') return keys['space'] || keys[' '];
+    if (key === 'left arrow') return keys['arrowleft'];
+    if (key === 'right arrow') return keys['arrowright'];
+    if (key === 'up arrow') return keys['arrowup'];
+    if (key === 'down arrow') return keys['arrowdown'];
+    return keys[key.toLowerCase()];
+  }
+
+  function getVarName(block, sprite) {
+    const key = `${block.id}_0`;
+    return block.inputs?.[key] || 'my variable';
+  }
+
+  function setVar(sprite, name, val) {
+    if (!sprite.variables) sprite.variables = {};
+    sprite.variables[name] = val;
+  }
+
+  function getVar(sprite, name) {
+    return sprite?.variables?.[name] ?? globalVars[name] ?? 0;
+  }
+
+  function promptUser(question) {
+    return new Promise(resolve => {
+      const ans = prompt(question) || '';
+      resolve(ans);
+    });
+  }
+
+  return { start, stopAll, triggerEvent, getVar, setVar };
+})();
+
+// ===== MAIN =====
+// Initializes the app and wires everything together
+
+document.addEventListener('DOMContentLoaded', () => {
+  // Init subsystems
+  renderCategoryTabs();
+  Stage.init();
+  Editor.init();
+  Stage.bindSpriteProps();
+
+  // Set first sprite as active in editor
+  const sprites = Stage.getAllSprites();
+  if (sprites.length > 0) {
+    Editor.loadSpriteScripts(sprites[0].id);
+  }
+
+  // Green flag
+  document.getElementById('btn-flag').addEventListener('click', () => {
+    // Save any pending script changes first
+    Editor.saveScripts();
+    Runtime.start();
+  });
+
+  // Stop button
+  document.getElementById('btn-stop').addEventListener('click', () => {
+    Runtime.stopAll();
+  });
+
+  // Add sprite button
+  document.getElementById('btn-add-sprite').addEventListener('click', () => {
+    const name = prompt('Sprite name:', 'Sprite' + (Stage.getAllSprites().length + 1));
+    if (name) {
+      Stage.addSprite(name);
+    }
+  });
+
+  // Keyboard shortcut: Enter/Space to run
+  document.addEventListener('keydown', e => {
+    if (e.key === 'F5') { e.preventDefault(); Runtime.start(); }
+    if (e.key === 'F6') { e.preventDefault(); Runtime.stopAll(); }
+  });
+
+  // Workspace panning (middle mouse or right-click drag)
+  const workspace = document.getElementById('script-area');
+  let panning = false, panStart = null, panOrigin = null;
+  let panX = 0, panY = 0;
+
+  workspace.addEventListener('mousedown', e => {
+    if (e.button === 1 || e.button === 2) {
+      e.preventDefault();
+      panning = true;
+      panStart = { x: e.clientX, y: e.clientY };
+      panOrigin = { x: panX, y: panY };
+      workspace.style.cursor = 'grabbing';
+    }
+  });
+
+  document.addEventListener('mousemove', e => {
+    if (!panning) return;
+    panX = panOrigin.x + (e.clientX - panStart.x);
+    panY = panOrigin.y + (e.clientY - panStart.y);
+    workspace.style.setProperty('--pan-x', panX + 'px');
+    workspace.style.setProperty('--pan-y', panY + 'px');
+  });
+
+  document.addEventListener('mouseup', e => {
+    if (e.button === 1 || e.button === 2) {
+      panning = false;
+      workspace.style.cursor = '';
+    }
+  });
+
+  workspace.addEventListener('contextmenu', e => e.preventDefault());
+
+  // Toast helper (available globally)
+  window.toast = function(msg, duration = 2000) {
+    let tc = document.getElementById('toast-container');
+    if (!tc) {
+      tc = document.createElement('div');
+      tc.id = 'toast-container';
+      document.body.appendChild(tc);
+    }
+    const t = document.createElement('div');
+    t.className = 'toast';
+    t.textContent = msg;
+    tc.appendChild(t);
+    setTimeout(() => t.remove(), duration);
+  };
+
+  // Variable name dropdowns - populate with sprite variables
+  document.addEventListener('click', e => {
+    const sel = e.target.closest('select.var-select');
+    if (!sel) return;
+    const sp = Stage.getSelected();
+    const vars = sp ? Object.keys(sp.variables || {}) : [];
+    const existing = Array.from(sel.options).map(o => o.value);
+    vars.forEach(v => {
+      if (!existing.includes(v)) {
+        const opt = document.createElement('option');
+        opt.value = v; opt.textContent = v;
+        sel.appendChild(opt);
+      }
+    });
+  });
+
+  // Right-click on workspace block to delete
+  document.getElementById('script-area').addEventListener('contextmenu', e => {
+    e.preventDefault();
+    const block = e.target.closest('.block');
+    const stack = e.target.closest('.script-stack');
+    if (block && !block.dataset.fromPalette) {
+      if (confirm('Delete this block?')) {
+        block.remove();
+        if (stack && stack.children.length === 0) stack.remove();
+        Editor.saveScripts();
+      }
+    }
+  });
+
+  console.log('%cLykoScript loaded ✓', 'color:#00ffe1;font-family:monospace;font-size:14px');
+});
+  </script>
+</body>
+</html>
