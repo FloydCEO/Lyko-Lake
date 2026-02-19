@@ -7,194 +7,265 @@
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=DM+Mono&display=swap');
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-html,body{width:100%;height:100%;background:#07080f;overflow:hidden;
-  font-family:'DM Mono',monospace;color:#dce8ff}
-
-#gameFrame{
-  position:fixed;inset:0;width:100%;height:100%;border:none;
-  opacity:0;transition:opacity .5s;z-index:1
-}
-#overlay{
-  position:fixed;inset:0;background:#07080f;z-index:10;
-  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;
-  transition:opacity .4s
-}
-#overlay.fade{opacity:0;pointer-events:none}
+html,body{width:100%;height:100%;background:#07080f;overflow:hidden;font-family:'DM Mono',monospace;color:#dce8ff}
 
 .owrap{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);
-  width:580px;height:580px;pointer-events:none;opacity:.05}
+  width:620px;height:620px;pointer-events:none;opacity:.05;z-index:0}
 .orb{position:absolute;inset:0;border:1px solid #fff;border-radius:50%;animation:spin 40s linear infinite}
-.orb:nth-child(2){inset:55px;border-color:#00e5ff;animation-duration:58s;animation-direction:reverse}
-.orb:nth-child(3){inset:120px;animation-duration:75s}
+.orb:nth-child(2){inset:60px;border-color:#00e5ff;animation-duration:58s;animation-direction:reverse}
+.orb:nth-child(3){inset:130px;animation-duration:75s}
 @keyframes spin{to{transform:rotate(360deg)}}
-.scanlines{position:fixed;inset:0;pointer-events:none;
+.scan{position:fixed;inset:0;pointer-events:none;z-index:0;
   background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,.025) 2px,rgba(0,0,0,.025) 4px)}
 
-.inner{position:relative;z-index:2;display:flex;flex-direction:column;align-items:center;gap:0;text-align:center}
-.logo{font-family:'Orbitron',sans-serif;font-size:clamp(52px,9vw,90px);
-  color:#fff;letter-spacing:2px;line-height:1;margin-bottom:20px}
+/* screen system */
+.screen{position:fixed;inset:0;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;transition:opacity .35s;z-index:10}
+.screen.hide{opacity:0;pointer-events:none}
+.screen.off{display:none}
+.inner{position:relative;z-index:2;display:flex;flex-direction:column;align-items:center;text-align:center}
+
+/* logo */
+.logo{font-family:'Orbitron',sans-serif;font-size:clamp(50px,9vw,88px);
+  color:#fff;letter-spacing:2px;line-height:1}
 .logo .io{color:#00e5ff}
+.logo.sm{font-size:clamp(28px,4vw,44px)}
+.eyebrow{font-size:9px;letter-spacing:4px;color:#5a6a90;margin-top:6px;margin-bottom:22px}
+.divider{width:120px;height:1px;background:linear-gradient(90deg,transparent,#00e5ff,transparent);margin-bottom:26px}
 
-#statusLine{font-size:10px;letter-spacing:3px;color:#5a6a90;text-transform:uppercase;
-  margin-bottom:14px;transition:color .3s}
-#statusLine.ok{color:#39ff8f}
-#statusLine.err{color:#e94560}
+/* name screen */
+#nameIn{background:#121428;border:1px solid #1e2240;color:#dce8ff;
+  font-family:'DM Mono',monospace;font-size:15px;padding:13px 22px;width:280px;
+  outline:none;letter-spacing:2px;text-align:center;transition:border-color .3s;margin-bottom:12px}
+#nameIn:focus{border-color:#00e5ff}
+#nameIn::placeholder{color:#2a3a60}
+.btn-p{background:#00e5ff;color:#07080f;font-family:'Orbitron',sans-serif;
+  font-size:11px;font-weight:700;letter-spacing:3px;border:none;
+  padding:14px 48px;cursor:pointer;transition:background .2s,transform .1s;margin-bottom:10px}
+.btn-p:hover{background:#fff;transform:scale(1.04)}
+.btn-g{background:transparent;border:1px solid #1e2240;color:#5a6a90;
+  font-family:'DM Mono',monospace;font-size:9px;letter-spacing:3px;padding:9px 24px;
+  cursor:pointer;transition:all .2s;margin-bottom:24px}
+.btn-g:hover{border-color:#f5a623;color:#f5a623}
+.hints{font-size:9px;letter-spacing:1px;color:#3a4a68;line-height:2.4}
+.hints b{color:#f5a623;font-weight:400}
 
-.pbar{width:200px;height:2px;background:#1e2240;overflow:hidden;margin-bottom:20px;transition:opacity .3s}
-.pfill{height:100%;width:35%;
-  background:linear-gradient(90deg,transparent,#00e5ff,transparent);
+/* server screen */
+.srv-sub{font-size:9px;letter-spacing:2px;color:#5a6a90;margin-top:10px;margin-bottom:24px}
+.srv-sub span{color:#00e5ff}
+.srvlist{display:flex;flex-direction:column;gap:10px;width:330px}
+.srv{background:#0d1020;border:1px solid #1e2240;padding:16px 18px;
+  cursor:pointer;transition:border-color .2s,background .2s;
+  display:flex;align-items:center;gap:14px;position:relative;text-align:left}
+.srv:hover:not(.dead){border-color:#00e5ff;background:#111626}
+.srv.dead{cursor:default;opacity:.4}
+.dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.dot.on{background:#39ff8f;box-shadow:0 0 6px #39ff8f}
+.dot.off{background:#2a3050}
+.sn{font-family:'Orbitron',sans-serif;font-size:9px;letter-spacing:2px;color:#fff}
+.sd{font-size:8px;letter-spacing:1px;color:#5a6a90;margin-top:3px}
+.stag{position:absolute;right:14px;font-size:7px;letter-spacing:2px;
+  padding:3px 8px;border:1px solid;text-transform:uppercase}
+.stag.live{color:#39ff8f;border-color:#39ff8f33;background:#39ff8f08}
+.stag.soon{color:#f5a623;border-color:#f5a62333;background:#f5a62308}
+.btn-back{background:none;border:none;font-family:'DM Mono',monospace;
+  font-size:8px;letter-spacing:2px;color:#2a3a60;cursor:pointer;
+  padding:8px;margin-top:14px;transition:color .2s}
+.btn-back:hover{color:#5a6a90}
+
+/* loading screen */
+#loadMsg{font-size:10px;letter-spacing:3px;color:#5a6a90;margin-top:16px;transition:color .3s}
+#loadMsg.ok{color:#39ff8f}
+#loadMsg.err{color:#e94560}
+.pbar{width:200px;height:2px;background:#1e2240;overflow:hidden;margin-top:14px;transition:opacity .3s}
+.pfill{height:100%;background:linear-gradient(90deg,transparent,#00e5ff,transparent);
   animation:sweep 1.5s ease-in-out infinite}
 @keyframes sweep{from{transform:translateX(-200%)}to{transform:translateX(500%)}}
 .pbar.hidden{opacity:0}
+.load-btns{display:flex;gap:10px;margin-top:18px}
+.lbtn{background:transparent;font-family:'DM Mono',monospace;font-size:8px;
+  letter-spacing:2px;text-transform:uppercase;padding:9px 18px;cursor:pointer;
+  transition:all .2s;display:none}
+.lbtn.show{display:block}
+.lbtn-r{border:1px solid #1e2240;color:#5a6a90}.lbtn-r:hover{border-color:#00e5ff;color:#00e5ff}
+.lbtn-b{border:1px solid #1e2240;color:#5a6a90}.lbtn-b:hover{border-color:#f5a623;color:#f5a623}
 
-.btn-row{display:flex;gap:10px;margin-top:4px}
-.btn{background:transparent;font-family:'DM Mono',monospace;font-size:9px;
-  letter-spacing:3px;text-transform:uppercase;padding:10px 22px;
-  cursor:pointer;transition:all .2s;display:none}
-.btn.show{display:block}
-.btn-retry{border:1px solid #1e2240;color:#5a6a90}
-.btn-retry:hover{border-color:#00e5ff;color:#00e5ff}
-.btn-offline{border:1px solid #1e2240;color:#5a6a90}
-.btn-offline:hover{border-color:#f5a623;color:#f5a623}
-
-#errDetail{font-size:9px;letter-spacing:1px;color:#2a3050;margin-top:8px;max-width:340px;
-  line-height:1.9;display:none;text-align:center}
-#errDetail.show{display:block}
+/* game frame */
+#gf{position:fixed;inset:0;width:100%;height:100%;border:none;opacity:0;transition:opacity .5s;z-index:1}
 </style>
 </head>
 <body>
 
-<div id="overlay">
-  <div class="owrap"><div class="orb"></div><div class="orb"></div><div class="orb"></div></div>
-  <div class="scanlines"></div>
-  <div class="inner">
+<div class="owrap"><div class="orb"></div><div class="orb"></div><div class="orb"></div></div>
+<div class="scan"></div>
+
+<!-- SCREEN 1: Name Entry -->
+<div class="screen" id="S1">
+  <div class="inner" style="gap:0">
     <div class="logo">LYKO<span class="io">IO</span></div>
-    <div id="statusLine">Connecting to server...</div>
-    <div class="pbar" id="pbar"><div class="pfill"></div></div>
-    <div class="btn-row">
-      <button class="btn btn-retry"   id="retryBtn"   onclick="tryLoad()">↺ Retry</button>
-      <button class="btn btn-offline" id="offlineBtn" onclick="goOffline()">Play Offline</button>
+    <div class="eyebrow">Welcome to LilLyko.space</div>
+    <div class="divider"></div>
+    <input id="nameIn" type="text" placeholder="ENTER YOUR NAME" maxlength="16" spellcheck="false" autocomplete="off">
+    <button class="btn-p" id="playBtn">ENTER THE ISLAND</button>
+    <button class="btn-g" id="offlineBtn">⚡ PLAY OFFLINE</button>
+    <div class="hints">
+      <b>WASD</b> move &nbsp;·&nbsp; <b>Click</b> enemy to attack<br>
+      Auto-pickup items &nbsp;·&nbsp; <b>E</b> to talk to Lyko<br>
+      Kill animals for XP &nbsp;·&nbsp; Reach <b>Level 10</b> to unlock islands
     </div>
-    <div id="errDetail"></div>
   </div>
 </div>
 
-<iframe
-  id="gameFrame"
-  src="about:blank"
+<!-- SCREEN 2: Server Picker -->
+<div class="screen hide off" id="S2">
+  <div class="inner" style="gap:0">
+    <div class="logo sm">SELECT SERVER</div>
+    <div class="srv-sub">Choose your island, <span id="greetName"></span></div>
+    <div class="srvlist">
+
+      <div class="srv" onclick="joinServer('https://game.lillyko.space')">
+        <div class="dot on"></div>
+        <div>
+          <div class="sn">ISLAND 1 — LYKO REALM</div>
+          <div class="sd">Roguelike survival · All players welcome</div>
+        </div>
+        <div class="stag live">LIVE</div>
+      </div>
+
+      <div class="srv dead">
+        <div class="dot off"></div>
+        <div>
+          <div class="sn">ISLAND 2 — THE VOID</div>
+          <div class="sd">Harder enemies · Higher loot · PvP focused</div>
+        </div>
+        <div class="stag soon">SOON</div>
+      </div>
+
+      <div class="srv dead">
+        <div class="dot off"></div>
+        <div>
+          <div class="sn">ISLAND 3 — ???</div>
+          <div class="sd">Unknown territory</div>
+        </div>
+        <div class="stag soon">SOON</div>
+      </div>
+
+    </div>
+    <button class="btn-back" onclick="goTo('S1')">← Back</button>
+  </div>
+</div>
+
+<!-- SCREEN 3: Connecting -->
+<div class="screen hide off" id="S3">
+  <div class="inner" style="gap:0">
+    <div class="logo sm">LYKO<span class="io">IO</span></div>
+    <div id="loadMsg">Connecting to server...</div>
+    <div class="pbar" id="pbar"><div class="pfill"></div></div>
+    <div class="load-btns">
+      <button class="lbtn lbtn-r" id="retryBtn" onclick="retryConn()">↺ Retry</button>
+      <button class="lbtn lbtn-b" id="backBtn2" onclick="goTo('S2')">← Servers</button>
+    </div>
+  </div>
+</div>
+
+<iframe id="gf" src="about:blank"
   sandbox="allow-scripts allow-same-origin allow-forms allow-pointer-lock allow-popups allow-modals"
-  allowfullscreen
-></iframe>
+  allowfullscreen></iframe>
 
 <script>
-// ══════════════════════════════════════════════════════════════════════════════
-//  SERVER URL — Wispbyte proxies your Node server through HTTPS via the
-//  Custom Subdomains feature. You've added lillyko.space there (ACTIVE).
-//
-//  BUT: lillyko.space root is also your GitHub Pages site, which causes a
-//  conflict. The cleanest fix:
-//
-//  Option A (recommended): In Wispbyte Custom Subdomains, click "+ Add Subdomain"
-//  and add "game.lillyko.space". Then add an A record in Cloudflare DNS:
-//    Name: game   →   IP: 212.132.120.102
-//  Then change SERVER below to 'https://game.lillyko.space'
-//
-//  Option B (quick test): If lillyko.space is currently routing to your
-//  Wispbyte server (not GitHub Pages), just use 'https://lillyko.space'
-//  Change whichever one works for you below:
-// ══════════════════════════════════════════════════════════════════════════════
-const SERVER = 'https://game.lillyko.space'; // ← change this if needed
+let playerName   = '';
+let targetServer = '';
+let attempt      = 0;
+const gf         = document.getElementById('gf');
 
-const GAME_URL    = SERVER + '/Lykoio.html';
-const OFFLINE_URL = 'Lykoio_offline.html';
-
-const frame      = document.getElementById('gameFrame');
-const overlay    = document.getElementById('overlay');
-const statusLine = document.getElementById('statusLine');
-const pbar       = document.getElementById('pbar');
-const retryBtn   = document.getElementById('retryBtn');
-const offlineBtn = document.getElementById('offlineBtn');
-const errDetail  = document.getElementById('errDetail');
-
-let loadAttempt = 0;
-
-function setLoading(msg) {
-  statusLine.textContent = msg || 'Connecting to server...';
-  statusLine.className = '';
-  pbar.classList.remove('hidden');
-  retryBtn.classList.remove('show');
-  offlineBtn.classList.remove('show');
-  errDetail.classList.remove('show');
-  errDetail.textContent = '';
-}
-
-function setError(msg, detail) {
-  statusLine.textContent = msg;
-  statusLine.className = 'err';
-  pbar.classList.add('hidden');
-  retryBtn.classList.add('show');
-  offlineBtn.classList.add('show');
-  if (detail) { errDetail.textContent = detail; errDetail.classList.add('show'); }
-}
-
-function showGame() {
-  overlay.classList.add('fade');
-  frame.style.opacity = '1';
-  setTimeout(() => overlay.style.display = 'none', 450);
-}
-
-function tryLoad() {
-  loadAttempt++;
-  setLoading(loadAttempt > 1 ? 'Retrying...' : 'Connecting to server...');
-
-  // Use an image probe instead of fetch — avoids mixed content issues entirely
-  // because image loads don't trigger mixed content blocks the same way
-  const img = new Image();
-  const timer = setTimeout(() => {
-    img.src = ''; // cancel
-    setError('✗ Server down', 'Connection timed out. Try again or play offline.');
-  }, 7000);
-
-  img.onload = () => {
-    clearTimeout(timer);
-    statusLine.textContent = '✓ Server found — loading game...';
-    statusLine.className = 'ok';
-    setTimeout(() => { frame.src = GAME_URL; }, 400);
-  };
-
-  img.onerror = () => {
-    // onerror fires even for valid servers that return non-image responses
-    // If the server is UP, we'll still get an error (it's not an image)
-    // but the error fires quickly. If the server is DOWN, it takes longer / times out.
-    // So we use timing: fast error = server up, slow = server down
-    const elapsed = Date.now() - startT;
-    if (elapsed < 5000) {
-      // Server responded (just not with an image) — it's up
-      clearTimeout(timer);
-      statusLine.textContent = '✓ Server found — loading game...';
-      statusLine.className = 'ok';
-      setTimeout(() => { frame.src = GAME_URL; }, 400);
-    } else {
-      clearTimeout(timer);
-      setError('✗ Server down', 'Could not reach the server. Try again or play offline.');
+/* ── screen management ── */
+function goTo(id) {
+  ['S1','S2','S3'].forEach(s => {
+    const el = document.getElementById(s);
+    if (s === id) { el.classList.remove('hide','off'); }
+    else {
+      el.classList.add('hide');
+      setTimeout(() => { if (el.classList.contains('hide')) el.classList.add('off'); }, 380);
     }
+  });
+}
+function allOff() {
+  ['S1','S2','S3'].forEach(s => {
+    const el = document.getElementById(s);
+    el.classList.add('hide');
+    setTimeout(() => el.classList.add('off'), 400);
+  });
+}
+
+/* ── screen 1 ── */
+document.getElementById('playBtn').onclick  = () => {
+  playerName = document.getElementById('nameIn').value.trim() || 'Wanderer';
+  document.getElementById('greetName').textContent = playerName;
+  goTo('S2');
+};
+document.getElementById('nameIn').onkeydown = e => { if (e.key === 'Enter') document.getElementById('playBtn').click(); };
+document.getElementById('offlineBtn').onclick = () => {
+  playerName = document.getElementById('nameIn').value.trim() || 'Wanderer';
+  goTo('S3');
+  setMsg('Loading offline mode...');
+  // Load the standalone offline game (same repo, game.html)
+  setTimeout(() => { gf.src = 'game.html?name=' + encodeURIComponent(playerName) + '&offline=1'; }, 300);
+};
+
+/* ── screen 2 ── */
+function joinServer(url) {
+  targetServer = url;
+  attempt = 0;
+  goTo('S3');
+  probe();
+}
+
+/* ── screen 3 ── */
+function setMsg(msg) {
+  const el = document.getElementById('loadMsg');
+  el.textContent = msg;
+  el.className = msg.includes('✓') ? 'ok' : msg.includes('✗') ? 'err' : '';
+  document.getElementById('pbar').classList.toggle('hidden', msg.includes('✗'));
+  document.getElementById('retryBtn').classList.toggle('show', msg.includes('✗'));
+  document.getElementById('backBtn2').classList.toggle('show', msg.includes('✗'));
+}
+
+function retryConn() {
+  attempt++;
+  setMsg('Retrying...');
+  setTimeout(probe, 300);
+}
+
+function probe() {
+  setMsg(attempt > 0 ? 'Retrying...' : 'Connecting to server...');
+  const t0  = Date.now();
+  const img = new Image();
+  const TL  = 7000;
+
+  const ok = () => {
+    clearTimeout(timer);
+    setMsg('✓ Server found — loading game...');
+    setTimeout(() => {
+      gf.src = targetServer + '/?name=' + encodeURIComponent(playerName);
+    }, 450);
   };
 
-  const startT = Date.now();
-  img.src = SERVER + '/favicon.ico?_=' + Date.now();
+  const timer = setTimeout(() => { img.src = ''; setMsg('✗ Server timed out'); }, TL);
+  img.onload  = ok;
+  img.onerror = () => {
+    // Quick error = server is up (just not an image endpoint)
+    if (Date.now() - t0 < TL - 800) ok();
+    else { clearTimeout(timer); setMsg('✗ Server unreachable'); }
+  };
+  img.src = targetServer + '/favicon.ico?_=' + Date.now();
 }
 
-frame.addEventListener('load', () => {
-  if (!frame.src || frame.src === 'about:blank') return;
-  showGame();
+/* ── iframe loaded ── */
+gf.addEventListener('load', () => {
+  if (!gf.src || gf.src === 'about:blank') return;
+  allOff();
+  gf.style.opacity = '1';
 });
-
-function goOffline() {
-  setLoading('Loading offline mode...');
-  frame.src = OFFLINE_URL;
-}
-
-tryLoad();
 </script>
 </body>
 </html>
