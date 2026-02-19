@@ -41,7 +41,7 @@ html,body{width:100%;height:100%;background:#07080f;overflow:hidden;
 #statusLine.ok{color:#39ff8f}
 #statusLine.err{color:#e94560}
 
-.pbar{width:200px;height:2px;background:#1e2240;overflow:hidden;margin-bottom:20px}
+.pbar{width:200px;height:2px;background:#1e2240;overflow:hidden;margin-bottom:20px;transition:opacity .3s}
 .pfill{height:100%;width:35%;
   background:linear-gradient(90deg,transparent,#00e5ff,transparent);
   animation:sweep 1.5s ease-in-out infinite}
@@ -57,14 +57,31 @@ html,body{width:100%;height:100%;background:#07080f;overflow:hidden;
 .btn-retry:hover{border-color:#00e5ff;color:#00e5ff}
 .btn-offline{border:1px solid #1e2240;color:#5a6a90}
 .btn-offline:hover{border-color:#f5a623;color:#f5a623}
+.btn-offline:disabled{opacity:.3;cursor:not-allowed;border-color:#1e2240;color:#5a6a90}
 
-#errDetail{font-size:9px;letter-spacing:1px;color:#2a3050;margin-top:6px;max-width:340px;
-  line-height:1.8;display:none}
+#errDetail{font-size:9px;letter-spacing:1px;color:#2a3050;margin-top:8px;max-width:340px;
+  line-height:1.9;display:none;text-align:center}
 #errDetail.show{display:block}
+
+/* Offline "coming soon" popup */
+#offlinePopup{
+  position:fixed;inset:0;background:rgba(7,8,15,.92);z-index:20;
+  display:none;flex-direction:column;align-items:center;justify-content:center;gap:14px}
+#offlinePopup.show{display:flex}
+.popup-box{background:#121428;border:1px solid #1e2240;padding:28px 36px;
+  max-width:340px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:12px}
+.popup-title{font-family:'Orbitron',sans-serif;font-size:13px;color:#fff;letter-spacing:2px}
+.popup-text{font-size:10px;letter-spacing:1px;color:#5a6a90;line-height:1.9}
+.popup-text b{color:#f5a623;font-weight:400}
+.popup-close{background:transparent;border:1px solid #1e2240;color:#5a6a90;
+  font-family:'DM Mono',monospace;font-size:9px;letter-spacing:3px;text-transform:uppercase;
+  padding:9px 22px;cursor:pointer;transition:all .2s;margin-top:4px}
+.popup-close:hover{border-color:#00e5ff;color:#00e5ff}
 </style>
 </head>
 <body>
 
+<!-- Loading / error overlay -->
 <div id="overlay">
   <div class="owrap"><div class="orb"></div><div class="orb"></div><div class="orb"></div></div>
   <div class="scanlines"></div>
@@ -73,13 +90,27 @@ html,body{width:100%;height:100%;background:#07080f;overflow:hidden;
     <div id="statusLine">Connecting to server...</div>
     <div class="pbar" id="pbar"><div class="pfill"></div></div>
     <div class="btn-row">
-      <button class="btn btn-retry" id="retryBtn" onclick="tryLoad()">↺ Retry</button>
-      <button class="btn btn-offline" id="offlineBtn" onclick="goOffline()">Play Offline</button>
+      <button class="btn btn-retry"   id="retryBtn"   onclick="tryLoad()">↺ Retry</button>
+      <button class="btn btn-offline" id="offlineBtn" onclick="showOfflinePopup()">Play Offline</button>
     </div>
     <div id="errDetail"></div>
   </div>
 </div>
 
+<!-- Offline mode popup (coming soon) -->
+<div id="offlinePopup">
+  <div class="popup-box">
+    <div class="popup-title">OFFLINE MODE</div>
+    <div class="popup-text">
+      Offline mode is <b>coming soon</b>.<br><br>
+      For now the game requires a server connection.<br>
+      Try again later or hit Retry — the server may just be restarting.
+    </div>
+    <button class="popup-close" onclick="closeOfflinePopup()">← Go Back</button>
+  </div>
+</div>
+
+<!-- The actual game loads in here — users still see lillyko.space/Lykoio.html in URL bar -->
 <iframe
   id="gameFrame"
   src="about:blank"
@@ -88,6 +119,7 @@ html,body{width:100%;height:100%;background:#07080f;overflow:hidden;
 ></iframe>
 
 <script>
+// Your Wispbyte server IP + port
 const SERVER   = 'http://212.132.120.102:13888';
 const GAME_URL = SERVER + '/Lykoio.html';
 
@@ -108,6 +140,7 @@ function setLoading(msg) {
   retryBtn.classList.remove('show');
   offlineBtn.classList.remove('show');
   errDetail.classList.remove('show');
+  errDetail.textContent = '';
 }
 
 function setError(msg, detail) {
@@ -116,7 +149,10 @@ function setError(msg, detail) {
   pbar.classList.add('hidden');
   retryBtn.classList.add('show');
   offlineBtn.classList.add('show');
-  if (detail) { errDetail.textContent = detail; errDetail.classList.add('show'); }
+  if (detail) {
+    errDetail.textContent = detail;
+    errDetail.classList.add('show');
+  }
 }
 
 function tryLoad() {
@@ -127,7 +163,9 @@ function tryLoad() {
   const killTimer  = setTimeout(() => controller.abort(), 7000);
 
   fetch(SERVER + '/socket.io/socket.io.js', {
-    method: 'HEAD', mode: 'no-cors', signal: controller.signal
+    method: 'HEAD',
+    mode:   'no-cors',
+    signal: controller.signal
   })
   .then(() => {
     clearTimeout(killTimer);
@@ -137,11 +175,15 @@ function tryLoad() {
   })
   .catch(err => {
     clearTimeout(killTimer);
-    setError('✗ Server down', err.name === 'AbortError'
-      ? 'Connection timed out.' : 'Could not reach the game server.');
+    if (err.name === 'AbortError') {
+      setError('✗ Server down', 'Connection timed out. The server may be restarting — try again in a moment.');
+    } else {
+      setError('✗ Server down', 'Could not reach the game server. Try again shortly.');
+    }
   });
 }
 
+// Fade overlay and show game once iframe loads
 frame.addEventListener('load', () => {
   if (!frame.src || frame.src === 'about:blank') return;
   overlay.classList.add('fade');
@@ -149,14 +191,12 @@ frame.addEventListener('load', () => {
   setTimeout(() => overlay.style.display = 'none', 450);
 });
 
-function goOffline() {
-  setLoading('Loading offline mode...');
-  setTimeout(() => {
-    frame.src = 'Lykoio_offline.html';
-    overlay.classList.add('fade');
-    frame.style.opacity = '1';
-    setTimeout(() => overlay.style.display = 'none', 450);
-  }, 300);
+// Offline popup
+function showOfflinePopup() {
+  document.getElementById('offlinePopup').classList.add('show');
+}
+function closeOfflinePopup() {
+  document.getElementById('offlinePopup').classList.remove('show');
 }
 
 tryLoad();
