@@ -418,14 +418,27 @@ function retryConn() { attempt++; setMsg('Retrying...'); setTimeout(probe, 300);
 
 function probe() {
   setMsg(attempt > 0 ? 'Retrying...' : 'Connecting to server...');
-  const t0 = Date.now(), TL = 6000;
-  const img = new Image();
 
-  const ok = () => { clearTimeout(timer); setMsg('✓ Server found — loading game...'); setTimeout(launchGame, 500); };
-  const timer = setTimeout(() => { img.src=''; setMsg('✗ Server timed out — retry or play offline'); }, TL);
-  img.onload  = ok;
-  img.onerror = () => { Date.now()-t0 < TL-800 ? ok() : (clearTimeout(timer), setMsg('✗ Server unreachable — retry or play offline')); };
-  img.src = SERVER + '/favicon.ico?t=' + Date.now();
+  // Use fetch to /api/status — reliable through nginx proxy
+  const ctrl = new AbortController();
+  const timer = setTimeout(() => { ctrl.abort(); setMsg('✗ Server timed out — retry or play offline'); }, 7000);
+
+  fetch(SERVER + '/api/status', { signal: ctrl.signal, cache: 'no-store' })
+    .then(r => {
+      clearTimeout(timer);
+      if (r.ok) {
+        setMsg('✓ Server found — loading game...');
+        setTimeout(launchGame, 500);
+      } else {
+        setMsg('✗ Server error (' + r.status + ') — retry or play offline');
+      }
+    })
+    .catch(err => {
+      clearTimeout(timer);
+      if (err.name !== 'AbortError') {
+        setMsg('✗ Server unreachable — retry or play offline');
+      }
+    });
 }
 
 // ── launch game ───────────────────────────────────────────────
@@ -661,7 +674,7 @@ function offAddXp(amt){
 
 // ── ONLINE ────────────────────────────────────────────────────
 function connectOnline(name){
-  socket=io(SERVER,{reconnection:true,reconnectionAttempts:15});
+  socket=io(SERVER,{transports:['polling'],reconnection:true,reconnectionAttempts:15,timeout:10000});
   socket.on('connect',()=>{myId=socket.id;socket.emit('join',{name});});
   socket.on('disconnect',()=>{document.getElementById('dcScreen').style.display='flex';});
   socket.on('serverFull',()=>{document.getElementById('srvFullScreen').style.display='flex';});
