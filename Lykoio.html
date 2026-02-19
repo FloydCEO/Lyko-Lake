@@ -11,29 +11,37 @@
   --void:#07080f;--surf:#121428;--bord:#1e2240;
   --red:#e94560;--gold:#f5a623;--cyan:#00e5ff;
   --green:#39ff8f;--text:#dce8ff;--dim:#5a6a90;
+  --grass:#1a3a1a;--grass2:#1f4422;
 }
 html,body{width:100%;height:100%;background:var(--void);color:var(--text);
   font-family:'DM Mono',monospace;overflow:hidden;user-select:none}
 
-/* ── LOBBY ── */
-#lobby{position:fixed;inset:0;background:var(--void);z-index:99;
-  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:22px}
-#lobby::before{content:'';position:fixed;inset:0;
-  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
-  opacity:.4;pointer-events:none}
+/* ── LOADING SCREEN ── */
+#loadScreen{position:fixed;inset:0;background:var(--void);z-index:200;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px}
+#loadScreen h1{font-family:'Orbitron',sans-serif;font-size:clamp(44px,8vw,88px);color:#fff;letter-spacing:2px}
+#loadScreen h1 .io{color:var(--cyan)}
+#loadStatus{font-size:11px;letter-spacing:3px;color:var(--dim);text-transform:uppercase}
 .owrap{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);
   width:600px;height:600px;pointer-events:none;opacity:.04}
 .orb{position:absolute;inset:0;border:1px solid #fff;border-radius:50%;animation:spin 40s linear infinite}
 .orb:nth-child(2){inset:60px;border-color:var(--cyan);animation-duration:60s;animation-direction:reverse}
 .orb:nth-child(3){inset:130px;animation-duration:80s}
 @keyframes spin{to{transform:rotate(360deg)}}
+
+/* ── NAME ENTRY ── */
+#nameScreen{position:fixed;inset:0;background:var(--void);z-index:150;
+  display:none;flex-direction:column;align-items:center;justify-content:center;gap:22px}
+#nameScreen::before{content:'';position:fixed;inset:0;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+  opacity:.4;pointer-events:none}
 .scanl{position:fixed;inset:0;pointer-events:none;
   background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,.03) 2px,rgba(0,0,0,.03) 4px)}
-.li{position:relative;z-index:2;display:flex;flex-direction:column;align-items:center;gap:22px}
+.ni{position:relative;z-index:2;display:flex;flex-direction:column;align-items:center;gap:22px}
 .leyebrow{font-size:11px;letter-spacing:4px;color:var(--dim);text-transform:uppercase}
 .leyebrow span{color:var(--gold)}
-#lobby h1{font-family:'Orbitron',sans-serif;font-size:clamp(44px,8vw,88px);color:#fff;letter-spacing:2px;line-height:1}
-#lobby h1 .io{color:var(--cyan)}
+#nameScreen h1{font-family:'Orbitron',sans-serif;font-size:clamp(44px,8vw,88px);color:#fff;letter-spacing:2px;line-height:1}
+#nameScreen h1 .io{color:var(--cyan)}
 .ldiv{width:120px;height:1px;background:linear-gradient(90deg,transparent,var(--cyan),transparent)}
 #connStatus{font-size:10px;letter-spacing:3px;padding:6px 18px;border:1px solid var(--bord);
   color:var(--dim);text-transform:uppercase;transition:color .3s,border-color .3s}
@@ -52,6 +60,18 @@ html,body{width:100%;height:100%;background:var(--void);color:var(--text);
 .lhints span{color:var(--gold)}
 .bklink{font-size:10px;letter-spacing:2px;color:var(--dim);text-decoration:none;transition:color .2s}
 .bklink:hover{color:var(--cyan)}
+
+/* ── NPC DIALOGUE ── */
+#npcDialogue{position:fixed;bottom:90px;left:50%;transform:translateX(-50%);
+  background:rgba(7,8,15,.97);border:1px solid var(--bord);
+  padding:18px 28px;max-width:420px;width:90%;z-index:30;display:none;
+  animation:dIn .3s ease}
+@keyframes dIn{from{opacity:0;transform:translateX(-50%) translateY(10px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}
+#npcDialogue .npcName{font-family:'Orbitron',sans-serif;font-size:11px;color:var(--cyan);letter-spacing:3px;margin-bottom:8px}
+#npcDialogue .npcText{font-size:13px;color:var(--text);line-height:1.7;letter-spacing:.5px}
+#npcDialogue .npcClose{margin-top:12px;font-size:9px;letter-spacing:2px;color:var(--dim);text-align:right}
+#npcDialogue .npcClose span{color:var(--cyan);cursor:pointer}
+#npcDialogue .npcClose span:hover{color:#fff}
 
 /* ── CANVAS ── */
 canvas{display:block;position:fixed;inset:0;z-index:0}
@@ -137,21 +157,36 @@ canvas{display:block;position:fixed;inset:0;z-index:0}
 .islbtn{background:var(--gold);color:var(--void);font-family:'Orbitron',sans-serif;
   font-size:11px;font-weight:700;letter-spacing:2px;border:none;
   padding:10px 28px;cursor:pointer;margin-top:8px}
+
+/* ── INTERACT PROMPT ── */
+#interactPrompt{position:fixed;bottom:160px;left:50%;transform:translateX(-50%);
+  font-size:10px;letter-spacing:2px;color:var(--dim);pointer-events:none;display:none;z-index:20;
+  background:rgba(7,8,15,.85);border:1px solid var(--bord);padding:5px 14px}
 </style>
 </head>
 <body>
 
-<!-- Lobby -->
-<div id="lobby">
+<!-- Loading Screen -->
+<div id="loadScreen">
   <div class="owrap"><div class="orb"></div><div class="orb"></div><div class="orb"></div></div>
   <div class="scanl"></div>
-  <div class="li">
+  <div style="position:relative;z-index:2;display:flex;flex-direction:column;align-items:center;gap:16px">
+    <h1>LYKO<span class="io">IO</span></h1>
+    <div id="loadStatus">CONNECTING TO SERVER...</div>
+  </div>
+</div>
+
+<!-- Name Entry Screen -->
+<div id="nameScreen">
+  <div class="owrap"><div class="orb"></div><div class="orb"></div><div class="orb"></div></div>
+  <div class="scanl"></div>
+  <div class="ni">
     <p class="leyebrow">Welcome to <span>LilLyko.space</span></p>
     <h1>LYKO<span class="io">IO</span></h1>
     <div class="ldiv"></div>
-    <div id="connStatus">⟳ CONNECTING TO SERVER...</div>
+    <div id="connStatus">✓ SERVER ONLINE</div>
     <input id="nameIn" type="text" placeholder="ENTER YOUR NAME" maxlength="16" spellcheck="false">
-    <button id="playBtn" disabled>ENTER THE ISLAND</button>
+    <button id="playBtn">ENTER THE ISLAND</button>
     <div class="lhints">
       <span>WASD</span> move &nbsp;·&nbsp; <span>Click</span> enemy to attack<br>
       <span>Click</span> item to use / equip &nbsp;·&nbsp; <span>Right-click</span> to drop<br>
@@ -175,10 +210,18 @@ canvas{display:block;position:fixed;inset:0;z-index:0}
   <div id="mm"><canvas id="mmc" width="158" height="158"></canvas></div>
   <div id="invBar"></div>
   <div id="kf"></div>
-  <div id="ctrl"><span>WASD</span> – Move<br><span>Click</span> enemy – Attack<br><span>Click</span> item – Use/Equip<br><span>Right-click</span> – Drop</div>
+  <div id="ctrl"><span>WASD</span> – Move<br><span>Click</span> enemy – Attack<br><span>Click</span> item – Use/Equip<br><span>Right-click</span> – Drop<br><span>E</span> – Interact</div>
 </div>
 
 <div id="tip"></div>
+<div id="interactPrompt">[ E ] Talk to LYKO</div>
+
+<!-- NPC Dialogue -->
+<div id="npcDialogue">
+  <div class="npcName">✦ LYKO</div>
+  <div class="npcText" id="npcText">Hello!</div>
+  <div class="npcClose"><span id="npcCloseBtn">[ E ] Close</span></div>
+</div>
 
 <div id="death">
   <h2>YOU DIED</h2>
@@ -205,19 +248,68 @@ canvas{display:block;position:fixed;inset:0;z-index:0}
 
 <div id="lvlFlash"><span>LEVEL UP!</span></div>
 
-<!-- Socket.io from the Wispbyte server -->
-<script src="http://212.132.120.102:13888/socket.io/socket.io.js"
-  onerror="document.getElementById('connStatus').textContent='✗ FAILED TO LOAD SOCKET.IO';document.getElementById('connStatus').className='err'">
-</script>
+<!--
+  IMPORTANT: To fix the Mixed Content (HTTPS) error, you need to either:
+  1. Set up an HTTPS subdomain on Wispbyte pointing to your server port, e.g. game.lillyko.space
+  2. Then replace SERVER_URL below with 'https://game.lillyko.space' (or whatever your Wispbyte gives you)
+  
+  For now, the socket.io script is loaded from the same origin as a fallback,
+  and we also try loading it from the server dynamically.
+  
+  On Wispbyte go to "Subdomains" tab -> create a subdomain -> it will give you a URL -> use that here.
+-->
 <script>
-const SERVER  = 'http://212.132.120.102:13888';
-const XP_TBL  = [0,100,250,450,700,1050,1500,2100,2900,4000,5500];
+// ── SERVER CONFIG ──────────────────────────────────────────────────────────────
+// TODO: Replace this with your Wispbyte HTTPS subdomain URL!
+// Go to Subdomains tab in Wispbyte panel -> create one -> paste the URL here (with https://)
+// Example: const SERVER_URL = 'https://d0666df1.wispbyte.com';
+const SERVER_URL = 'https://d0666df1.wispbyte.com'; // <-- UPDATE THIS
+
+// ── Dynamic socket.io loader ───────────────────────────────────────────────────
+const loadScript = (src) => new Promise((res, rej) => {
+  const s = document.createElement('script');
+  s.src = src; s.onload = res; s.onerror = rej;
+  document.head.appendChild(s);
+});
+
+const loadScreen = document.getElementById('loadScreen');
+const loadStatus = document.getElementById('loadStatus');
+
+async function init() {
+  // Try loading socket.io from the server
+  try {
+    await loadScript(SERVER_URL + '/socket.io/socket.io.js');
+    loadStatus.textContent = 'SERVER FOUND — ENTER YOUR NAME';
+    loadStatus.style.color = '#39ff8f';
+    setTimeout(()=>{
+      loadScreen.style.display = 'none';
+      document.getElementById('nameScreen').style.display = 'flex';
+      document.getElementById('connStatus').textContent = '✓ SERVER ONLINE';
+      document.getElementById('connStatus').className = 'ok';
+    }, 600);
+  } catch(e) {
+    loadStatus.textContent = '✗ SERVER UNREACHABLE — CHECK WISPBYTE';
+    loadStatus.style.color = '#e94560';
+    // Still show name screen after 3s so they can at least see the UI
+    setTimeout(()=>{
+      loadScreen.style.display = 'none';
+      document.getElementById('nameScreen').style.display = 'flex';
+      document.getElementById('connStatus').textContent = '✗ SERVER UNREACHABLE';
+      document.getElementById('connStatus').className = 'err';
+    }, 3000);
+  }
+}
+init();
+</script>
+
+<script>
+const XP_TBL = [0,100,250,450,700,1050,1500,2100,2900,4000,5500];
 
 // Canvas
-const canvas  = document.getElementById('c');
-const ctx     = canvas.getContext('2d');
-const mmc     = document.getElementById('mmc');
-const mmx     = mmc.getContext('2d');
+const canvas = document.getElementById('c');
+const ctx    = canvas.getContext('2d');
+const mmc    = document.getElementById('mmc');
+const mmx    = mmc.getContext('2d');
 function resize(){ canvas.width=innerWidth; canvas.height=innerHeight; }
 resize(); addEventListener('resize', resize);
 
@@ -228,48 +320,100 @@ let worldPlayers={}, worldAnimals={}, worldDrops={};
 let hits=[], floats=[];
 let keys={}, camX=0, camY=0, started=false;
 
-// ── Connection probe ──────────────────────────────────────────────────────────
-const statusEl = document.getElementById('connStatus');
-const playBtn  = document.getElementById('playBtn');
+// ── LOCAL MAP (used when server not connected or for lobby rendering) ──────────
+// Island 1 dimensions
+const MAP_W = 3200, MAP_H = 3200;
 
-function probe(){
-  if(typeof io === 'undefined'){
-    statusEl.textContent='✗ SERVER UNREACHABLE'; statusEl.className='err';
-    setTimeout(()=>location.reload(), 5000); return;
-  }
-  statusEl.textContent='⟳ CONNECTING...'; statusEl.className='';
-  const s = io(SERVER, {reconnection:false, timeout:5000});
-  s.on('connect', ()=>{
-    statusEl.textContent='✓ SERVER ONLINE'; statusEl.className='ok';
-    playBtn.disabled=false; s.disconnect();
-  });
-  s.on('connect_error', ()=>{
-    statusEl.textContent='✗ SERVER OFFLINE — RETRYING'; statusEl.className='err';
-    playBtn.disabled=true; setTimeout(probe, 4000);
+// Lobby building position (center of map)
+const LOBBY_X = MAP_W/2, LOBBY_Y = MAP_H/2;
+const LOBBY_W = 220, LOBBY_H = 180;
+
+// Lyko NPC position (inside lobby center)
+const LYKO_X = LOBBY_X;
+const LYKO_Y = LOBBY_Y - 20;
+const LYKO_INTERACT_DIST = 80;
+
+// Player state for offline/pre-join gameplay
+let localPlayer = {
+  x: LOBBY_X,
+  y: LOBBY_Y + 60, // spawn just inside lobby door
+  hp: 100, maxHp: 100,
+  xp: 0, level: 1, kills: 0, pvpKills: 0,
+  name: 'Player',
+  inv: [], equipped: {}
+};
+
+// Track whether Lyko dialogue is open
+let lykoDialogueOpen = false;
+let isOnline = false; // true once server connection established
+
+// Pre-generate grass tiles for rendering
+const grassTiles = [];
+for(let i=0;i<400;i++){
+  grassTiles.push({
+    x: Math.random()*MAP_W,
+    y: Math.random()*MAP_H,
+    type: Math.random() > 0.7 ? 1 : 0, // 0=short, 1=tall
+    seed: Math.random()
   });
 }
-probe();
 
-// ── Lobby ─────────────────────────────────────────────────────────────────────
+// ── Name Entry ────────────────────────────────────────────────────────────────
+const playBtn = document.getElementById('playBtn');
 playBtn.onclick = go;
-document.getElementById('nameIn').onkeydown = e=>{ if(e.key==='Enter'&&!playBtn.disabled) go(); };
+document.getElementById('nameIn').onkeydown = e=>{ if(e.key==='Enter') go(); };
+
 function go(){
   if(started) return; started=true;
   const name = document.getElementById('nameIn').value.trim()||'Wanderer';
-  document.getElementById('lobby').style.display='none';
+  localPlayer.name = name;
+  document.getElementById('nameScreen').style.display='none';
   document.getElementById('hud').style.display='block';
-  connect(name);
+
+  // Try to connect to server
+  if(typeof io !== 'undefined'){
+    connect(name);
+    isOnline = true;
+  } else {
+    // Offline mode — local-only game for now
+    isOnline = false;
+    me = {...localPlayer};
+    mapData = {w:MAP_W, h:MAP_H, trees:[], rocks:[]};
+    updateHUD(); buildInv();
+    // Show Lyko greeting automatically after a moment
+    setTimeout(showLykoGreeting, 800);
+  }
   requestAnimationFrame(loop);
 }
 
-// ── Socket ────────────────────────────────────────────────────────────────────
+// ── Lyko NPC dialogue ─────────────────────────────────────────────────────────
+function showLykoGreeting(){
+  document.getElementById('npcText').textContent = 'Hello!';
+  document.getElementById('npcDialogue').style.display = 'block';
+  document.getElementById('interactPrompt').style.display = 'none';
+  lykoDialogueOpen = true;
+}
+
+function closeLykoDialogue(){
+  document.getElementById('npcDialogue').style.display = 'none';
+  lykoDialogueOpen = false;
+}
+
+document.getElementById('npcCloseBtn').onclick = closeLykoDialogue;
+
+// ── Socket (online mode) ──────────────────────────────────────────────────────
 function connect(name){
-  socket = io(SERVER, {reconnection:true, reconnectionAttempts:10});
-  socket.on('connect', ()=>{ myId=socket.id; socket.emit('join',{name}); });
+  socket = io(SERVER_URL, {reconnection:true, reconnectionAttempts:10});
+  socket.on('connect', ()=>{
+    myId=socket.id;
+    socket.emit('join',{name});
+  });
   socket.on('disconnect', ()=> document.getElementById('dcScreen').style.display='flex');
 
   socket.on('init', d=>{
-    me=d.me; itemDefs=d.items; mapData=d.map; updateHUD(); buildInv();
+    me=d.me; itemDefs=d.items; mapData=d.map;
+    updateHUD(); buildInv();
+    setTimeout(showLykoGreeting, 800);
   });
   socket.on('state', d=>{
     worldPlayers={}; d.players.forEach(p=>worldPlayers[p.id]=p);
@@ -293,7 +437,7 @@ function connect(name){
   socket.on('hpUpdate', d=>{ if(me){me.hp=d.hp;me.maxHp=d.maxHp;} updateHUD(); });
   socket.on('hit', d=>{ hits.push({x:d.x,y:d.y,r:5,a:1}); fl(d.x,d.y-14,`-${d.dmg}`,'#e94560',800); });
   socket.on('invUpdate', d=>{ if(me){me.inv=d.inv;me.equipped=d.equipped;me.hp=d.hp;} buildInv();updateHUD(); });
-  socket.on('killfeed', d=>kf(d.killer,d.victim));
+  socket.on('killfeed', d=>addKf(d.killer,d.victim));
   socket.on('youDied', d=>{
     document.getElementById('dBy').textContent=`Killed by ${d.by}`;
     document.getElementById('dK').textContent=me?.kills||0;
@@ -310,20 +454,62 @@ function connect(name){
 }
 
 // ── Input ─────────────────────────────────────────────────────────────────────
-addEventListener('keydown',e=>keys[e.code]=true);
-addEventListener('keyup',  e=>keys[e.code]=false);
+addEventListener('keydown', e=>{
+  keys[e.code]=true;
+  // E to interact / close dialogue
+  if(e.code==='KeyE'){
+    if(lykoDialogueOpen){
+      closeLykoDialogue();
+    } else {
+      // Check if near Lyko
+      const px = isOnline ? (worldPlayers[myId]?.x||me?.x||0) : localPlayer.x;
+      const py = isOnline ? (worldPlayers[myId]?.y||me?.y||0) : localPlayer.y;
+      const dist = Math.hypot(px - LYKO_X, py - LYKO_Y);
+      if(dist < LYKO_INTERACT_DIST){
+        showLykoGreeting();
+      }
+    }
+  }
+});
+addEventListener('keyup', e=>keys[e.code]=false);
+
+// Movement tick — online sends to server, offline moves locally
 setInterval(()=>{
-  if(!socket||!me||me.dead) return;
+  if(!started) return;
+  if(lykoDialogueOpen) return;
+
   let vx=0,vy=0;
   if(keys['KeyW']||keys['ArrowUp'])   vy=-1;
   if(keys['KeyS']||keys['ArrowDown']) vy= 1;
   if(keys['KeyA']||keys['ArrowLeft']) vx=-1;
   if(keys['KeyD']||keys['ArrowRight'])vx= 1;
   if(vx&&vy){vx*=.707;vy*=.707;}
-  socket.emit('move',{vx,vy});
-},33);
-canvas.addEventListener('click',e=>{
-  if(!socket||!me||me.dead) return;
+
+  if(isOnline){
+    if(!socket||!me||me.dead) return;
+    socket.emit('move',{vx,vy});
+  } else {
+    // Local movement
+    const speed = 3.5;
+    localPlayer.x = Math.max(10, Math.min(MAP_W-10, localPlayer.x + vx*speed));
+    localPlayer.y = Math.max(10, Math.min(MAP_H-10, localPlayer.y + vy*speed));
+    if(me){ me.x=localPlayer.x; me.y=localPlayer.y; }
+  }
+
+  // Update interact prompt
+  const px = isOnline ? (worldPlayers[myId]?.x||me?.x||0) : localPlayer.x;
+  const py = isOnline ? (worldPlayers[myId]?.y||me?.y||0) : localPlayer.y;
+  const distToLyko = Math.hypot(px - LYKO_X, py - LYKO_Y);
+  const promptEl = document.getElementById('interactPrompt');
+  if(!lykoDialogueOpen && distToLyko < LYKO_INTERACT_DIST){
+    promptEl.style.display = 'block';
+  } else if(!lykoDialogueOpen){
+    promptEl.style.display = 'none';
+  }
+}, 33);
+
+canvas.addEventListener('click', e=>{
+  if(!isOnline||!socket||!me||me.dead) return;
   const wx=e.clientX+camX,wy=e.clientY+camY;
   for(const a of Object.values(worldAnimals)){
     if(Math.hypot(a.x-wx,a.y-wy)<a.r+14){socket.emit('atkAnimal',{id:a.id});return;}
@@ -363,8 +549,8 @@ function buildInv(){
         const nm=document.createElement('span'); nm.className='sn'; nm.textContent=def.name; sl.appendChild(nm);
         sl.dataset.iid=inv[i].id; sl.dataset.itemId=inv[i].itemId;
         sl.addEventListener('mouseenter',showTip); sl.addEventListener('mouseleave',hideTip); sl.addEventListener('mousemove',movTip);
-        sl.addEventListener('click',()=>{socket.emit('useItem',{invId:inv[i].id});hideTip();});
-        sl.addEventListener('contextmenu',e=>{e.preventDefault();socket.emit('dropItem',{invId:inv[i].id});hideTip();});
+        sl.addEventListener('click',()=>{if(socket)socket.emit('useItem',{invId:inv[i].id});hideTip();});
+        sl.addEventListener('contextmenu',e=>{e.preventDefault();if(socket)socket.emit('dropItem',{invId:inv[i].id});hideTip();});
       }
     } else { sl.innerHTML='<span class="iempty">+</span>'; }
     bar.appendChild(sl);
@@ -385,7 +571,7 @@ function hideTip(){document.getElementById('tip').style.display='none';}
 function movTip(e){const t=document.getElementById('tip');t.style.left=(e.clientX+14)+'px';t.style.top=(e.clientY-10)+'px';}
 
 // ── Kill feed ─────────────────────────────────────────────────────────────────
-function kf(killer,victim){
+function addKf(killer,victim){
   const el=document.createElement('div'); el.className='kfe';
   el.innerHTML=`<span class="kk">${killer}</span> slew <span class="kv">${victim}</span>`;
   document.getElementById('kf').appendChild(el); setTimeout(()=>el.remove(),4000);
@@ -396,46 +582,218 @@ function fl(x,y,txt,col,life){floats.push({x,y,txt,col,life,maxLife:life,vy:-0.8
 
 // ── Minimap ───────────────────────────────────────────────────────────────────
 function drawMM(){
-  if(!mapData||!me) return;
-  const W=158,H=158,sx=W/mapData.w,sy=H/mapData.h;
-  mmx.clearRect(0,0,W,H); mmx.fillStyle='#0d0f1e'; mmx.fillRect(0,0,W,H);
-  mmx.fillStyle='rgba(39,80,45,.45)';
-  mapData.trees.forEach(t=>mmx.fillRect(t.x*sx-1,t.y*sy-1,2,2));
+  if(!me) return;
+  const mw = mapData?.w||MAP_W, mh = mapData?.h||MAP_H;
+  const W=158,H=158,sx=W/mw,sy=H/mh;
+  mmx.clearRect(0,0,W,H);
+  mmx.fillStyle='#0d1a0d'; mmx.fillRect(0,0,W,H);
+
+  // Draw lobby building on minimap
+  mmx.fillStyle='rgba(0,229,255,.15)';
+  mmx.fillRect((LOBBY_X - LOBBY_W/2)*sx, (LOBBY_Y - LOBBY_H/2)*sy, LOBBY_W*sx, LOBBY_H*sy);
+
+  if(mapData?.trees){
+    mmx.fillStyle='rgba(39,80,45,.6)';
+    mapData.trees.forEach(t=>mmx.fillRect(t.x*sx-1,t.y*sy-1,2,2));
+  }
+  if(mapData?.rocks){
+    mmx.fillStyle='rgba(80,80,100,.5)';
+    mapData.rocks.forEach(r=>mmx.fillRect(r.x*sx-1,r.y*sy-1,2,2));
+  }
   mmx.fillStyle='#e94560';
   Object.values(worldAnimals).forEach(a=>mmx.fillRect(a.x*sx-1.5,a.y*sy-1.5,3,3));
   mmx.fillStyle='#00e5ff';
   Object.values(worldPlayers).forEach(p=>{if(p.id===myId)return;mmx.fillRect(p.x*sx-2,p.y*sy-2,4,4);});
-  mmx.fillStyle='#fff'; mmx.fillRect(me.x*sx-3,me.y*sy-3,6,6);
+  // Draw self
+  const selfX = isOnline ? (worldPlayers[myId]?.x||me?.x||0) : localPlayer.x;
+  const selfY = isOnline ? (worldPlayers[myId]?.y||me?.y||0) : localPlayer.y;
+  mmx.fillStyle='#fff';
+  mmx.fillRect(selfX*sx-3,selfY*sy-3,6,6);
+}
+
+// ── Grass rendering helpers ───────────────────────────────────────────────────
+let grassPatternCanvas = null;
+function getGrassPattern(){
+  if(grassPatternCanvas) return grassPatternCanvas;
+  grassPatternCanvas = document.createElement('canvas');
+  grassPatternCanvas.width = 80; grassPatternCanvas.height = 80;
+  const gc = grassPatternCanvas.getContext('2d');
+  // Base grass color
+  gc.fillStyle = '#162b14';
+  gc.fillRect(0,0,80,80);
+  // Add subtle variation
+  for(let i=0;i<30;i++){
+    const x=Math.random()*80, y=Math.random()*80;
+    gc.fillStyle = Math.random()>0.5 ? 'rgba(30,60,20,0.4)' : 'rgba(20,50,15,0.3)';
+    gc.fillRect(x,y,2+Math.random()*3,2+Math.random()*3);
+  }
+  return grassPatternCanvas;
 }
 
 // ── Render ────────────────────────────────────────────────────────────────────
 const TILE=80;
+let frameT = 0;
+
+function drawLobbyBuilding(cx, cy){
+  // Shadow
+  ctx.fillStyle='rgba(0,0,0,0.35)';
+  ctx.fillRect(cx-LOBBY_W/2+8, cy-LOBBY_H/2+8, LOBBY_W, LOBBY_H);
+
+  // Floor (inside building)
+  ctx.fillStyle='#0d1520';
+  ctx.fillRect(cx-LOBBY_W/2, cy-LOBBY_H/2, LOBBY_W, LOBBY_H);
+
+  // Walls
+  ctx.fillStyle='#1a2a40';
+  ctx.fillRect(cx-LOBBY_W/2, cy-LOBBY_H/2, LOBBY_W, 14); // top
+  ctx.fillRect(cx-LOBBY_W/2, cy+LOBBY_H/2-14, LOBBY_W, 14); // bottom
+  ctx.fillRect(cx-LOBBY_W/2, cy-LOBBY_H/2, 14, LOBBY_H); // left
+  ctx.fillRect(cx+LOBBY_W/2-14, cy-LOBBY_H/2, 14, LOBBY_H); // right
+
+  // Door opening (bottom center)
+  ctx.fillStyle='#162b14';
+  ctx.fillRect(cx-24, cy+LOBBY_H/2-14, 48, 14);
+
+  // Border glow
+  ctx.strokeStyle='rgba(0,229,255,0.25)';
+  ctx.lineWidth=1.5;
+  ctx.strokeRect(cx-LOBBY_W/2, cy-LOBBY_H/2, LOBBY_W, LOBBY_H);
+
+  // Interior details — floor tiles
+  ctx.strokeStyle='rgba(30,40,64,0.4)';
+  ctx.lineWidth=0.5;
+  for(let tx=cx-LOBBY_W/2+14;tx<cx+LOBBY_W/2-14;tx+=24){
+    ctx.beginPath();ctx.moveTo(tx,cy-LOBBY_H/2+14);ctx.lineTo(tx,cy+LOBBY_H/2-14);ctx.stroke();
+  }
+  for(let ty=cy-LOBBY_H/2+14;ty<cy+LOBBY_H/2-14;ty+=24){
+    ctx.beginPath();ctx.moveTo(cx-LOBBY_W/2+14,ty);ctx.lineTo(cx+LOBBY_W/2-14,ty);ctx.stroke();
+  }
+
+  // Building sign
+  ctx.fillStyle='rgba(0,229,255,0.8)';
+  ctx.font="bold 11px 'DM Mono', monospace";
+  ctx.textAlign='center'; ctx.textBaseline='middle';
+  ctx.fillText('[ LOBBY ]', cx, cy-LOBBY_H/2-12);
+}
+
+function drawLykoNPC(t){
+  const bobY = Math.sin(t * 0.002) * 2;
+  const lx = LYKO_X, ly = LYKO_Y + bobY;
+
+  // Glow aura
+  const pulse = 0.4 + Math.sin(t*0.003)*0.2;
+  const grad = ctx.createRadialGradient(lx,ly,5,lx,ly,34);
+  grad.addColorStop(0,`rgba(0,229,255,${pulse*0.3})`);
+  grad.addColorStop(1,'rgba(0,229,255,0)');
+  ctx.beginPath();ctx.arc(lx,ly,34,0,Math.PI*2);
+  ctx.fillStyle=grad;ctx.fill();
+
+  // Body
+  ctx.beginPath();ctx.arc(lx,ly,16,0,Math.PI*2);
+  ctx.fillStyle='#0a1f30';ctx.fill();
+  ctx.strokeStyle='#00e5ff';ctx.lineWidth=2;ctx.stroke();
+
+  // Eyes
+  ctx.fillStyle='#00e5ff';
+  ctx.beginPath();ctx.arc(lx-5,ly-3,3,0,Math.PI*2);ctx.fill();
+  ctx.beginPath();ctx.arc(lx+5,ly-3,3,0,Math.PI*2);ctx.fill();
+
+  // Name tag
+  ctx.font="bold 10px 'DM Mono',monospace";
+  ctx.fillStyle='#00e5ff';ctx.textAlign='center';
+  ctx.fillText('LYKO', lx, ly-24);
+
+  // Interaction hint (pulsing dot)
+  ctx.beginPath();ctx.arc(lx,ly-30+bobY*0.5,3,0,Math.PI*2);
+  ctx.fillStyle=`rgba(0,229,255,${0.5+Math.sin(t*0.005)*0.5})`;
+  ctx.fill();
+}
+
 function draw(){
   const W=canvas.width,H=canvas.height;
-  if(!mapData||!me){ctx.clearRect(0,0,W,H);return;}
-  const wp=worldPlayers[myId]||me;
-  camX+=(wp.x-W/2-camX)*.1; camY+=(wp.y-H/2-camY)*.1;
-  ctx.save(); ctx.translate(-camX,-camY);
-  ctx.fillStyle='#07080f'; ctx.fillRect(camX,camY,W,H);
-  // Grid
-  ctx.strokeStyle='rgba(30,34,64,.5)'; ctx.lineWidth=.5;
-  for(let x=Math.floor(camX/TILE)*TILE;x<camX+W;x+=TILE){ctx.beginPath();ctx.moveTo(x,camY);ctx.lineTo(x,camY+H);ctx.stroke();}
-  for(let y=Math.floor(camY/TILE)*TILE;y<camY+H;y+=TILE){ctx.beginPath();ctx.moveTo(camX,y);ctx.lineTo(camX+W,y);ctx.stroke();}
-  // Border
-  ctx.strokeStyle='rgba(0,229,255,.22)'; ctx.lineWidth=3; ctx.strokeRect(0,0,mapData.w,mapData.h);
-  // Trees
-  mapData.trees.forEach(t=>{
-    ctx.beginPath();ctx.arc(t.x,t.y,t.r*1.1,0,Math.PI*2);ctx.fillStyle='rgba(15,40,20,.7)';ctx.fill();
-    ctx.font=`${t.r*1.5}px serif`;ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText('🌲',t.x,t.y);
+  frameT += 16;
+
+  // Get current player position
+  let px, py;
+  if(isOnline && me){
+    const wp=worldPlayers[myId]||me;
+    px=wp.x; py=wp.y;
+  } else {
+    px=localPlayer.x; py=localPlayer.y;
+  }
+
+  camX+=(px-W/2-camX)*.1;
+  camY+=(py-H/2-camY)*.1;
+
+  ctx.save();
+  ctx.translate(-camX,-camY);
+
+  const mw = mapData?.w||MAP_W, mh = mapData?.h||MAP_H;
+
+  // ── Grass background ──
+  // Tiled grass fill
+  const gx0=Math.floor(camX/TILE)*TILE, gy0=Math.floor(camY/TILE)*TILE;
+  for(let gx=gx0;gx<camX+W+TILE;gx+=TILE){
+    for(let gy=gy0;gy<camY+H+TILE;gy+=TILE){
+      // Clip to map bounds
+      if(gx+TILE<0||gx>mw||gy+TILE<0||gy>mh) continue;
+      // Alternate grass shades for checker texture
+      const even = ((Math.floor(gx/TILE)+Math.floor(gy/TILE))%2===0);
+      ctx.fillStyle = even ? '#162b14' : '#152914';
+      ctx.fillRect(gx,gy,TILE,TILE);
+    }
+  }
+
+  // Void outside map
+  ctx.fillStyle='#07080f';
+  ctx.fillRect(camX,camY,-camX+0,H); // left void
+  ctx.fillRect(mw,camY,W,H); // right void
+  ctx.fillRect(0,camY,mw,-camY+0); // top void
+  ctx.fillRect(0,mh,mw,H); // bottom void
+  ctx.fillRect(camX,camY,W,-camY+0); // top full
+  ctx.fillRect(camX,mh,W,H); // bottom full
+
+  // Map border glow
+  ctx.strokeStyle='rgba(0,229,255,.22)'; ctx.lineWidth=3;
+  ctx.strokeRect(0,0,mw,mh);
+
+  // Grass details (decorative blades)
+  grassTiles.forEach(g=>{
+    if(g.x<camX-10||g.x>camX+W+10||g.y<camY-10||g.y>camY+H+10) return;
+    ctx.strokeStyle=g.type===1?'rgba(45,100,30,0.5)':'rgba(35,80,25,0.4)';
+    ctx.lineWidth=0.8;
+    const h2=g.type===1?8:5;
+    const wob=Math.sin(frameT*0.001+g.seed*10)*1.5;
+    ctx.beginPath();ctx.moveTo(g.x,g.y);ctx.lineTo(g.x+wob,g.y-h2);ctx.stroke();
   });
-  // Rocks
-  mapData.rocks.forEach(r=>{ctx.font=`${r.r*1.5}px serif`;ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText('🪨',r.x,r.y);});
-  // Drops
+
+  // Trees (from server map or none if not connected yet)
+  if(mapData?.trees){
+    mapData.trees.forEach(t=>{
+      ctx.beginPath();ctx.arc(t.x,t.y,t.r*1.1,0,Math.PI*2);
+      ctx.fillStyle='rgba(10,30,15,.75)';ctx.fill();
+      ctx.font=`${t.r*1.5}px serif`;ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText('🌲',t.x,t.y);
+    });
+  }
+  if(mapData?.rocks){
+    mapData.rocks.forEach(r=>{
+      ctx.font=`${r.r*1.5}px serif`;ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText('🪨',r.x,r.y);
+    });
+  }
+
+  // ── Lobby building ──
+  drawLobbyBuilding(LOBBY_X, LOBBY_Y);
+
+  // ── Lyko NPC (inside lobby) ──
+  drawLykoNPC(frameT);
+
+  // Ground drops
   Object.values(worldDrops).forEach(d=>{
     const def=itemDefs[d.itemId]; if(!def) return;
     ctx.save();ctx.shadowColor='#00e5ff';ctx.shadowBlur=10;
     ctx.font='18px serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(def.icon,d.x,d.y);ctx.restore();
   });
+
   // Animals
   Object.values(worldAnimals).forEach(a=>{
     const bw=a.r*2.2;
@@ -444,14 +802,31 @@ function draw(){
     ctx.font=`${a.r*1.7}px serif`;ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(a.icon,a.x,a.y);
     ctx.fillStyle='#5a6a90';ctx.font='9px DM Mono';ctx.fillText(a.name,a.x,a.y-a.r-20);
   });
-  // Players
+
+  // Online players
   Object.values(worldPlayers).forEach(p=>drawP(p,p.id===myId));
-  // Hits
+
+  // Local player (offline mode or own char)
+  if(!isOnline && me){
+    drawP({...localPlayer, id:'local', equipped:{}, dead:false}, true);
+  }
+
+  // Hit ripples
   hits=hits.filter(h=>h.a>0);
-  hits.forEach(h=>{h.r+=1.2;h.a-=.055;ctx.save();ctx.beginPath();ctx.arc(h.x,h.y,h.r,0,Math.PI*2);ctx.strokeStyle=`rgba(233,69,96,${h.a})`;ctx.lineWidth=2;ctx.stroke();ctx.restore();});
+  hits.forEach(h=>{
+    h.r+=1.2;h.a-=.055;ctx.save();ctx.beginPath();ctx.arc(h.x,h.y,h.r,0,Math.PI*2);
+    ctx.strokeStyle=`rgba(233,69,96,${h.a})`;ctx.lineWidth=2;ctx.stroke();ctx.restore();
+  });
+
   // Floats
   floats=floats.filter(f=>f.life>0);
-  floats.forEach(f=>{f.life-=16;f.y+=f.vy;ctx.save();ctx.globalAlpha=Math.min(1,f.life/(f.maxLife*.4));ctx.fillStyle=f.col;ctx.font='bold 13px DM Mono';ctx.textAlign='center';ctx.fillText(f.txt,f.x,f.y);ctx.restore();});
+  floats.forEach(f=>{
+    f.life-=16;f.y+=f.vy;
+    ctx.save();ctx.globalAlpha=Math.min(1,f.life/(f.maxLife*.4));
+    ctx.fillStyle=f.col;ctx.font='bold 13px DM Mono';
+    ctx.textAlign='center';ctx.fillText(f.txt,f.x,f.y);ctx.restore();
+  });
+
   ctx.restore();
   drawMM();
 }
@@ -460,17 +835,21 @@ function drawP(p,isMe){
   const r=18; ctx.save();
   const bw=50,hp=Math.max(0,p.hp)/p.maxHp;
   ctx.fillStyle='#1e2240';ctx.fillRect(p.x-bw/2,p.y-r-24,bw,4);
-  ctx.fillStyle=hp>.5?'#39ff8f':hp>.25?'#f5a623':'#e94560';ctx.fillRect(p.x-bw/2,p.y-r-24,bw*hp,4);
+  ctx.fillStyle=hp>.5?'#39ff8f':hp>.25?'#f5a623':'#e94560';
+  ctx.fillRect(p.x-bw/2,p.y-r-24,bw*hp,4);
   if(isMe){ctx.shadowColor='#00e5ff';ctx.shadowBlur=18;}
   ctx.beginPath();ctx.arc(p.x,p.y,r,0,Math.PI*2);
   ctx.fillStyle=isMe?'#0d1a2e':'#2a0d14';ctx.fill();
   ctx.strokeStyle=isMe?'#00e5ff':'#e94560';ctx.lineWidth=isMe?2.5:1.5;ctx.stroke();
   ctx.shadowBlur=0;
   if(p.equipped?.weapon&&itemDefs[p.equipped.weapon]){
-    ctx.font='13px serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(itemDefs[p.equipped.weapon].icon,p.x+10,p.y+9);
+    ctx.font='13px serif';ctx.textAlign='center';ctx.textBaseline='middle';
+    ctx.fillText(itemDefs[p.equipped.weapon].icon,p.x+10,p.y+9);
   }
-  ctx.fillStyle=isMe?'#00e5ff':'#e94560';ctx.font=`${isMe?'bold ':''}10px DM Mono`;ctx.textAlign='center';
-  ctx.fillText(`${p.name} [${p.level}]`,p.x,p.y-r-28);
+  ctx.fillStyle=isMe?'#00e5ff':'#e94560';
+  ctx.font=`${isMe?'bold ':''}10px DM Mono`;
+  ctx.textAlign='center';
+  ctx.fillText(`${p.name||'?'} [${p.level||1}]`,p.x,p.y-r-28);
   ctx.restore();
 }
 
