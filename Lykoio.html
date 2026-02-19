@@ -243,16 +243,6 @@ canvas{display:block;position:fixed;inset:0;z-index:0}
         <div class="srv-count">— / 20</div>
       </div>
 
-      <div class="srv dead">
-        <div class="dot off"></div>
-        <div style="flex:1;min-width:0;padding-right:80px">
-          <div class="srvname">ISLAND 3 — ???</div>
-          <div class="srvdesc">Unknown territory</div>
-        </div>
-        <div class="stag soon" style="top:10px;bottom:auto;transform:none">SOON</div>
-        <div class="srv-count">— / 20</div>
-      </div>
-
     </div>
     <button class="btn-back" onclick="goTo('S1')">← Back</button>
   </div>
@@ -268,6 +258,7 @@ canvas{display:block;position:fixed;inset:0;z-index:0}
       <button class="lbtn lbtn-r" id="retryBtn" onclick="retryConn()">↺ Retry</button>
       <button class="lbtn lbtn-b" id="backBtn2" onclick="goTo('S2')">← Servers</button>
     </div>
+    <button class="lbtn lbtn-b show" id="offlineBtnS3" onclick="goOfflineFromS3()" style="display:none;margin-top:6px;border-color:var(--gold);color:var(--gold)">⚡ Play Offline</button>
   </div>
 </div>
 
@@ -413,15 +404,24 @@ function setMsg(msg) {
   document.getElementById('pbar').classList.toggle('hidden', msg.includes('✗'));
   document.getElementById('retryBtn').classList.toggle('show', msg.includes('✗'));
   document.getElementById('backBtn2').classList.toggle('show', msg.includes('✗'));
+  if (!msg.includes('✗')) document.getElementById('offlineBtnS3').style.display = 'none';
+}
+function goOfflineFromS3() {
+  isOffline = true;
+  goTo('S3');
+  setMsg('Loading offline mode...');
+  setTimeout(() => launchGame(), 400);
 }
 function retryConn() { attempt++; setMsg('Retrying...'); setTimeout(probe, 300); }
 
 function probe() {
   setMsg(attempt > 0 ? 'Retrying...' : 'Connecting to server...');
 
-  // Use fetch to /api/status — reliable through nginx proxy
   const ctrl = new AbortController();
-  const timer = setTimeout(() => { ctrl.abort(); setMsg('✗ Server timed out — retry or play offline'); }, 7000);
+  const timer = setTimeout(() => {
+    ctrl.abort();
+    setErr('✗ Server timed out — retry or play offline');
+  }, 7000);
 
   fetch(SERVER + '/api/status', { signal: ctrl.signal, cache: 'no-store' })
     .then(r => {
@@ -430,15 +430,23 @@ function probe() {
         setMsg('✓ Server found — loading game...');
         setTimeout(launchGame, 500);
       } else {
-        setMsg('✗ Server error (' + r.status + ') — retry or play offline');
+        setErr('✗ Server error (' + r.status + ') — retry or play offline');
       }
     })
-    .catch(err => {
+    .catch(() => {
       clearTimeout(timer);
-      if (err.name !== 'AbortError') {
-        setMsg('✗ Server unreachable — retry or play offline');
-      }
+      setErr('✗ Server unreachable — retry or play offline');
     });
+}
+
+function setErr(msg) {
+  const el = document.getElementById('loadMsg');
+  el.textContent = msg;
+  el.className = 'err';
+  document.getElementById('pbar').classList.add('hidden');
+  document.getElementById('retryBtn').classList.add('show');
+  document.getElementById('backBtn2').classList.add('show');
+  document.getElementById('offlineBtnS3').style.display = 'block';
 }
 
 // ── launch game ───────────────────────────────────────────────
@@ -539,9 +547,9 @@ const grassBlades=Array.from({length:500},()=>({
 }));
 
 const LYKO_LINES=[
-  n=>`Hello, ${n}! Welcome to the Lobby.\nI am Lyko — guardian of this island.\nYou start with nothing here. Everything you need is out there.`,
-  n=>`Good to see you again, ${n}.\nThe wilds beyond are dangerous — wolves and bears roam freely.\nThe lobby is the only safe zone. Stay sharp out there.`,
-  n=>`${n}... You keep coming back. I respect that.\nWhispers say more islands lie beyond this one.\nReach Level 10 and you'll find a way.`,
+  n=>`Hello, ${n}. Welcome to the Island.\nI am Lyko — guardian of this realm.\nYou arrived with nothing. That's how it always begins.\nEverything you need is out there. Good luck.`,
+  n=>`Good to see you again, ${n}.\nThe wilds are dangerous — wolves and bears roam freely.\nThis lobby is the only safe zone.\nWhen you're ready, step beyond the gate.`,
+  n=>`${n}... you keep coming back. I respect that.\nWhispers say more islands lie beyond this one.\nReach Level 10 and you'll find the way.`,
   n=>`A word, ${n} — animals cannot enter this lobby.\nIt's your safe haven. Use it wisely.\nItems drop when you kill creatures. Walk over them to pick up.`,
 ];
 
