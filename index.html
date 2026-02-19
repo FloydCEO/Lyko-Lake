@@ -144,6 +144,14 @@ h1:hover .h1-space { animation: glitch 0.4s steps(2) both; }
 .card.v-purple .card-cta { color: var(--purple); }
 .card.v-purple:hover .card-cta { color: #fff; }
 
+/* LykoIo cyan variant */
+.card.v-cyan:hover { border-color: var(--cyan); }
+.card.v-cyan::before { background: radial-gradient(circle at var(--mx,50%) var(--my,50%), rgba(0,229,255,0.08), transparent 60%); }
+.card.v-cyan::after { border-color: var(--cyan); }
+.card.v-cyan:hover .card-corner-bl { border-color: var(--cyan); }
+.card.v-cyan .card-cta { color: var(--cyan); }
+.card.v-cyan:hover .card-cta { color: #fff; }
+
 /* Coming soon */
 .card.soon { cursor: not-allowed; }
 .card.soon:hover { border-color: var(--dim); transform: none; }
@@ -242,6 +250,16 @@ footer span { color: var(--accent); }
       <span class="card-icon">🧩</span>
       <div class="card-title">LYKO<span class="accent-purple">SCRIPT</span></div>
       <p class="card-desc">A browser-based block coding environment. Snap together blocks, animate sprites on a live stage, and build interactive programs — no setup needed.</p>
+      <div class="card-cta">Open App</div>
+    </a>
+
+    <!-- LykoIo -->
+    <a class="card v-cyan" href="Lykoio.html">
+      <div class="card-corner-bl"></div>
+      <span class="card-tag">App</span>
+      <span class="card-icon">⚡</span>
+      <div class="card-title">LYKO<span style="color:var(--cyan)">IO</span></div>
+      <p class="card-desc">A browser-based I/O environment. Run inputs, inspect outputs, and interact with live data streams — all from your browser, no install required.</p>
       <div class="card-cta">Open App</div>
     </a>
 
