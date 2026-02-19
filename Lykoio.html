@@ -1,0 +1,812 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LykoIO</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=DM+Mono:wght@300;400&display=swap');
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --void: #07080f;
+  --deep: #0d0f1e;
+  --surface: #121428;
+  --border: #1e2240;
+  --accent: #e94560;
+  --gold: #f5a623;
+  --cyan: #00e5ff;
+  --purple: #b36bff;
+  --green: #39ff8f;
+  --text: #dce8ff;
+  --dim: #5a6a90;
+}
+
+html, body {
+  width: 100%; height: 100%;
+  background: var(--void);
+  color: var(--text);
+  font-family: 'DM Mono', monospace;
+  overflow: hidden;
+  user-select: none;
+}
+
+/* ── LOBBY SCREEN ── */
+#lobby {
+  position: fixed; inset: 0;
+  background: var(--void);
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  z-index: 100; gap: 24px;
+}
+#lobby h1 {
+  font-family: 'Orbitron', sans-serif;
+  font-size: clamp(36px, 7vw, 72px);
+  color: #fff; letter-spacing: 2px;
+}
+#lobby h1 span { color: var(--cyan); }
+#lobby p { font-size: 12px; letter-spacing: 3px; color: var(--dim); }
+#nameInput {
+  background: var(--surface); border: 1px solid var(--border);
+  color: var(--text); font-family: 'DM Mono', monospace;
+  font-size: 16px; padding: 14px 24px; width: 280px;
+  outline: none; letter-spacing: 2px; text-align: center;
+  transition: border-color 0.3s;
+}
+#nameInput:focus { border-color: var(--cyan); }
+#playBtn {
+  background: var(--cyan); color: var(--void);
+  font-family: 'Orbitron', sans-serif; font-size: 14px;
+  font-weight: 700; letter-spacing: 3px;
+  border: none; padding: 14px 48px; cursor: pointer;
+  transition: background 0.2s, transform 0.1s;
+}
+#playBtn:hover { background: #fff; transform: scale(1.04); }
+.lobby-tips { font-size: 10px; color: var(--dim); letter-spacing: 1px; line-height: 1.9; text-align: center; margin-top: 8px; }
+.lobby-tips span { color: var(--gold); }
+
+/* ── GAME CANVAS ── */
+#gameCanvas { display: block; }
+
+/* ── HUD ── */
+#hud {
+  position: fixed; inset: 0; pointer-events: none; z-index: 10;
+  display: none;
+}
+
+/* Top left – player stats */
+#stats {
+  position: absolute; top: 16px; left: 16px;
+  background: rgba(7,8,15,0.85); border: 1px solid var(--border);
+  padding: 14px 18px; min-width: 210px;
+  pointer-events: none;
+}
+#statsName { font-family: 'Orbitron', sans-serif; font-size: 13px; color: #fff; letter-spacing: 2px; margin-bottom: 10px; }
+.bar-row { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+.bar-label { font-size: 9px; letter-spacing: 2px; color: var(--dim); width: 28px; }
+.bar { flex: 1; height: 6px; background: var(--border); border-radius: 0; overflow: hidden; }
+.bar-fill { height: 100%; transition: width 0.3s; }
+.bar-fill.hp { background: var(--accent); }
+.bar-fill.xp { background: var(--cyan); }
+.bar-val { font-size: 9px; color: var(--dim); width: 50px; text-align: right; }
+#levelBadge {
+  font-family: 'Orbitron', sans-serif; font-size: 11px;
+  color: var(--gold); letter-spacing: 2px; margin-top: 8px;
+}
+#killCount { font-size: 9px; color: var(--dim); letter-spacing: 2px; margin-top: 4px; }
+
+/* Top right – minimap */
+#minimap {
+  position: absolute; top: 16px; right: 16px;
+  width: 160px; height: 160px;
+  background: rgba(7,8,15,0.85); border: 1px solid var(--border);
+  overflow: hidden;
+}
+#minimapCanvas { display: block; }
+
+/* Bottom – inventory bar */
+#invBar {
+  position: absolute; bottom: 16px; left: 50%; transform: translateX(-50%);
+  display: flex; gap: 6px; pointer-events: all;
+}
+.inv-slot {
+  width: 52px; height: 52px;
+  background: rgba(7,8,15,0.9); border: 1px solid var(--border);
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  cursor: pointer; position: relative; transition: border-color 0.2s;
+  font-size: 22px;
+}
+.inv-slot:hover { border-color: var(--cyan); }
+.inv-slot.equipped { border-color: var(--gold); }
+.inv-slot .slot-name {
+  font-size: 7px; letter-spacing: 1px; color: var(--dim);
+  position: absolute; bottom: 3px; white-space: nowrap; overflow: hidden;
+  max-width: 48px; text-align: center;
+}
+.inv-slot-empty { opacity: 0.25; font-size: 18px; }
+
+/* Inventory tooltip */
+#tooltip {
+  position: fixed; background: rgba(7,8,15,0.95);
+  border: 1px solid var(--border); padding: 10px 14px;
+  font-size: 11px; z-index: 200; pointer-events: none;
+  display: none; max-width: 200px; line-height: 1.7;
+}
+#tooltip .t-name { font-family: 'Orbitron', sans-serif; font-size: 12px; color: #fff; }
+#tooltip .t-rarity { font-size: 9px; letter-spacing: 2px; }
+.r-common    { color: var(--dim); }
+.r-uncommon  { color: var(--green); }
+.r-rare      { color: var(--cyan); }
+#tooltip .t-desc { color: var(--dim); font-size: 10px; margin-top: 4px; }
+#tooltip .t-hint { color: var(--gold); font-size: 9px; letter-spacing: 1px; margin-top: 6px; }
+
+/* Kill feed */
+#killfeed {
+  position: absolute; top: 16px; left: 50%; transform: translateX(-50%);
+  display: flex; flex-direction: column; align-items: center; gap: 6px;
+  pointer-events: none;
+}
+.kf-entry {
+  background: rgba(7,8,15,0.85); border: 1px solid var(--border);
+  padding: 5px 14px; font-size: 10px; letter-spacing: 2px;
+  animation: kfIn 0.3s both, kfOut 0.5s 3.5s both;
+  color: var(--text);
+}
+.kf-entry .kf-killer { color: var(--cyan); }
+.kf-entry .kf-victim { color: var(--accent); }
+@keyframes kfIn  { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes kfOut { from { opacity: 1; } to { opacity: 0; } }
+
+/* Floating XP text & notifications */
+#notifications {
+  position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+  pointer-events: none; display: flex; flex-direction: column; align-items: center; gap: 4px;
+}
+.notif {
+  font-family: 'Orbitron', sans-serif; font-size: 14px; font-weight: 700;
+  animation: notifAnim 1.8s both;
+}
+@keyframes notifAnim {
+  0%   { opacity: 0; transform: translateY(0) scale(0.7); }
+  20%  { opacity: 1; transform: translateY(-10px) scale(1.1); }
+  80%  { opacity: 1; transform: translateY(-30px) scale(1); }
+  100% { opacity: 0; transform: translateY(-50px) scale(0.9); }
+}
+
+/* Death screen */
+#deathScreen {
+  position: fixed; inset: 0;
+  background: rgba(7,8,15,0.92);
+  display: none; flex-direction: column;
+  align-items: center; justify-content: center;
+  z-index: 50; gap: 18px;
+  font-family: 'Orbitron', sans-serif;
+}
+#deathScreen h2 { font-size: 48px; color: var(--accent); letter-spacing: 4px; }
+#deathScreen p  { font-size: 13px; color: var(--dim); letter-spacing: 3px; }
+#deathScreen .stats-row { display: flex; gap: 40px; margin-top: 8px; }
+.d-stat { text-align: center; }
+.d-stat .val { font-size: 32px; color: #fff; display: block; }
+.d-stat .lbl { font-size: 9px; letter-spacing: 3px; color: var(--dim); }
+#respawnBtn {
+  background: var(--accent); color: #fff;
+  font-family: 'Orbitron', sans-serif; font-size: 12px;
+  font-weight: 700; letter-spacing: 3px;
+  border: none; padding: 14px 40px; cursor: pointer; margin-top: 16px;
+  transition: background 0.2s;
+}
+#respawnBtn:hover { background: #fff; color: var(--void); }
+
+/* Controls hint */
+#controls {
+  position: absolute; bottom: 84px; left: 16px;
+  font-size: 9px; letter-spacing: 1px; color: var(--dim);
+  line-height: 1.9; pointer-events: none;
+}
+#controls span { color: var(--text); }
+
+/* Level up flash */
+#levelUpFlash {
+  position: fixed; inset: 0; pointer-events: none; z-index: 40;
+  display: flex; align-items: center; justify-content: center;
+  opacity: 0; transition: opacity 0.3s;
+}
+#levelUpFlash.active { opacity: 1; }
+#levelUpFlash .luf-text {
+  font-family: 'Orbitron', sans-serif; font-size: 56px; font-weight: 900;
+  color: var(--gold); text-shadow: 0 0 60px var(--gold);
+  animation: none;
+}
+</style>
+</head>
+<body>
+
+<!-- Lobby -->
+<div id="lobby">
+  <h1>LYKO<span>IO</span></h1>
+  <p>SURVIVE · LOOT · DOMINATE</p>
+  <input id="nameInput" type="text" placeholder="ENTER YOUR NAME" maxlength="16" spellcheck="false"/>
+  <button id="playBtn">ENTER THE ISLAND</button>
+  <div class="lobby-tips">
+    <span>WASD</span> / Arrow Keys – Move &nbsp;|&nbsp; <span>Click</span> enemy – Attack<br>
+    <span>Click</span> inventory item – Use/Equip &nbsp;|&nbsp; <span>Right click</span> – Drop<br>
+    Kill animals for XP · Kill players for <span>bonus XP</span> · Level up to unlock new islands
+  </div>
+</div>
+
+<!-- Canvas -->
+<canvas id="gameCanvas"></canvas>
+
+<!-- HUD -->
+<div id="hud">
+
+  <div id="stats">
+    <div id="statsName">—</div>
+    <div class="bar-row">
+      <span class="bar-label">HP</span>
+      <div class="bar"><div class="bar-fill hp" id="hpBar" style="width:100%"></div></div>
+      <span class="bar-val" id="hpVal">100/100</span>
+    </div>
+    <div class="bar-row">
+      <span class="bar-label">XP</span>
+      <div class="bar"><div class="bar-fill xp" id="xpBar" style="width:0%"></div></div>
+      <span class="bar-val" id="xpVal">0/100</span>
+    </div>
+    <div id="levelBadge">LVL 1</div>
+    <div id="killCount">Kills: 0 | PvP: 0</div>
+  </div>
+
+  <div id="minimap">
+    <canvas id="minimapCanvas" width="160" height="160"></canvas>
+  </div>
+
+  <div id="invBar"></div>
+
+  <div id="killfeed"></div>
+  <div id="notifications"></div>
+
+  <div id="controls">
+    <span>WASD</span> – Move<br>
+    <span>Click</span> enemy – Attack<br>
+    <span>Click</span> inv item – Use/Equip<br>
+    <span>Right-click</span> inv – Drop
+  </div>
+</div>
+
+<div id="tooltip"></div>
+
+<div id="deathScreen">
+  <h2>YOU DIED</h2>
+  <p id="deathMsg">Killed by the void</p>
+  <div class="stats-row">
+    <div class="d-stat"><span class="val" id="d-kills">0</span><span class="lbl">KILLS</span></div>
+    <div class="d-stat"><span class="val" id="d-pvp">0</span><span class="lbl">PLAYER KILLS</span></div>
+    <div class="d-stat"><span class="val" id="d-lvl">1</span><span class="lbl">LEVEL</span></div>
+  </div>
+  <button id="respawnBtn">RESPAWN</button>
+</div>
+
+<div id="levelUpFlash"><span class="luf-text">LEVEL UP!</span></div>
+
+<script src="/socket.io/socket.io.js"></script>
+<script>
+// ─── State ────────────────────────────────────────────────────────────────────
+const canvas = document.getElementById('gameCanvas');
+const ctx = canvas.getContext('2d');
+const mmCanvas = document.getElementById('minimapCanvas');
+const mmCtx = mmCanvas.getContext('2d');
+
+let socket, myId, myPlayer, mapData, itemDefs = {};
+let worldPlayers = {}, worldAnimals = {}, worldGroundItems = {};
+let hitEffects = [], floatingTexts = [];
+let keys = {};
+let cameraX = 0, cameraY = 0;
+const CAM_LERP = 0.1;
+let connected = false;
+
+// ─── Resize ───────────────────────────────────────────────────────────────────
+function resize() {
+  canvas.width  = window.innerWidth;
+  canvas.height = window.innerHeight;
+}
+resize();
+window.addEventListener('resize', resize);
+
+// ─── Lobby ────────────────────────────────────────────────────────────────────
+document.getElementById('playBtn').addEventListener('click', joinGame);
+document.getElementById('nameInput').addEventListener('keydown', e => { if (e.key === 'Enter') joinGame(); });
+
+function joinGame() {
+  const name = document.getElementById('nameInput').value.trim() || 'Wanderer';
+  if (connected) return;
+  connected = true;
+  document.getElementById('lobby').style.display = 'none';
+  document.getElementById('hud').style.display = 'block';
+  initSocket(name);
+}
+
+// ─── Socket ───────────────────────────────────────────────────────────────────
+function initSocket(name) {
+  socket = io();
+
+  socket.on('connect', () => {
+    myId = socket.id;
+    socket.emit('join', { name });
+  });
+
+  socket.on('init', ({ player, map, items }) => {
+    myPlayer = player;
+    mapData = map;
+    itemDefs = items;
+    updateHUD();
+    updateInventoryBar();
+    requestAnimationFrame(gameLoop);
+  });
+
+  socket.on('worldState', ({ players, animals, groundItems }) => {
+    worldPlayers = {};
+    players.forEach(p => { worldPlayers[p.id] = p; });
+    worldAnimals = {};
+    animals.forEach(a => { worldAnimals[a.id] = a; });
+    worldGroundItems = {};
+    groundItems.forEach(g => { worldGroundItems[g.id] = g; });
+  });
+
+  socket.on('hitEffect', ({ x, y, dmg }) => {
+    hitEffects.push({ x, y, dmg, timer: 600, maxTimer: 600 });
+    floatingTexts.push({ x, y, text: `-${dmg}`, color: '#e94560', timer: 900, maxTimer: 900, vy: -1 });
+  });
+
+  socket.on('xpGain', ({ amount, level, xp, nextXp }) => {
+    if (myPlayer) { myPlayer.xp = xp; myPlayer.level = level; }
+    floatingTexts.push({ x: myPlayer?.x || 0, y: (myPlayer?.y || 0) - 30, text: `+${amount} XP`, color: '#00e5ff', timer: 1000, maxTimer: 1000, vy: -0.8 });
+    updateHUD();
+  });
+
+  socket.on('levelUp', ({ level }) => {
+    if (myPlayer) myPlayer.level = level;
+    showNotif('LEVEL UP!', '#f5a623');
+    showLevelUpFlash();
+    updateHUD();
+  });
+
+  socket.on('playerKill', ({ name }) => {
+    addKillfeed('You', name, true);
+    floatingTexts.push({ x: myPlayer?.x || 0, y: (myPlayer?.y || 0) - 50, text: `PLAYER KILL! +200XP`, color: '#f5a623', timer: 1400, maxTimer: 1400, vy: -0.7 });
+  });
+
+  socket.on('playerHurt', ({ hp, maxHp }) => {
+    if (myPlayer) { myPlayer.hp = hp; myPlayer.maxHp = maxHp; }
+    updateHUD();
+  });
+
+  socket.on('pickedUp', ({ itemId, inventory, equipped }) => {
+    if (myPlayer) { myPlayer.inventory = inventory; myPlayer.equipped = equipped; }
+    const def = itemDefs[itemId];
+    if (def) floatingTexts.push({ x: myPlayer?.x || 0, y: (myPlayer?.y || 0) - 20, text: `Picked up ${def.name}`, color: '#39ff8f', timer: 900, maxTimer: 900, vy: -0.6 });
+    updateInventoryBar();
+  });
+
+  socket.on('groundItemRemoved', id => { delete worldGroundItems[id]; });
+  socket.on('groundItemSpawned', gi => { if (gi) worldGroundItems[gi.id] = gi; });
+  socket.on('animalDied', id => { delete worldAnimals[id]; });
+
+  socket.on('inventoryUpdate', ({ inventory, equipped, hp }) => {
+    if (myPlayer) { myPlayer.inventory = inventory; myPlayer.equipped = equipped; myPlayer.hp = hp; }
+    updateInventoryBar();
+    updateHUD();
+  });
+
+  socket.on('itemUsed', ({ itemId, heal }) => {
+    if (heal) showNotif(`+${heal} HP`, '#39ff8f');
+  });
+
+  socket.on('youDied', ({ killerName }) => {
+    document.getElementById('deathMsg').textContent = `Killed by ${killerName}`;
+    document.getElementById('d-kills').textContent = myPlayer?.kills || 0;
+    document.getElementById('d-pvp').textContent = myPlayer?.playerKills || 0;
+    document.getElementById('d-lvl').textContent = myPlayer?.level || 1;
+    document.getElementById('deathScreen').style.display = 'flex';
+    if (myPlayer) myPlayer.dead = true;
+  });
+
+  socket.on('respawned', (player) => {
+    myPlayer = player;
+    document.getElementById('deathScreen').style.display = 'none';
+    updateHUD();
+    updateInventoryBar();
+  });
+
+  document.getElementById('respawnBtn').addEventListener('click', () => {
+    socket.emit('respawn');
+  });
+}
+
+// ─── Input ────────────────────────────────────────────────────────────────────
+window.addEventListener('keydown', e => { keys[e.code] = true; });
+window.addEventListener('keyup',   e => { keys[e.code] = false; });
+
+setInterval(() => {
+  if (!socket || !myPlayer || myPlayer.dead) return;
+  let vx = 0, vy = 0;
+  if (keys['KeyW'] || keys['ArrowUp'])    vy -= 1;
+  if (keys['KeyS'] || keys['ArrowDown'])  vy += 1;
+  if (keys['KeyA'] || keys['ArrowLeft'])  vx -= 1;
+  if (keys['KeyD'] || keys['ArrowRight']) vx += 1;
+  // Normalize
+  if (vx !== 0 && vy !== 0) { vx *= 0.707; vy *= 0.707; }
+  socket.emit('move', { vx, vy });
+}, 33);
+
+canvas.addEventListener('click', e => {
+  if (!socket || !myPlayer || myPlayer.dead) return;
+  const wx = e.clientX + cameraX;
+  const wy = e.clientY + cameraY;
+
+  // Check animals
+  for (const a of Object.values(worldAnimals)) {
+    if (Math.hypot(a.x - wx, a.y - wy) < a.size + 10) {
+      socket.emit('attackAnimal', { animalId: a.id });
+      return;
+    }
+  }
+  // Check players
+  for (const p of Object.values(worldPlayers)) {
+    if (p.id === myId) continue;
+    if (Math.hypot(p.x - wx, p.y - wy) < 22) {
+      socket.emit('attackPlayer', { targetId: p.id });
+      return;
+    }
+  }
+});
+
+// ─── HUD Updates ──────────────────────────────────────────────────────────────
+function updateHUD() {
+  if (!myPlayer) return;
+  const { hp, maxHp, xp, level, kills, playerKills, name } = myPlayer;
+  const nextXp = getNextXP(level);
+  document.getElementById('statsName').textContent = (name || '').toUpperCase();
+  document.getElementById('hpBar').style.width = (hp / maxHp * 100) + '%';
+  document.getElementById('hpVal').textContent = `${Math.max(0, Math.ceil(hp))}/${maxHp}`;
+  document.getElementById('xpBar').style.width = Math.min(100, xp / nextXp * 100) + '%';
+  document.getElementById('xpVal').textContent = `${xp}/${nextXp}`;
+  document.getElementById('levelBadge').textContent = `LVL ${level}${level >= 10 ? ' ✦ MAX' : ''}`;
+  document.getElementById('killCount').textContent = `Kills: ${kills || 0} | PvP: ${playerKills || 0}`;
+}
+
+function getNextXP(level) {
+  const table = [0,100,250,500,900,1400,2100,3000,4200,5800,8000];
+  return table[Math.min(level, 10)] || 8000;
+}
+
+// ─── Inventory Bar ───────────────────────────────────────────────────────────
+function updateInventoryBar() {
+  const bar = document.getElementById('invBar');
+  bar.innerHTML = '';
+  const inv = myPlayer?.inventory || [];
+  const eq  = myPlayer?.equipped || {};
+  const equippedIds = new Set(Object.values(eq).filter(Boolean));
+
+  for (let i = 0; i < 10; i++) {
+    const slot = document.createElement('div');
+    slot.className = 'inv-slot';
+    if (inv[i]) {
+      const def = itemDefs[inv[i].itemId];
+      if (def) {
+        if (equippedIds.has(inv[i].itemId)) slot.classList.add('equipped');
+        slot.textContent = def.icon;
+        const nm = document.createElement('span');
+        nm.className = 'slot-name';
+        nm.textContent = def.name;
+        slot.appendChild(nm);
+        slot.dataset.invId = inv[i].id;
+        slot.dataset.itemId = inv[i].itemId;
+
+        slot.addEventListener('mouseenter', showTooltip);
+        slot.addEventListener('mouseleave', hideTooltip);
+        slot.addEventListener('mousemove', moveTooltip);
+        slot.addEventListener('click', () => { socket.emit('useItem', { invId: inv[i].id }); hideTooltip(); });
+        slot.addEventListener('contextmenu', e => { e.preventDefault(); socket.emit('dropItem', { invId: inv[i].id }); hideTooltip(); });
+      }
+    } else {
+      slot.innerHTML = '<span class="inv-slot-empty">+</span>';
+    }
+    bar.appendChild(slot);
+  }
+}
+
+function showTooltip(e) {
+  const itemId = e.currentTarget.dataset.itemId;
+  if (!itemId) return;
+  const def = itemDefs[itemId];
+  if (!def) return;
+  const tt = document.getElementById('tooltip');
+  tt.innerHTML = `
+    <div class="t-name">${def.icon} ${def.name}</div>
+    <div class="t-rarity r-${def.rarity}">${def.rarity?.toUpperCase()}</div>
+    <div class="t-desc">${def.desc}</div>
+    ${def.damage  ? `<div style="color:#e94560;font-size:10px">⚔ DMG ${def.damage}</div>` : ''}
+    ${def.defense ? `<div style="color:#00e5ff;font-size:10px">🛡 DEF ${def.defense}</div>` : ''}
+    ${def.heal    ? `<div style="color:#39ff8f;font-size:10px">❤ HEAL ${def.heal}</div>` : ''}
+    <div class="t-hint">Click: Use/Equip · Right-click: Drop</div>
+  `;
+  tt.style.display = 'block';
+  moveTooltip(e);
+}
+function hideTooltip() { document.getElementById('tooltip').style.display = 'none'; }
+function moveTooltip(e) {
+  const tt = document.getElementById('tooltip');
+  tt.style.left = (e.clientX + 14) + 'px';
+  tt.style.top  = (e.clientY - 10) + 'px';
+}
+
+// ─── Killfeed ─────────────────────────────────────────────────────────────────
+function addKillfeed(killer, victim, isMe) {
+  const kf = document.getElementById('killfeed');
+  const el = document.createElement('div');
+  el.className = 'kf-entry';
+  el.innerHTML = `<span class="kf-killer">${killer}</span> slew <span class="kf-victim">${victim}</span>`;
+  kf.appendChild(el);
+  setTimeout(() => el.remove(), 4000);
+}
+
+// ─── Notifications ────────────────────────────────────────────────────────────
+function showNotif(text, color) {
+  const n = document.getElementById('notifications');
+  const el = document.createElement('div');
+  el.className = 'notif';
+  el.style.color = color;
+  el.textContent = text;
+  n.appendChild(el);
+  setTimeout(() => el.remove(), 1800);
+}
+
+function showLevelUpFlash() {
+  const el = document.getElementById('levelUpFlash');
+  el.classList.add('active');
+  setTimeout(() => el.classList.remove('active'), 800);
+}
+
+// ─── Minimap ──────────────────────────────────────────────────────────────────
+function drawMinimap() {
+  if (!mapData || !myPlayer) return;
+  const W = 160, H = 160;
+  const scaleX = W / mapData.width;
+  const scaleY = H / mapData.height;
+
+  mmCtx.clearRect(0, 0, W, H);
+  mmCtx.fillStyle = '#0d0f1e';
+  mmCtx.fillRect(0, 0, W, H);
+
+  // Trees (very small)
+  mmCtx.fillStyle = 'rgba(39,80,45,0.5)';
+  (mapData.trees || []).forEach(t => {
+    mmCtx.fillRect(t.x * scaleX - 1, t.y * scaleY - 1, 2, 2);
+  });
+
+  // Animals
+  mmCtx.fillStyle = '#e94560';
+  Object.values(worldAnimals).forEach(a => {
+    mmCtx.fillRect(a.x * scaleX - 1.5, a.y * scaleY - 1.5, 3, 3);
+  });
+
+  // Other players
+  mmCtx.fillStyle = '#00e5ff';
+  Object.values(worldPlayers).forEach(p => {
+    if (p.id === myId) return;
+    mmCtx.fillRect(p.x * scaleX - 2, p.y * scaleY - 2, 4, 4);
+  });
+
+  // Me
+  mmCtx.fillStyle = '#fff';
+  mmCtx.fillRect(myPlayer.x * scaleX - 3, myPlayer.y * scaleY - 3, 6, 6);
+}
+
+// ─── Render ───────────────────────────────────────────────────────────────────
+const TILE = 80;
+
+function drawWorld() {
+  const W = canvas.width, H = canvas.height;
+  if (!mapData) return;
+
+  // Camera: center on player
+  const target = worldPlayers[myId] || myPlayer;
+  if (target) {
+    cameraX += (target.x - W / 2 - cameraX) * CAM_LERP;
+    cameraY += (target.y - H / 2 - cameraY) * CAM_LERP;
+  }
+
+  ctx.save();
+  ctx.translate(-cameraX, -cameraY);
+
+  // Background grid
+  ctx.fillStyle = '#07080f';
+  ctx.fillRect(cameraX, cameraY, W, H);
+  ctx.strokeStyle = 'rgba(30,34,64,0.6)';
+  ctx.lineWidth = 0.5;
+  const startX = Math.floor(cameraX / TILE) * TILE;
+  const startY = Math.floor(cameraY / TILE) * TILE;
+  for (let x = startX; x < cameraX + W; x += TILE) {
+    ctx.beginPath(); ctx.moveTo(x, cameraY); ctx.lineTo(x, cameraY + H); ctx.stroke();
+  }
+  for (let y = startY; y < cameraY + H; y += TILE) {
+    ctx.beginPath(); ctx.moveTo(cameraX, y); ctx.lineTo(cameraX + W, y); ctx.stroke();
+  }
+
+  // Map border
+  ctx.strokeStyle = 'rgba(0,229,255,0.3)';
+  ctx.lineWidth = 3;
+  ctx.strokeRect(0, 0, mapData.width, mapData.height);
+
+  // Trees
+  if (mapData.trees) {
+    mapData.trees.forEach(t => {
+      ctx.save();
+      ctx.beginPath();
+      ctx.arc(t.x, t.y, t.r * 1.2, 0, Math.PI * 2);
+      ctx.fillStyle = 'rgba(20,50,28,0.7)';
+      ctx.fill();
+      ctx.beginPath();
+      ctx.arc(t.x, t.y, t.r, 0, Math.PI * 2);
+      ctx.fillStyle = '#1a3a20';
+      ctx.fill();
+      ctx.font = `${t.r * 1.4}px serif`;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('🌲', t.x, t.y);
+      ctx.restore();
+    });
+  }
+
+  // Rocks
+  if (mapData.rocks) {
+    mapData.rocks.forEach(r => {
+      ctx.save();
+      ctx.beginPath();
+      ctx.arc(r.x, r.y, r.r, 0, Math.PI * 2);
+      ctx.fillStyle = '#1e2030';
+      ctx.fill();
+      ctx.font = `${r.r * 1.5}px serif`;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('🪨', r.x, r.y);
+      ctx.restore();
+    });
+  }
+
+  // Ground items
+  Object.values(worldGroundItems).forEach(gi => {
+    const def = itemDefs[gi.itemId];
+    if (!def) return;
+    ctx.save();
+    ctx.font = '18px serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    // Glow
+    ctx.shadowColor = '#00e5ff';
+    ctx.shadowBlur = 8;
+    ctx.fillText(def.icon, gi.x, gi.y);
+    ctx.shadowBlur = 0;
+    ctx.restore();
+  });
+
+  // Animals
+  Object.values(worldAnimals).forEach(a => {
+    ctx.save();
+    // HP bar
+    const barW = a.size * 2;
+    ctx.fillStyle = '#1e2240';
+    ctx.fillRect(a.x - barW/2, a.y - a.size - 14, barW, 5);
+    ctx.fillStyle = '#e94560';
+    ctx.fillRect(a.x - barW/2, a.y - a.size - 14, barW * (a.hp / a.maxHp), 5);
+
+    // Body
+    ctx.font = `${a.size * 1.6}px serif`;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(a.icon, a.x, a.y);
+
+    // Name
+    ctx.fillStyle = '#5a6a90';
+    ctx.font = '9px DM Mono';
+    ctx.fillText(a.name, a.x, a.y - a.size - 18);
+    ctx.restore();
+  });
+
+  // Other players
+  Object.values(worldPlayers).forEach(p => {
+    if (p.id === myId) {
+      // Update local player position for HUD
+      if (myPlayer) { myPlayer.x = p.x; myPlayer.y = p.y; }
+    }
+    drawPlayerSprite(p, p.id === myId);
+  });
+
+  // Hit effects
+  hitEffects = hitEffects.filter(h => h.timer > 0);
+  hitEffects.forEach(h => {
+    h.timer -= 16;
+    const alpha = h.timer / h.maxTimer;
+    ctx.save();
+    ctx.beginPath();
+    ctx.arc(h.x, h.y, 20 * (1 - alpha) + 5, 0, Math.PI * 2);
+    ctx.strokeStyle = `rgba(233,69,96,${alpha})`;
+    ctx.lineWidth = 2;
+    ctx.stroke();
+    ctx.restore();
+  });
+
+  // Floating texts (in world space)
+  floatingTexts = floatingTexts.filter(f => f.timer > 0);
+  floatingTexts.forEach(f => {
+    const alpha = Math.min(1, f.timer / (f.maxTimer * 0.3));
+    f.timer -= 16;
+    f.y += f.vy;
+    ctx.save();
+    ctx.globalAlpha = alpha;
+    ctx.fillStyle = f.color;
+    ctx.font = 'bold 13px DM Mono';
+    ctx.textAlign = 'center';
+    ctx.fillText(f.text, f.x, f.y);
+    ctx.restore();
+  });
+
+  ctx.restore();
+}
+
+function drawPlayerSprite(p, isMe) {
+  ctx.save();
+  const r = 18;
+
+  // HP bar
+  const barW = 50;
+  ctx.fillStyle = '#1e2240';
+  ctx.fillRect(p.x - barW/2, p.y - r - 22, barW, 5);
+  const hpPct = p.hp / p.maxHp;
+  ctx.fillStyle = hpPct > 0.5 ? '#39ff8f' : hpPct > 0.25 ? '#f5a623' : '#e94560';
+  ctx.fillRect(p.x - barW/2, p.y - r - 22, barW * hpPct, 5);
+
+  // Glow for self
+  if (isMe) {
+    ctx.shadowColor = '#00e5ff';
+    ctx.shadowBlur = 18;
+  }
+
+  // Circle body
+  ctx.beginPath();
+  ctx.arc(p.x, p.y, r, 0, Math.PI * 2);
+  ctx.fillStyle = isMe ? '#1a2a40' : '#2a1a1a';
+  ctx.fill();
+  ctx.strokeStyle = isMe ? '#00e5ff' : '#e94560';
+  ctx.lineWidth = isMe ? 2.5 : 1.5;
+  ctx.stroke();
+  ctx.shadowBlur = 0;
+
+  // Weapon icon overlay
+  if (p.equipped?.weapon && itemDefs[p.equipped.weapon]) {
+    ctx.font = '14px serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(itemDefs[p.equipped.weapon].icon, p.x + 10, p.y + 10);
+  }
+
+  // Name
+  ctx.fillStyle = isMe ? '#00e5ff' : '#e94560';
+  ctx.font = `${isMe ? 'bold ' : ''}10px DM Mono`;
+  ctx.textAlign = 'center';
+  ctx.fillText(`${p.name} [${p.level}]`, p.x, p.y - r - 26);
+
+  ctx.restore();
+}
+
+// ─── Game Loop ────────────────────────────────────────────────────────────────
+function gameLoop() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  drawWorld();
+  drawMinimap();
+  requestAnimationFrame(gameLoop);
+}
+</script>
+</body>
+</html>
