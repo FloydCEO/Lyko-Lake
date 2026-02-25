@@ -608,6 +608,31 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(-
 #tab-stage { flex-direction: column; flex: 1; overflow-y: auto; }
 
 /* Override any existing sprite-panel rule that already sets flex */
+
+/* ===== SNAP PREVIEW ===== */
+.snap-bottom-preview {
+  outline: 2px solid rgba(0,255,225,0.7);
+  outline-offset: 2px;
+}
+.block-mouth.snap-mouth-preview {
+  background: rgba(0,255,225,0.15);
+  outline: 2px dashed rgba(0,255,225,0.7);
+}
+
+/* ===== C-BLOCK MOUTH DROPPABLE ===== */
+.block-mouth {
+  cursor: default;
+  transition: background 0.15s;
+}
+.block-mouth:empty::before {
+  content: 'drop blocks here';
+  display: block;
+  color: rgba(255,255,255,0.25);
+  font-size: 10px;
+  padding: 4px 8px;
+  font-style: italic;
+  pointer-events: none;
+}
 </style></head><body>
 
   <!-- Top Bar -->
@@ -1625,7 +1650,8 @@ const Stage = (() => {
 const Editor = (() => {
   const spriteScripts = {};
   let activeSpriteId = null;
-  let dragging = null;
+  let dragging = null; // { stack, offsetX, offsetY, fromPalette }
+  let snapTarget = null; // { el, type: 'bottom'|'mouth' }
 
   function init() {
     document.getElementById('block-palette').addEventListener('mousedown', onPaletteDown);
@@ -1649,16 +1675,14 @@ const Editor = (() => {
     const wsRect = ws.getBoundingClientRect();
     const bRect = blockEl.getBoundingClientRect();
 
-    const stack = createStack(
-      bRect.left - wsRect.left,
-      bRect.top  - wsRect.top
-    );
+    const stack = createStack(bRect.left - wsRect.left, bRect.top - wsRect.top);
     stack.appendChild(buildBlockEl(id, def));
     stack.style.zIndex = 9000;
+    stack.style.opacity = '0.85';
     ws.appendChild(stack);
 
     dragging = {
-      stack,
+      stack, fromPalette: true,
       offsetX: e.clientX - bRect.left,
       offsetY: e.clientY - bRect.top,
     };
@@ -1666,17 +1690,71 @@ const Editor = (() => {
   }
 
   // ===== WORKSPACE DRAG =====
+  // When clicking a block inside a stack, we lift just that block + everything below it
   function onWorkspaceDown(e) {
     if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT') return;
-    const stack = e.target.closest('.script-stack');
-    if (!stack) return;
     e.preventDefault();
     e.stopPropagation();
 
-    stack.style.zIndex = 9000;
-    const rect = stack.getBoundingClientRect();
+    const ws = document.getElementById('script-area');
+    const wsRect = ws.getBoundingClientRect();
+
+    // Did we click a specific block (not just the stack background)?
+    const clickedBlock = e.target.closest('.block[data-block-id]');
+    const clickedStack = e.target.closest('.script-stack');
+
+    if (!clickedStack && !clickedBlock) return;
+
+    let stackToDrag;
+
+    if (clickedBlock && clickedStack) {
+      // Get all direct children of the stack
+      const allBlocks = getStackBlocks(clickedStack);
+      const clickedIdx = allBlocks.indexOf(clickedBlock);
+
+      // Also check if clicked block is inside a c-block mouth
+      const inMouth = clickedBlock.closest('.block-mouth');
+
+      if (inMouth) {
+        // Lift just this block from the mouth
+        const newStack = createStack(
+          clickedBlock.getBoundingClientRect().left - wsRect.left,
+          clickedBlock.getBoundingClientRect().top - wsRect.top
+        );
+        newStack.appendChild(clickedBlock);
+        newStack.style.zIndex = 9000;
+        newStack.style.opacity = '0.85';
+        ws.appendChild(newStack);
+        stackToDrag = newStack;
+      } else if (clickedIdx > 0) {
+        // Lift this block and everything below it into a new stack
+        const toMove = allBlocks.slice(clickedIdx);
+        const newStack = createStack(
+          clickedBlock.getBoundingClientRect().left - wsRect.left,
+          clickedBlock.getBoundingClientRect().top - wsRect.top
+        );
+        toMove.forEach(b => newStack.appendChild(b));
+        newStack.style.zIndex = 9000;
+        newStack.style.opacity = '0.85';
+        ws.appendChild(newStack);
+        stackToDrag = newStack;
+      } else {
+        // Lift the whole stack
+        clickedStack.style.zIndex = 9000;
+        clickedStack.style.opacity = '0.85';
+        stackToDrag = clickedStack;
+      }
+    } else if (clickedStack) {
+      clickedStack.style.zIndex = 9000;
+      clickedStack.style.opacity = '0.85';
+      stackToDrag = clickedStack;
+    } else {
+      return;
+    }
+
+    const rect = stackToDrag.getBoundingClientRect();
     dragging = {
-      stack,
+      stack: stackToDrag, fromPalette: false,
       offsetX: e.clientX - rect.left,
       offsetY: e.clientY - rect.top,
     };
@@ -1685,13 +1763,38 @@ const Editor = (() => {
   function onMouseMove(e) {
     if (!dragging) return;
     moveStack(e.clientX, e.clientY);
+    updateSnapHighlight(e.clientX, e.clientY);
   }
 
   function onMouseUp(e) {
     if (!dragging) return;
+    clearSnapHighlight();
+
+    const ws = document.getElementById('script-area');
+    const wsRect = ws.getBoundingClientRect();
     const { stack } = dragging;
+
+    // Check if dropped over palette (delete)
+    const paletteRect = document.getElementById('palette-panel').getBoundingClientRect();
+    const overPalette = e.clientX >= paletteRect.left && e.clientX <= paletteRect.right &&
+                        e.clientY >= paletteRect.top && e.clientY <= paletteRect.bottom;
+
+    if (overPalette && !dragging.fromPalette) {
+      stack.remove();
+      saveScripts();
+      dragging = null;
+      return;
+    }
+
     stack.style.zIndex = '';
-    trySnap(stack);
+    stack.style.opacity = '1';
+
+    // Try to snap to another stack or c-block mouth
+    const snapped = trySnap(stack, e.clientX, e.clientY);
+    if (!snapped) {
+      // Keep it wherever it was dropped
+    }
+
     saveScripts();
     dragging = null;
   }
@@ -1703,27 +1806,85 @@ const Editor = (() => {
     dragging.stack.style.top  = (cy - wsRect.top  - dragging.offsetY) + 'px';
   }
 
-  // ===== SNAP =====
-  function trySnap(draggedStack) {
+  // ===== SNAP HIGHLIGHT =====
+  function updateSnapHighlight(cx, cy) {
+    clearSnapHighlight();
+    const target = findSnapTarget(cx, cy);
+    if (!target) return;
+    snapTarget = target;
+    if (target.type === 'bottom') {
+      target.el.classList.add('snap-bottom-preview');
+    } else if (target.type === 'mouth') {
+      target.el.classList.add('snap-mouth-preview');
+    }
+  }
+
+  function clearSnapHighlight() {
+    document.querySelectorAll('.snap-bottom-preview, .snap-mouth-preview')
+      .forEach(el => el.classList.remove('snap-bottom-preview', 'snap-mouth-preview'));
+    snapTarget = null;
+  }
+
+  function findSnapTarget(cx, cy) {
     const ws = document.getElementById('script-area');
-    const stacks = Array.from(ws.querySelectorAll('.script-stack'));
-    const SNAP = 30;
+    const SNAP = 40;
+    const dragRect = dragging.stack.getBoundingClientRect();
 
-    const dRect = draggedStack.getBoundingClientRect();
-
-    for (const other of stacks) {
-      if (other === draggedStack) continue;
-      const oRect = other.getBoundingClientRect();
-
-      const dx = Math.abs(dRect.left - oRect.left);
-      const dy = Math.abs(dRect.top  - oRect.bottom);
-
-      if (dx < SNAP * 4 && dy < SNAP) {
-        Array.from(draggedStack.children).forEach(b => other.appendChild(b));
-        draggedStack.remove();
-        return;
+    // Check c-block mouths first (higher priority)
+    const mouths = Array.from(ws.querySelectorAll('.block-mouth'));
+    for (const mouth of mouths) {
+      // Don't snap into own dragged stack
+      if (dragging.stack.contains(mouth)) continue;
+      const mRect = mouth.getBoundingClientRect();
+      if (cx >= mRect.left && cx <= mRect.right && cy >= mRect.top && cy <= mRect.bottom) {
+        return { el: mouth, type: 'mouth' };
       }
     }
+
+    // Check stack bottoms
+    const stacks = Array.from(ws.querySelectorAll('.script-stack'));
+    let best = null, bestDist = SNAP * 2;
+    for (const other of stacks) {
+      if (other === dragging.stack) continue;
+      const oRect = other.getBoundingClientRect();
+      const dx = Math.abs(dragRect.left - oRect.left);
+      const dy = Math.abs(dragRect.top - oRect.bottom);
+      const dist = Math.sqrt(dx*dx + dy*dy);
+      if (dx < SNAP * 3 && dy < SNAP && dist < bestDist) {
+        bestDist = dist;
+        best = { el: other, type: 'bottom' };
+      }
+    }
+    return best;
+  }
+
+  // ===== SNAP =====
+  function trySnap(draggedStack, cx, cy) {
+    const target = findSnapTarget(cx, cy);
+    if (!target) return false;
+
+    const blocks = getStackBlocks(draggedStack);
+
+    if (target.type === 'mouth') {
+      blocks.forEach(b => target.el.appendChild(b));
+      draggedStack.remove();
+      return true;
+    }
+
+    if (target.type === 'bottom') {
+      blocks.forEach(b => target.el.appendChild(b));
+      draggedStack.remove();
+      return true;
+    }
+
+    return false;
+  }
+
+  // Get all top-level block children of a stack (not nested inside mouths)
+  function getStackBlocks(stack) {
+    return Array.from(stack.children).filter(el =>
+      el.classList.contains('block') && el.dataset.blockId
+    );
   }
 
   function createStack(x, y) {
@@ -1735,17 +1896,57 @@ const Editor = (() => {
   }
 
   // ===== SAVE / LOAD =====
+  // Serialize blocks recursively (handles c-block mouths)
+  function serializeBlocks(container) {
+    const blocks = [];
+    Array.from(container.children).forEach(el => {
+      if (!el.classList.contains('block') || !el.dataset.blockId) return;
+      const blockData = {
+        id: el.dataset.blockId,
+        inputs: readInputs(el),
+      };
+      // Check for inner blocks in mouth
+      const mouth = el.querySelector(':scope > .block-mouth');
+      if (mouth) {
+        blockData.inner = serializeBlocks(mouth);
+      }
+      // Check for else mouth
+      const elseMouth = el.querySelector(':scope > .block-else-mouth');
+      if (elseMouth) {
+        blockData.else = serializeBlocks(elseMouth);
+      }
+      blocks.push(blockData);
+    });
+    return blocks;
+  }
+
   function saveScripts() {
     if (!activeSpriteId) return;
     const ws = document.getElementById('script-area');
-    spriteScripts[activeSpriteId] = Array.from(ws.querySelectorAll('.script-stack')).map(stack => ({
+    spriteScripts[activeSpriteId] = Array.from(ws.querySelectorAll(':scope > .script-stack')).map(stack => ({
       x: parseInt(stack.style.left) || 0,
       y: parseInt(stack.style.top)  || 0,
-      blocks: Array.from(stack.children).map(b => ({
-        id: b.dataset.blockId,
-        inputs: readInputs(b),
-      })).filter(b => b.id),
+      blocks: serializeBlocks(stack),
     }));
+  }
+
+  // Render blocks recursively into a container
+  function renderBlocksInto(container, blocks) {
+    (blocks || []).forEach(bd => {
+      const def = BLOCK_DEFS[bd.id];
+      if (!def) return;
+      const el = buildBlockEl(bd.id, def, bd.inputs || {});
+      // Restore inner blocks into mouth
+      if (bd.inner && bd.inner.length > 0) {
+        const mouth = el.querySelector('.block-mouth');
+        if (mouth) renderBlocksInto(mouth, bd.inner);
+      }
+      if (bd.else && bd.else.length > 0) {
+        const elseMouth = el.querySelector('.block-else-mouth');
+        if (elseMouth) renderBlocksInto(elseMouth, bd.else);
+      }
+      container.appendChild(el);
+    });
   }
 
   function loadSpriteScripts(spriteId) {
@@ -1758,16 +1959,14 @@ const Editor = (() => {
     ws.innerHTML = '';
     scripts.forEach(sd => {
       const stack = createStack(sd.x, sd.y);
-      sd.blocks.forEach(bd => {
-        const def = BLOCK_DEFS[bd.id];
-        if (!def) return;
-        stack.appendChild(buildBlockEl(bd.id, def, bd.inputs));
-      });
+      renderBlocksInto(stack, sd.blocks);
       ws.appendChild(stack);
     });
   }
 
   function getScripts(spriteId) {
+    // For runtime: convert DOM blocks back to data
+    saveScripts();
     return spriteScripts[spriteId] || [];
   }
 
@@ -1789,16 +1988,12 @@ const Editor = (() => {
 
   function loadFullProject(data) {
     if (!data || data.version !== 1) { alert('Invalid .ls project file'); return; }
-
     const allSprites = Stage.getAllSprites();
     allSprites.splice(0);
-
     data.sprites.forEach(sd => Stage.addSpriteRaw(sd));
     Stage.updateSpriteList();
-
     Object.keys(spriteScripts).forEach(k => delete spriteScripts[k]);
     Object.assign(spriteScripts, data.scripts || {});
-
     const sprites = Stage.getAllSprites();
     if (sprites.length > 0) {
       Stage.selectSprite(sprites[0].id);
@@ -1816,7 +2011,7 @@ const Editor = (() => {
     return stack;
   }
 
-  // ===== LYKOSCRIPT COMPILER =====
+// ===== LYKOSCRIPT COMPILER =====
   function compileLykoScript(src) {
     const errors = [];
     const compiled = {};
@@ -2092,10 +2287,170 @@ const Editor = (() => {
     }
   }
 
+  
+
+  // ===== DECOMPILER: blocks -> LykoScript text =====
+  function decompileProject() {
+    const sprites = Stage.getAllSprites();
+    if (sprites.length === 0) return '// No sprites in project\n';
+
+    let out = '';
+    sprites.forEach(sp => {
+      const scripts = spriteScripts[sp.id] || [];
+      if (scripts.length === 0) {
+        out += sp.name + ';\n  // No scripts yet\n\n';
+        return;
+      }
+      out += sp.name + ';\n';
+      scripts.forEach(sd => {
+        const blocks = sd.blocks || [];
+        if (blocks.length === 0) return;
+        const hat = blocks[0];
+        const trigger = decompileTrigger(hat);
+        if (!trigger) return;
+        const body = blocks.slice(1);
+        if (body.length === 0) {
+          out += '  ' + trigger + ':\n    // empty\n  ;\n\n';
+          return;
+        }
+        out += '  ' + trigger + ':\n';
+        const lines = body.map(b => decompileBlock(b, 2)).filter(l => l.trim());
+        // Remove trailing commas from each line for clean output, then join
+        const cleaned = lines.map((l, i) =>
+          i === lines.length - 1 ? l.replace(/,\s*\n$/, '\n') : l
+        );
+        out += cleaned.join('') + '  ;\n\n';
+      });
+      out += '\n';
+    });
+    return out.trim() + '\n';
+  }
+
+  function decompileTrigger(block) {
+    if (!block) return null;
+    const inp = (key, def) => block.inputs?.[key] ?? def;
+    switch (block.id) {
+      case 'when_flag':           return 'Green(Start)';
+      case 'when_sprite_clicked': return 'Click';
+      case 'when_clone_start':    return 'Clone(Start)';
+      case 'when_key':            return 'Key(' + inp('when_key_1', 'space') + ')';
+      case 'when_msg':            return 'Msg(' + inp('when_msg_1', 'message1') + ')';
+      case 'when_gt':             return 'When(' + inp('when_gt_1','loudness') + '>' + inp('when_gt_2','10') + ')';
+      default: return null;
+    }
+  }
+
+  function decompileBlock(block, indent) {
+    const pad = '  '.repeat(indent);
+    const inp = (key, def) => {
+      const v = block.inputs?.[key];
+      return v !== undefined ? v : def;
+    };
+    const n = (key, def=0) => inp(key, def);
+    const s = (key, def='') => inp(key, def);
+    const q = (key, def='') => '"' + inp(key, def) + '"';
+
+    let line = '';
+    switch (block.id) {
+      // Motion
+      case 'move_steps':         line = 'Move(' + n('move_steps_1',10) + ')'; break;
+      case 'turn_right':         line = 'Turn(' + n('turn_right_1',15) + ')'; break;
+      case 'turn_left':          line = 'TurnL(' + n('turn_left_1',15) + ')'; break;
+      case 'goto_xy':            line = 'GotoXY(' + n('goto_xy_1',0) + ', ' + n('goto_xy_2',0) + ')'; break;
+      case 'goto_random': {
+        const t = s('goto_random_1','random position');
+        line = t === 'mouse-pointer' ? 'GotoMouse' : 'GotoRandom';
+        break;
+      }
+      case 'glide_secs_xy':      line = 'Glide(' + n('glide_secs_xy_1',1) + ', ' + n('glide_secs_xy_2',0) + ', ' + n('glide_secs_xy_3',0) + ')'; break;
+      case 'point_direction':    line = 'PointDir(' + n('point_direction_1',90) + ')'; break;
+      case 'point_towards':      line = 'PointDir(mouse)'; break;
+      case 'change_x':           line = 'ChangeX(' + n('change_x_1',10) + ')'; break;
+      case 'set_x':              line = 'SetX(' + n('set_x_1',0) + ')'; break;
+      case 'change_y':           line = 'ChangeY(' + n('change_y_1',10) + ')'; break;
+      case 'set_y':              line = 'SetY(' + n('set_y_1',0) + ')'; break;
+      case 'if_on_edge_bounce':  line = 'Bounce'; break;
+      case 'set_rotation_style': line = 'RotationStyle(' + s('set_rotation_style_1','all around') + ')'; break;
+
+      // Looks
+      case 'say': line = 'Say(' + q('say_1','Hello!') + ')'; break;
+      case 'say_timed': line = 'Say(' + q('say_timed_1','Hello!') + ', ' + n('say_timed_2',2) + ')'; break;
+      case 'think': line = 'Think(' + q('think_1','Hmm...') + ')'; break;
+      case 'think_timed': line = 'Think(' + q('think_timed_1','Hmm...') + ', ' + n('think_timed_2',2) + ')'; break;
+      case 'show': line = 'Show'; break;
+      case 'hide': line = 'Hide'; break;
+      case 'set_size': line = 'SetSize(' + n('set_size_1',100) + ')'; break;
+      case 'change_size': line = 'ChangeSize(' + n('change_size_1',10) + ')'; break;
+      case 'set_effect': line = 'SetEffect(' + s('set_effect_1','color') + ', ' + n('set_effect_2',0) + ')'; break;
+      case 'change_effect': line = 'ChangeEffect(' + s('change_effect_1','color') + ', ' + n('change_effect_2',25) + ')'; break;
+      case 'clear_effects': line = 'ClearEffects'; break;
+      case 'next_costume': line = 'NextCostume'; break;
+      case 'switch_costume': line = 'SwitchCostume(' + s('switch_costume_1','costume1') + ')'; break;
+      case 'next_backdrop': line = 'NextBackdrop'; break;
+      case 'go_to_layer': line = 'GoToLayer(' + s('go_to_layer_1','front') + ')'; break;
+
+      // Sound
+      case 'play_sound': line = 'PlaySound(' + s('play_sound_1','pop') + ')'; break;
+      case 'play_sound_until': line = 'PlaySoundWait(' + s('play_sound_until_1','pop') + ')'; break;
+      case 'stop_sounds': line = 'StopSounds'; break;
+      case 'set_volume': line = 'SetVolume(' + n('set_volume_1',100) + ')'; break;
+      case 'change_volume': line = 'ChangeVolume(' + n('change_volume_1',-10) + ')'; break;
+
+      // Control
+      case 'wait_secs': line = 'Wait(' + n('wait_secs_1',1) + ')'; break;
+      case 'stop': line = 'Stop(' + s('stop_1','all') + ')'; break;
+      case 'create_clone': line = 'CreateClone'; break;
+      case 'delete_clone': line = 'DeleteClone'; break;
+      case 'repeat': {
+        const inner = decompileBlockList(block.inner || [], indent + 1);
+        return pad + 'Repeat(' + n('repeat_1',10) + '){\n' + inner + pad + '},\n';
+      }
+      case 'forever': {
+        const inner = decompileBlockList(block.inner || [], indent + 1);
+        return pad + 'Forever{\n' + inner + pad + '},\n';
+      }
+      case 'if': {
+        const inner = decompileBlockList(block.inner || [], indent + 1);
+        return pad + 'If(/* condition */){\n' + inner + pad + '},\n';
+      }
+      case 'if_else': {
+        const inner = decompileBlockList(block.inner || [], indent + 1);
+        const elseInner = decompileBlockList(block.else || [], indent + 1);
+        return pad + 'IfElse(/* condition */){\n' + inner + pad + '}{\n' + elseInner + pad + '},\n';
+      }
+      case 'wait_until': line = 'WaitUntil(/* condition */)'; break;
+      case 'repeat_until': {
+        const inner = decompileBlockList(block.inner || [], indent + 1);
+        return pad + 'RepeatUntil(/* condition */){\n' + inner + pad + '},\n';
+      }
+
+      // Sensing
+      case 'ask_wait': line = 'Ask(' + q('ask_wait_1',"What's your name?") + ')'; break;
+      case 'reset_timer': line = 'ResetTimer'; break;
+
+      // Variables
+      case 'set_var': line = 'SetVar(' + s('set_var_0','my variable') + ', ' + s('set_var_2','0') + ')'; break;
+      case 'change_var': line = 'ChangeVar(' + s('change_var_0','my variable') + ', ' + n('change_var_2',1) + ')'; break;
+      case 'show_var': line = 'ShowVar(' + s('show_var_0','my variable') + ')'; break;
+      case 'hide_var': line = 'HideVar(' + s('hide_var_0','my variable') + ')'; break;
+
+      // Events
+      case 'broadcast': line = 'Broadcast(' + s('broadcast_1','message1') + ')'; break;
+      case 'broadcast_wait': line = 'BroadcastWait(' + s('broadcast_wait_1','message1') + ')'; break;
+
+      default: line = '// unknown block: ' + block.id; break;
+    }
+    return pad + line + ',\n';
+  }
+
+  function decompileBlockList(blocks, indent) {
+    return (blocks || []).map(b => decompileBlock(b, indent)).join('');
+  }
+
   return {
     init, loadSpriteScripts, getScripts, saveScripts, renderScripts,
     addBlockToWorkspace, getFullProject, loadFullProject,
-    compileLykoScript, applyCompiledScripts,
+    compileLykoScript, applyCompiledScripts, decompileProject,
   };
 })();
 
@@ -2558,20 +2913,11 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('btn-text-help').addEventListener('click', toggleHelp);
 
   function openTextMode() {
-    // Pre-populate with current sprite's scripts as a hint
     const modal = document.getElementById('text-modal');
     const ta = document.getElementById('text-editor');
-
-    // Generate LykoScript source from current scripts
-    const sprites = Stage.getAllSprites();
-    if (ta.value.trim() === '') {
-      let hint = '';
-      sprites.forEach(sp => {
-        hint += `${sp.name};\n`;
-        hint += `  // Green(Start): Say("Hello!", 2), Hide;\n\n`;
-      });
-      ta.value = hint;
-    }
+    // Always regenerate from current block state
+    Editor.saveScripts();
+    ta.value = Editor.decompileProject();
     modal.style.display = 'flex';
     ta.focus();
   }
