@@ -633,6 +633,76 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(-
   font-style: italic;
   pointer-events: none;
 }
+
+/* ===== STAGE OVERLAY BUTTONS ===== */
+#stage-container { position: relative; }
+#stage-overlay-btns {
+  position: absolute; top: 4px; right: 4px;
+  display: flex; gap: 4px; z-index: 10;
+  opacity: 0; transition: opacity 0.2s;
+}
+#stage-container:hover #stage-overlay-btns { opacity: 1; }
+#btn-fullscreen {
+  background: rgba(0,0,0,0.6); border: 1px solid rgba(255,255,255,0.2);
+  color: #fff; border-radius: 5px; width: 28px; height: 28px;
+  cursor: pointer; font-size: 14px; display: flex;
+  align-items: center; justify-content: center;
+  transition: background 0.15s;
+}
+#btn-fullscreen:hover { background: rgba(0,255,225,0.3); border-color: var(--accent); }
+
+/* XY readout on stage hover */
+#stage-xy-readout {
+  position: absolute; bottom: 4px; left: 4px;
+  background: rgba(0,0,0,0.6); border-radius: 4px;
+  padding: 2px 7px; font-size: 10px; color: var(--accent);
+  font-family: var(--font-ui); letter-spacing: 1px;
+  pointer-events: none; opacity: 0; transition: opacity 0.15s;
+  z-index: 10;
+}
+#stage-container:hover #stage-xy-readout { opacity: 1; }
+
+/* Stage cursor when hovering a sprite (edit mode) */
+#stage-canvas { cursor: default; }
+#stage-canvas.over-sprite { cursor: grab; }
+#stage-canvas.dragging-sprite { cursor: grabbing !important; }
+
+/* ===== FULLSCREEN MODAL ===== */
+#fullscreen-modal {
+  position: fixed; inset: 0; z-index: 99999;
+  background: #000;
+  display: none; align-items: center; justify-content: center;
+  flex-direction: column;
+}
+#fullscreen-modal.open { display: flex; }
+#fullscreen-inner {
+  position: relative; width: 100%; height: 100%;
+  display: flex; align-items: center; justify-content: center;
+}
+#fullscreen-canvas {
+  max-width: 100%; max-height: 100%;
+  object-fit: contain;
+  image-rendering: pixelated;
+}
+#btn-fullscreen-close {
+  position: absolute; top: 12px; right: 16px;
+  background: rgba(0,0,0,0.7); border: 1px solid rgba(255,255,255,0.2);
+  color: #fff; border-radius: 6px; padding: 6px 14px;
+  cursor: pointer; font-size: 12px; font-family: var(--font-ui);
+  letter-spacing: 1px; z-index: 10;
+  transition: all 0.15s;
+}
+#btn-fullscreen-close:hover { background: #ff4444; border-color: #ff4444; }
+
+/* Fullscreen key hint */
+#fullscreen-inner::after {
+  content: 'ESC to close';
+  position: absolute; bottom: 12px; left: 50%;
+  transform: translateX(-50%);
+  color: rgba(255,255,255,0.25); font-size: 11px;
+  font-family: var(--font-ui); letter-spacing: 1px;
+  pointer-events: none;
+}
 </style></head><body>
 
   <!-- Top Bar -->
@@ -643,7 +713,8 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(-
       <button id="btn-stop" title="Stop (F6)">⏹</button>
       <span id="run-status"></span>
     </div>
-    <div id="topbar-right">
+    <div id="topbar-right" style="display:flex;align-items:center;gap:12px">
+      <span id="stage-coords" style="font-size:10px;color:var(--text-dim);font-family:var(--font-ui);letter-spacing:1px"></span>
       <a href="../index.html" class="nav-back">← Home</a>
     </div>
   </header>
@@ -671,6 +742,18 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(-
     <aside id="right-panel">
       <div id="stage-container">
         <canvas id="stage-canvas" width="480" height="360"></canvas>
+        <div id="stage-overlay-btns">
+          <button id="btn-fullscreen" title="Fullscreen">⛶</button>
+        </div>
+        <div id="stage-xy-readout"></div>
+      </div>
+
+      <!-- Fullscreen modal -->
+      <div id="fullscreen-modal">
+        <div id="fullscreen-inner">
+          <canvas id="fullscreen-canvas" width="480" height="360"></canvas>
+          <button id="btn-fullscreen-close">✕ Close</button>
+        </div>
       </div>
       <div id="sprite-panel">
         <div id="right-tabs">
@@ -1194,28 +1277,89 @@ const Stage = (() => {
     window.addEventListener('keyup', e => { keys[e.key.toLowerCase()] = false; keys[e.code.toLowerCase()] = false; });
 
     // Mouse tracking (relative to stage)
+    let stageDragging = null; // { sprite, startX, startY }
+
     canvas.addEventListener('mousemove', e => {
       const rect = canvas.getBoundingClientRect();
       const scaleX = W / rect.width;
       const scaleY = H / rect.height;
-      // Scratch coords: center origin, y inverted
       mousePos.x = Math.round((e.clientX - rect.left) * scaleX - W/2);
       mousePos.y = Math.round(H/2 - (e.clientY - rect.top) * scaleY);
+
+      // Update XY readout
+      const readout = document.getElementById('stage-xy-readout');
+      if (readout) readout.textContent = 'x: ' + mousePos.x + '  y: ' + mousePos.y;
+
+      // Update cursor style based on whether over a sprite
+      if (!stageDragging) {
+        const cx2 = (e.clientX - rect.left) * scaleX;
+        const cy2 = (e.clientY - rect.top) * scaleY;
+        const overSprite = sprites.some(sp => sp.visible && pointInSprite(cx2, cy2, sp));
+        canvas.className = overSprite ? 'over-sprite' : '';
+      }
+
+      if (stageDragging) {
+        stageDragging.sprite.x = mousePos.x;
+        stageDragging.sprite.y = mousePos.y;
+        updateSpriteProps();
+      }
     });
-    canvas.addEventListener('mousedown', () => mouseDown = true);
-    canvas.addEventListener('mouseup', () => mouseDown = false);
-    canvas.addEventListener('click', e => {
-      // Trigger sprite click events
+
+    canvas.addEventListener('mousedown', e => {
+      mouseDown = true;
+      // Only allow drag when NOT running
+      if (typeof Runtime !== 'undefined' && Runtime._running) return;
       const rect = canvas.getBoundingClientRect();
       const scaleX = W / rect.width;
       const scaleY = H / rect.height;
       const cx = (e.clientX - rect.left) * scaleX;
       const cy = (e.clientY - rect.top) * scaleY;
-      sprites.forEach(sp => {
+      // Find topmost sprite under cursor (reverse order = top rendered last)
+      for (let i = sprites.length - 1; i >= 0; i--) {
+        const sp = sprites[i];
         if (sp.visible && pointInSprite(cx, cy, sp)) {
-          Runtime.triggerEvent('when_sprite_clicked', sp.id);
+          stageDragging = { sprite: sp };
+          selectedSpriteId = sp.id;
+          updateSpriteList();
+          Editor.loadSpriteScripts(sp.id);
+          canvas.style.cursor = 'grabbing';
+          e.preventDefault();
+          break;
         }
-      });
+      }
+    });
+
+    canvas.addEventListener('mouseup', e => {
+      mouseDown = false;
+      if (stageDragging) {
+        stageDragging.sprite.x = Math.round(stageDragging.sprite.x);
+        stageDragging.sprite.y = Math.round(stageDragging.sprite.y);
+        updateSpriteProps();
+        stageDragging = null;
+        canvas.style.cursor = '';
+      } else {
+        // Click (no drag) — trigger sprite click events if running
+        const rect = canvas.getBoundingClientRect();
+        const scaleX = W / rect.width;
+        const scaleY = H / rect.height;
+        const cx = (e.clientX - rect.left) * scaleX;
+        const cy = (e.clientY - rect.top) * scaleY;
+        sprites.forEach(sp => {
+          if (sp.visible && pointInSprite(cx, cy, sp)) {
+            Runtime.triggerEvent('when_sprite_clicked', sp.id);
+          }
+        });
+      }
+    });
+
+    canvas.addEventListener('mouseleave', () => {
+      if (stageDragging) {
+        stageDragging.sprite.x = Math.round(stageDragging.sprite.x);
+        stageDragging.sprite.y = Math.round(stageDragging.sprite.y);
+        updateSpriteProps();
+        stageDragging = null;
+        canvas.style.cursor = '';
+      }
     });
 
     // Add default sprite
@@ -1373,6 +1517,14 @@ const Stage = (() => {
       }
     });
 
+    // Mirror to fullscreen canvas if open
+    const fsModal = document.getElementById('fullscreen-modal');
+    const fsCanvas = document.getElementById('fullscreen-canvas');
+    if (fsModal && fsModal.classList.contains('open') && fsCanvas) {
+      const fsCtx = fsCanvas.getContext('2d');
+      fsCtx.clearRect(0, 0, fsCanvas.width, fsCanvas.height);
+      fsCtx.drawImage(canvas, 0, 0);
+    }
     animFrame = requestAnimationFrame(render);
   }
 
@@ -2832,7 +2984,9 @@ const Runtime = (() => {
     });
   }
 
-  return { start, stopAll, triggerEvent, getVar, setVar };
+  return { start, stopAll, triggerEvent, getVar, setVar,
+    get _running() { return running; }
+  };
 })();
 
 // ===== MAIN =====
@@ -3171,6 +3325,66 @@ document.addEventListener('DOMContentLoaded', () => {
       b.style.display = (!q || text.includes(q)) ? '' : 'none';
     });
   });
+
+  // ===== FULLSCREEN =====
+  const fsModal = document.getElementById('fullscreen-modal');
+  const fsCanvas = document.getElementById('fullscreen-canvas');
+
+  function openFullscreen() {
+    // Match canvas size to fill screen
+    const sw = window.innerWidth;
+    const sh = window.innerHeight;
+    // Keep 4:3 aspect
+    let fw, fh;
+    if (sw / sh > 4/3) { fh = sh; fw = Math.round(sh * 4/3); }
+    else { fw = sw; fh = Math.round(sw * 3/4); }
+    fsCanvas.width = 480; fsCanvas.height = 360;
+    fsCanvas.style.width = fw + 'px';
+    fsCanvas.style.height = fh + 'px';
+    fsModal.classList.add('open');
+  }
+
+  function closeFullscreen() {
+    fsModal.classList.remove('open');
+  }
+
+  document.getElementById('btn-fullscreen').addEventListener('click', openFullscreen);
+  document.getElementById('btn-fullscreen-close').addEventListener('click', closeFullscreen);
+
+  // ESC closes fullscreen
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') closeFullscreen();
+  });
+
+  // F key = fullscreen shortcut
+  document.addEventListener('keydown', e => {
+    if (e.key === 'f' && !e.ctrlKey && !e.metaKey &&
+        document.activeElement.tagName !== 'INPUT' &&
+        document.activeElement.tagName !== 'TEXTAREA') {
+      openFullscreen();
+    }
+  });
+
+  // Resize fullscreen canvas on window resize
+  window.addEventListener('resize', () => {
+    if (!fsModal.classList.contains('open')) return;
+    const sw = window.innerWidth, sh = window.innerHeight;
+    let fw, fh;
+    if (sw / sh > 4/3) { fh = sh; fw = Math.round(sh * 4/3); }
+    else { fw = sw; fh = Math.round(sw * 3/4); }
+    fsCanvas.style.width = fw + 'px';
+    fsCanvas.style.height = fh + 'px';
+  });
+
+  // ===== STAGE COORDS IN TOPBAR =====
+  // Update topbar coords display when selected sprite moves
+  setInterval(() => {
+    const sp = Stage.getSelected();
+    const el = document.getElementById('stage-coords');
+    if (el && sp) {
+      el.textContent = sp.name + '  x:' + Math.round(sp.x) + '  y:' + Math.round(sp.y);
+    }
+  }, 100);
 
   console.log('%cLykoScript ✓', 'color:#00ffe1;font-family:monospace;font-size:14px;font-weight:bold');
 });
