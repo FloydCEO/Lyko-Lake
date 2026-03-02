@@ -152,6 +152,14 @@ h1:hover .h1-space { animation: glitch 0.4s steps(2) both; }
 .card.v-cyan .card-cta { color: var(--cyan); }
 .card.v-cyan:hover .card-cta { color: #fff; }
 
+/* Lyko Casino gold variant */
+.card.v-gold:hover { border-color: var(--gold); }
+.card.v-gold::before { background: radial-gradient(circle at var(--mx,50%) var(--my,50%), rgba(245,166,35,0.09), transparent 60%); }
+.card.v-gold::after { border-color: var(--gold); }
+.card.v-gold:hover .card-corner-bl { border-color: var(--gold); }
+.card.v-gold .card-cta { color: var(--gold); }
+.card.v-gold:hover .card-cta { color: #fff; }
+
 /* Coming soon */
 .card.soon { cursor: not-allowed; }
 .card.soon:hover { border-color: var(--dim); transform: none; }
@@ -261,6 +269,16 @@ footer span { color: var(--accent); }
       <div class="card-title">LYKO<span style="color:var(--cyan)">IO</span></div>
       <p class="card-desc">A browser-based I/O environment. Run inputs, inspect outputs, and interact with live data streams — all from your browser, no install required.</p>
       <div class="card-cta">Open App</div>
+    </a>
+
+    <!-- Lyko's Casino -->
+    <a class="card v-gold" href="casino.html">
+      <div class="card-corner-bl"></div>
+      <span class="card-tag">App</span>
+      <span class="card-icon">🎰</span>
+      <div class="card-title">LYKO'S <span style="color:var(--gold)">CASINO</span></div>
+      <p class="card-desc">Step onto the floor. Spin the slots, hit the tables, and press your luck — a fully browser-based casino experience built for high rollers and newcomers alike.</p>
+      <div class="card-cta">Enter Casino</div>
     </a>
 
     <!-- Coming Soon -->
