@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Keno — Lyko's Casino</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=DM+Mono:ital,wght@0,300;0,400;1,300&display=swap');
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+:root{--void:#07080f;--deep:#0d0f1e;--surface:#121428;--border:#1e2240;--accent:#e94560;--gold:#f5a623;--cyan:#00e5ff;--lyko:#00e676;--text:#dce8ff;--dim:#5a6a90;}
+html,body{width:100%;min-height:100%;background:var(--void);color:var(--text);font-family:'DM Mono',monospace;overflow-x:hidden;cursor:none;}
+#cursor{position:fixed;top:0;left:0;width:12px;height:12px;background:var(--lyko);border-radius:50%;pointer-events:none;z-index:99999;transform:translate(-50%,-50%);transition:width .15s,height .15s;mix-blend-mode:difference;}
+#cursor.big{width:36px;height:36px;}
+body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(0,230,118,.03) 1px,transparent 1px),linear-gradient(90deg,rgba(0,230,118,.03) 1px,transparent 1px);background-size:40px 40px;pointer-events:none;z-index:0;}
+#shell{display:flex;min-height:100vh;position:relative;z-index:2;}
+#sidebar{width:220px;min-height:100vh;background:var(--deep);border-right:1px solid var(--border);display:flex;flex-direction:column;position:sticky;top:0;height:100vh;flex-shrink:0;z-index:10;overflow-y:auto;}
+.sidebar-logo{padding:28px 24px 20px;border-bottom:1px solid var(--border);}
+.sidebar-logo a{font-family:'Orbitron',sans-serif;font-size:22px;font-weight:900;color:var(--lyko);text-decoration:none;letter-spacing:2px;display:flex;align-items:center;gap:10px;}
+.logo-icon{width:32px;height:32px;background:var(--lyko);border-radius:8px;display:flex;align-items:center;justify-content:center;font-family:'Orbitron',sans-serif;font-weight:900;font-size:16px;color:#000;}
+.sidebar-section{padding:16px 0;border-bottom:1px solid var(--border);}
+.sidebar-label{font-size:9px;letter-spacing:3px;color:var(--dim);text-transform:uppercase;padding:0 20px 10px;}
+.sidebar-item{display:flex;align-items:center;gap:12px;padding:10px 20px;color:var(--dim);text-decoration:none;font-size:12px;letter-spacing:1px;transition:color .2s,background .2s;cursor:none;}
+.sidebar-item:hover,.sidebar-item.active{color:var(--text);background:rgba(0,230,118,.05);}
+.sidebar-item.active{color:var(--lyko);border-left:2px solid var(--lyko);}
+.sidebar-icon{font-size:16px;width:20px;text-align:center;}
+.sidebar-wallet{margin-top:auto;padding:20px;border-top:1px solid var(--border);}
+.wallet-label{font-size:9px;letter-spacing:3px;color:var(--dim);text-transform:uppercase;margin-bottom:12px;}
+.wallet-row{display:flex;align-items:center;justify-content:space-between;padding:8px 12px;background:var(--surface);border:1px solid var(--border);border-radius:4px;cursor:none;transition:border-color .2s;margin-bottom:6px;}
+.wallet-row:hover{border-color:var(--lyko);}
+.wallet-row.active-currency{border-color:var(--lyko);background:rgba(0,230,118,.06);}
+.wallet-coin{display:flex;align-items:center;gap:8px;font-size:11px;}
+.coin-icon{width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:10px;}
+.coin-lyko{background:var(--lyko);color:#000;}
+.coin-gold{background:var(--gold);color:#000;}
+.coin-cyber{background:var(--cyan);color:#000;}
+.wallet-amount{font-size:11px;color:var(--text);font-weight:700;}
+#main{flex:1;display:flex;flex-direction:column;}
+#topbar{height:64px;background:var(--deep);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 32px;position:sticky;top:0;z-index:9;}
+.topbar-title{font-family:'Orbitron',sans-serif;font-size:14px;font-weight:700;color:var(--dim);letter-spacing:3px;}
+.topbar-right{display:flex;align-items:center;gap:16px;}
+.active-bal{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:700;padding:8px 16px;background:rgba(0,230,118,.08);border:1px solid rgba(0,230,118,.3);border-radius:4px;color:var(--lyko);}
+.back-btn{font-size:10px;letter-spacing:2px;color:var(--dim);text-decoration:none;padding:8px 16px;border:1px solid var(--border);border-radius:4px;transition:all .2s;cursor:none;}
+.back-btn:hover{color:var(--text);border-color:var(--dim);}
+#game-area{display:flex;flex:1;}
+#bet-panel{width:260px;background:var(--deep);border-right:1px solid var(--border);padding:24px;flex-shrink:0;display:flex;flex-direction:column;gap:14px;}
+#play-area{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px;gap:24px;}
+.panel-title{font-family:'Orbitron',sans-serif;font-size:11px;font-weight:700;color:var(--dim);letter-spacing:3px;text-transform:uppercase;}
+.input-group{display:flex;flex-direction:column;gap:6px;}
+.input-label{font-size:9px;letter-spacing:2px;color:var(--dim);text-transform:uppercase;}
+.input-row{display:flex;gap:6px;align-items:center;}
+.bet-input{flex:1;background:var(--surface);border:1px solid var(--border);color:var(--text);font-family:'DM Mono',monospace;font-size:13px;padding:10px 12px;outline:none;transition:border-color .2s;}
+.bet-input:focus{border-color:var(--lyko);}
+.half-btn,.double-btn{padding:8px 10px;background:var(--surface);border:1px solid var(--border);color:var(--dim);font-family:'DM Mono',monospace;font-size:10px;cursor:none;transition:all .2s;}
+.half-btn:hover,.double-btn:hover{border-color:var(--lyko);color:var(--lyko);}
+.play-btn{width:100%;padding:14px;background:var(--lyko);border:none;color:#000;font-family:'Orbitron',sans-serif;font-size:12px;font-weight:700;letter-spacing:2px;cursor:none;transition:all .2s;}
+.play-btn:hover{background:#00ff85;box-shadow:0 0 20px rgba(0,230,118,.4);}
+.play-btn:disabled{background:var(--dim);}
+.alt-btn{width:100%;padding:10px;background:var(--surface);border:1px solid var(--border);color:var(--lyko);font-family:'DM Mono',monospace;font-size:11px;letter-spacing:1px;cursor:none;transition:all .2s;}
+.alt-btn:hover{border-color:var(--lyko);}
+.stat-row{display:flex;justify-content:space-between;font-size:11px;padding:8px 0;border-bottom:1px solid var(--border);}
+.stat-label{color:var(--dim);}
+.stat-val{color:var(--text);font-weight:700;}
+.stat-val.green{color:var(--lyko);}
+.stat-val.red{color:var(--accent);}
+
+/* KENO GRID */
+.keno-grid{display:grid;grid-template-columns:repeat(8,1fr);gap:6px;width:min(520px,90vw);}
+.keno-num{
+  aspect-ratio:1;display:flex;align-items:center;justify-content:center;
+  font-family:'Orbitron',sans-serif;font-size:13px;font-weight:700;
+  background:var(--surface);border:1px solid var(--border);
+  cursor:none;transition:all .2s;
+}
+.keno-num:hover{border-color:var(--lyko);color:var(--lyko);}
+.keno-num.selected{background:rgba(0,230,118,.15);border-color:var(--lyko);color:var(--lyko);}
+.keno-num.drawn{background:rgba(0,229,255,.15);border-color:var(--cyan);color:var(--cyan);}
+.keno-num.hit{background:rgba(0,230,118,.3);border-color:var(--lyko);color:var(--lyko);animation:hitPop .3s ease;}
+.keno-num.miss-draw{background:rgba(90,106,144,.1);border-color:var(--dim);color:var(--dim);}
+@keyframes hitPop{0%{transform:scale(0.7)}70%{transform:scale(1.15)}100%{transform:scale(1)}}
+.keno-info{font-size:12px;letter-spacing:2px;color:var(--dim);}
+.keno-info span{color:var(--lyko);}
+</style>
+</head>
+<body>
+<div id="cursor"></div>
+<div id="shell">
+  <aside id="sidebar">
+    <div class="sidebar-logo"><a href="../casino.html"><div class="logo-icon">L</div>LYKO</a></div>
+    <div class="sidebar-section">
+      <div class="sidebar-label">Originals</div>
+      <a class="sidebar-item" href="hilo.html"><span class="sidebar-icon">🃏</span> HiLo</a>
+      <a class="sidebar-item" href="limbo.html"><span class="sidebar-icon">🎯</span> Limbo</a>
+      <a class="sidebar-item" href="plinko.html"><span class="sidebar-icon">⚪</span> Plinko</a>
+      <a class="sidebar-item" href="mines.html"><span class="sidebar-icon">💎</span> Mines</a>
+      <a class="sidebar-item" href="chicken.html"><span class="sidebar-icon">🐔</span> Chicken</a>
+      <a class="sidebar-item active" href="keno.html"><span class="sidebar-icon">🔢</span> Keno</a>
+      <a class="sidebar-item" href="pump.html"><span class="sidebar-icon">🎈</span> Pump</a>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-label">Navigate</div>
+      <a class="sidebar-item" href="../casino.html"><span class="sidebar-icon">🎰</span> Casino Lobby</a>
+      <a class="sidebar-item" href="#" onclick="openAccount(event)"><span class="sidebar-icon">👤</span> <span id="usernameNav">Account</span></a>
+    </div>
+    <div class="sidebar-wallet">
+      <div class="wallet-label">Balances</div>
+      <div class="wallet-row active-currency" data-currency="lyko" onclick="setCurrency('lyko')">
+        <div class="wallet-coin"><div class="coin-icon coin-lyko">L</div><span>LYKO</span></div>
+        <span class="wallet-amount" id="bal-lyko">0.00</span>
+      </div>
+      <div class="wallet-row" data-currency="gold" onclick="setCurrency('gold')">
+        <div class="wallet-coin"><div class="coin-icon coin-gold">G</div><span>GOLD</span></div>
+        <span class="wallet-amount" id="bal-gold">0.00</span>
+      </div>
+      <div class="wallet-row" data-currency="cyber" onclick="setCurrency('cyber')">
+        <div class="wallet-coin"><div class="coin-icon coin-cyber">C</div><span>CYBER</span></div>
+        <span class="wallet-amount" id="bal-cyber">0.00</span>
+      </div>
+    </div>
+  </aside>
+  <main id="main">
+    <div id="topbar">
+      <span class="topbar-title">KENO</span>
+      <div class="topbar-right">
+        <div class="active-bal">
+          <span id="topCoinIcon" style="width:18px;height:18px;background:var(--lyko);border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:9px;font-weight:900;color:#000;">L</span>
+          <span id="activeCoinBal">0.00</span>
+          <span id="activeCoinName" style="font-size:9px;color:var(--dim)">LYKO</span>
+        </div>
+        <a href="../casino.html" class="back-btn">← LOBBY</a>
+      </div>
+    </div>
+    <div id="game-area">
+      <div id="bet-panel">
+        <div class="panel-title">Keno</div>
+        <div class="input-group">
+          <div class="input-label">Bet Amount</div>
+          <div class="input-row">
+            <input class="bet-input" id="betAmt" type="number" value="1" min="0.01" step="0.01">
+            <button class="half-btn" onclick="setBet(0.5)">½</button>
+            <button class="double-btn" onclick="setBet(2)">2×</button>
+          </div>
+        </div>
+        <div class="stat-row"><span class="stat-label">Selected</span><span class="stat-val" id="selectedCount">0 / 10</span></div>
+        <div class="stat-row"><span class="stat-label">Matches</span><span class="stat-val green" id="matchCount">—</span></div>
+        <div class="stat-row"><span class="stat-label">Multiplier</span><span class="stat-val green" id="multDisplay">—</span></div>
+        <button class="play-btn" id="playBtn" onclick="play()">BET</button>
+        <button class="alt-btn" onclick="randomPick()">AUTO PICK</button>
+        <button class="alt-btn" onclick="clearPicks()">CLEAR</button>
+      </div>
+      <div id="play-area">
+        <div class="keno-info">Pick up to <span>10</span> numbers (1–40)</div>
+        <div class="keno-grid" id="kenoGrid"></div>
+      </div>
+    </div>
+  </main>
+</div>
+<script>
+const cursor=document.getElementById('cursor');
+document.addEventListener('mousemove',e=>{cursor.style.left=e.clientX+'px';cursor.style.top=e.clientY+'px';});
+document.querySelectorAll('a,button,.wallet-row').forEach(el=>{el.addEventListener('mouseenter',()=>cursor.classList.add('big'));el.addEventListener('mouseleave',()=>cursor.classList.remove('big'));});
+const currencies={lyko:{icon:'L',color:'var(--lyko)',bal:parseFloat(||'1000')},gold:{icon:'G',color:'var(--gold)',bal:parseFloat(localStorage.getItem('bal_gold')||'500')},cyber:{icon:'C',color:'var(--cyan)',bal:parseFloat(localStorage.getItem('bal_cyber')||'250')}};
+
+
+
+
+
+/* getBalance provided by shared system */
+
+function setBet(m){const i=document.getElementById('betAmt');i.value=Math.max(0.01,(parseFloat(i.value)||1)*m).toFixed(2);}
+
+// Payout table (spots_selected -> [mult for 0 matches, 1 match, 2 matches, ...]
+const payouts={
+  1:[0,2.7],
+  2:[0,0,4],
+  3:[0,0,2,20],
+  4:[0,0,1,5,50],
+  5:[0,0,1.5,3,15,100],
+  6:[0,0,1,2,6,30,200],
+  7:[0,0,1,1.5,4,15,80,500],
+  8:[0,0,0.5,1.5,3,10,40,200,1000],
+  9:[0,0,0.5,1,2,6,20,100,500,2000],
+  10:[0,0,0,1,2,5,15,50,200,1000,5000]
+};
+
+let selected=new Set(),drawing=false;
+
+function buildGrid(){
+  const grid=document.getElementById('kenoGrid');
+  grid.innerHTML='';
+  for(let i=1;i<=40;i++){
+    const el=document.createElement('div');
+    el.className='keno-num';el.textContent=i;el.dataset.n=i;
+    el.onclick=()=>toggleNum(i,el);
+    grid.appendChild(el);
+  }
+}
+
+function toggleNum(n,el){
+  if(drawing)return;
+  if(selected.has(n)){selected.delete(n);el.classList.remove('selected');}
+  else if(selected.size<10){selected.add(n);el.classList.add('selected');}
+  document.getElementById('selectedCount').textContent=selected.size+' / 10';
+}
+
+function randomPick(){
+  if(drawing)return;
+  clearPicks();
+  const nums=Array.from({length:40},(_,i)=>i+1);
+  for(let i=nums.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[nums[i],nums[j]]=[nums[j],nums[i]];}
+  const picks=nums.slice(0,Math.floor(Math.random()*9)+2);
+  picks.forEach(n=>{selected.add(n);const el=document.querySelector(`[data-n="${n}"]`);if(el)el.classList.add('selected');});
+  document.getElementById('selectedCount').textContent=selected.size+' / 10';
+}
+
+function clearPicks(){
+  if(drawing)return;
+  selected.clear();
+  document.querySelectorAll('.keno-num').forEach(el=>el.className='keno-num');
+  document.getElementById('selectedCount').textContent='0 / 10';
+  document.getElementById('matchCount').textContent='—';
+  document.getElementById('multDisplay').textContent='—';
+}
+
+function play(){
+  if(drawing||selected.size===0)return;
+  const bet=parseFloat(document.getElementById('betAmt').value)||1;
+  if(bet>getBalance())return;
+  adjustBalance(-bet);drawing=true;
+  document.getElementById('playBtn').disabled=true;
+  // Reset drawn state
+  document.querySelectorAll('.keno-num').forEach(el=>{el.classList.remove('drawn','hit','miss-draw');if(selected.has(parseInt(el.dataset.n)))el.classList.add('selected');});
+  // Draw 20 numbers
+  const pool=Array.from({length:40},(_,i)=>i+1);
+  for(let i=pool.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[pool[i],pool[j]]=[pool[j],pool[i]];}
+  const drawn=new Set(pool.slice(0,20));
+  let revealed=0;
+  const drawnArr=[...drawn];
+  function revealNext(){
+    if(revealed>=20){
+      // Count matches
+      let matches=0;
+      selected.forEach(n=>{if(drawn.has(n))matches++;});
+      const spots=selected.size;
+      const payTable=payouts[spots]||[0];
+      const mult=payTable[Math.min(matches,payTable.length-1)]||0;
+      const payout=bet*mult;
+      if(payout>0)adjustBalance(payout);
+      document.getElementById('matchCount').textContent=matches+' hits';
+      document.getElementById('multDisplay').textContent=mult+'×';
+      drawing=false;
+      document.getElementById('playBtn').disabled=false;
+      return;
+    }
+    const n=drawnArr[revealed];
+    const el=document.querySelector(`[data-n="${n}"]`);
+    if(el){
+      if(selected.has(n)){el.className='keno-num hit';}
+      else{el.className='keno-num miss-draw';}
+    }
+    revealed++;
+    setTimeout(revealNext,80);
+  }
+  revealNext();
+}
+
+buildGrid();
+// LYKO CASINO SHARED ACCOUNT SYSTEM - COOKIE BASED
+// Include this snippet in each game page's <script> block
+
+function getCookie(n){const m=document.cookie.match(new RegExp('(?:^|; )'+n+'=([^;]*)'));if(!m)return null;try{return JSON.parse(decodeURIComponent(m[1]));}catch{return null;}}
+function setCookieRaw(n,v,days=3650){const d=new Date();d.setTime(d.getTime()+days*86400000);document.cookie=`${n}=${encodeURIComponent(JSON.stringify(v))};expires=${d.toUTCString()};path=/;SameSite=Lax`;}
+function loadAcc(){return getCookie('lyko_account');}
+function saveAcc(acc){if(acc.transactions&&acc.transactions.length>200)acc.transactions=acc.transactions.slice(-200);setCookieRaw('lyko_account',acc);}
+
+const COIN_META={lyko:{bg:'#00e676',fg:'#000',icon:'L'},gold:{bg:'#f5a623',fg:'#000',icon:'G'},cyber:{bg:'#00e5ff',fg:'#000',icon:'C'}};
+
+function refreshDisplays(){
+  const acc=loadAcc();if(!acc)return;
+  const cur=acc.activeCurrency||'lyko';
+  ['lyko','gold','cyber'].forEach(c=>{
+    const el=document.getElementById('bal-'+c);if(el)el.textContent=(acc.balances[c]||0).toFixed(2);
+    const row=document.querySelector(`.wallet-row[data-currency="${c}"]`);if(row)row.classList.toggle('active-currency',c===cur);
+  });
+  const balEl=document.getElementById('activeCoinBal');if(balEl)balEl.textContent=(acc.balances[cur]||0).toFixed(2);
+  const nameEl=document.getElementById('activeCoinName');if(nameEl)nameEl.textContent=cur.toUpperCase();
+  const cm=COIN_META[cur];
+  const ic=document.getElementById('topCoinIcon');if(ic){ic.style.background=cm.bg;ic.style.color=cm.fg;ic.textContent=cm.icon;}
+  const un=document.getElementById('usernameNav');if(un)un.textContent=acc.username||'Account';
+}
+
+function setCurrency(c){const acc=loadAcc();if(!acc)return;acc.activeCurrency=c;saveAcc(acc);refreshDisplays();}
+
+function recordBet(game,bet,currency,payout,mult){
+  const acc=loadAcc();if(!acc)return;
+  acc.balances[currency]=Math.max(0,(acc.balances[currency]||0)-bet+payout);
+  acc.stats=acc.stats||{totalWagered:{},totalWon:{},gamesPlayed:0,biggestWin:0,biggestMult:0};
+  acc.stats.totalWagered[currency]=(acc.stats.totalWagered[currency]||0)+bet;
+  if(payout>bet){acc.stats.totalWon=acc.stats.totalWon||{};acc.stats.totalWon[currency]=(acc.stats.totalWon[currency]||0)+(payout-bet);}
+  acc.stats.gamesPlayed=(acc.stats.gamesPlayed||0)+1;
+  const profit=payout-bet;
+  if(profit>(acc.stats.biggestWin||0))acc.stats.biggestWin=profit;
+  if(mult>(acc.stats.biggestMult||0))acc.stats.biggestMult=mult;
+  acc.transactions=acc.transactions||[];
+  acc.transactions.push({type:payout>=bet?'win':'loss',game,bet,payout,profit:parseFloat((payout-bet).toFixed(4)),currency,mult:parseFloat(mult.toFixed(2)),ts:Date.now()});
+  saveAcc(acc);refreshDisplays();
+}
+
+function getBalance(){const acc=loadAcc();if(!acc)return 0;return acc.balances[acc.activeCurrency||'lyko']||0;}
+function getActiveCurrency(){const acc=loadAcc();return acc?.activeCurrency||'lyko';}
+
+function openAccount(e){if(e)e.preventDefault();showAccountModal();}
+function showAccountModal(){
+  const acc=loadAcc();if(!acc)return;
+  const old=document.getElementById('lykoModal');if(old)old.remove();
+  const txRows=[...(acc.transactions||[])].reverse().slice(0,60).map(tx=>{const c=tx.type==='withdrawal'?'#5a6a90':tx.profit>=0?'#00e676':'#e94560';const s=tx.profit>=0?'+':'';return`<tr><td style="color:#5a6a90;font-size:10px;white-space:nowrap">${new Date(tx.ts).toLocaleDateString()} ${new Date(tx.ts).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})}</td><td>${tx.game}</td><td>${(tx.bet||0).toFixed(2)} ${(tx.currency||'lyko').toUpperCase()}</td><td style="color:#5a6a90">${tx.mult>0?tx.mult.toFixed(2)+'×':'—'}</td><td style="color:${c};font-weight:700">${tx.type==='withdrawal'?'↑ Withdraw':s+(tx.profit||0).toFixed(2)}</td></tr>`;}).join('')||'<tr><td colspan="5" style="padding:20px;text-align:center;color:#5a6a90">No transactions yet</td></tr>';
+  const o=document.createElement('div');o.id='lykoModal';o.style.cssText='position:fixed;inset:0;z-index:10000;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.85);backdrop-filter:blur(4px);';
+  o.innerHTML=`<div style="background:#0d0f1e;border:1px solid #1e2240;width:min(720px,95vw);max-height:88vh;display:flex;flex-direction:column;overflow:hidden;">
+    <div style="padding:20px 24px;border-bottom:1px solid #1e2240;display:flex;justify-content:space-between;align-items:center;flex-shrink:0"><div><div style="font-family:'Orbitron',sans-serif;font-size:18px;font-weight:900;color:#00e676">${acc.username}</div><div style="font-size:10px;color:#5a6a90;margin-top:2px">Member since ${new Date(acc.created).toLocaleDateString()}</div></div><button onclick="document.getElementById('lykoModal').remove()" style="background:none;border:1px solid #1e2240;color:#5a6a90;font-size:16px;padding:6px 12px;cursor:pointer">&times;</button></div>
+    <div style="display:flex;border-bottom:1px solid #1e2240;flex-shrink:0">${['ov:Overview','tx:History','st:Settings','wd:Withdraw'].map(x=>{const[id,label]=x.split(':');return`<button id="mt-${id}" onclick="mSwitch('${id}')" style="flex:1;padding:10px;background:none;border:none;border-bottom:2px solid transparent;color:#5a6a90;font-family:'DM Mono',monospace;font-size:10px;letter-spacing:2px;cursor:pointer;transition:all .2s">${label}</button>`;}).join('')}</div>
+    <div style="overflow-y:auto;flex:1;padding:20px 24px">
+      <div id="mp-ov"><div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin-bottom:18px">${[['Games',acc.stats?.gamesPlayed||0,'#dce8ff'],['Biggest Win',(acc.stats?.biggestWin||0).toFixed(2),'#00e676'],['Best Multi',(acc.stats?.biggestMult||0).toFixed(2)+'×','#f5a623'],['LYKO Wagered',(acc.stats?.totalWagered?.lyko||0).toFixed(2),'#00e676'],['GOLD Wagered',(acc.stats?.totalWagered?.gold||0).toFixed(2),'#f5a623'],['CYBER Wagered',(acc.stats?.totalWagered?.cyber||0).toFixed(2),'#00e5ff']].map(([l,v,c])=>`<div style="background:#121428;border:1px solid #1e2240;padding:14px"><div style="font-size:9px;letter-spacing:2px;color:#5a6a90;text-transform:uppercase;margin-bottom:6px">${l}</div><div style="font-family:'Orbitron',sans-serif;font-size:16px;font-weight:700;color:${c}">${v}</div></div>`).join('')}</div>${['lyko','gold','cyber'].map(c=>{const m=COIN_META[c];const usd=(acc.balances[c]||0)*(c==='lyko'?2:c==='gold'?1.5:0.8);return`<div style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:#121428;border:1px solid #1e2240;margin-bottom:8px"><div style="display:flex;align-items:center;gap:8px"><span style="width:24px;height:24px;border-radius:50%;background:${m.bg};color:${m.fg};display:inline-flex;align-items:center;justify-content:center;font-weight:900;font-size:11px">${m.icon}</span><span>${c.toUpperCase()}</span></div><div style="text-align:right"><div style="font-family:'Orbitron',sans-serif;font-weight:700;color:#dce8ff">${(acc.balances[c]||0).toFixed(2)}</div><div style="font-size:10px;color:#5a6a90">≈ $${usd.toFixed(2)}</div></div></div>`;}).join('')}</div>
+      <div id="mp-tx" style="display:none"><div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:11px"><thead><tr style="border-bottom:1px solid #1e2240">${['Time','Game','Bet','Mult','Profit'].map(h=>`<th style="padding:7px 10px;text-align:left;color:#5a6a90;font-weight:400;font-size:9px;letter-spacing:2px;text-transform:uppercase">${h}</th>`).join('')}</tr></thead><tbody>${txRows}</tbody></table></div></div>
+      <div id="mp-st" style="display:none"><div style="display:flex;flex-direction:column;gap:12px;max-width:380px"><div><div style="font-size:9px;letter-spacing:2px;color:#5a6a90;text-transform:uppercase;margin-bottom:8px">Display Name</div><div style="display:flex;gap:8px"><input id="mni" value="${acc.username}" style="flex:1;background:#121428;border:1px solid #1e2240;color:#dce8ff;font-family:'DM Mono',monospace;font-size:13px;padding:9px 12px;outline:none"><button onclick="mSaveName()" style="padding:9px 16px;background:#00e676;border:none;color:#000;font-family:'Orbitron',sans-serif;font-size:11px;font-weight:700;cursor:pointer">SAVE</button></div></div><div><div style="font-size:9px;letter-spacing:2px;color:#5a6a90;text-transform:uppercase;margin-bottom:8px">Withdrawal Address</div><div style="display:flex;gap:8px"><input id="mwi" value="${acc.withdrawalAddress||''}" placeholder="Address / username" style="flex:1;background:#121428;border:1px solid #1e2240;color:#dce8ff;font-family:'DM Mono',monospace;font-size:13px;padding:9px 12px;outline:none"><button onclick="mSaveWallet()" style="padding:9px 16px;background:#00e676;border:none;color:#000;font-family:'Orbitron',sans-serif;font-size:11px;font-weight:700;cursor:pointer">SAVE</button></div></div><div id="mok" style="display:none;color:#00e676;font-size:11px;letter-spacing:2px">✓ Saved!</div></div></div>
+      <div id="mp-wd" style="display:none"><div style="max-width:380px;display:flex;flex-direction:column;gap:12px"><div style="padding:12px;background:rgba(0,230,118,.06);border:1px solid rgba(0,230,118,.2);font-size:11px;color:#00e676;line-height:1.7">Min 1 coin per withdrawal. 1 LYKO = $2.00 USD.</div><div><div style="font-size:9px;letter-spacing:2px;color:#5a6a90;text-transform:uppercase;margin-bottom:6px">Currency</div><select id="wc" style="width:100%;background:#121428;border:1px solid #1e2240;color:#dce8ff;font-family:'DM Mono',monospace;font-size:13px;padding:9px 12px;outline:none"><option value="lyko">LYKO (${(acc.balances.lyko||0).toFixed(2)})</option><option value="gold">GOLD (${(acc.balances.gold||0).toFixed(2)})</option><option value="cyber">CYBER (${(acc.balances.cyber||0).toFixed(2)})</option></select></div><div><div style="font-size:9px;letter-spacing:2px;color:#5a6a90;text-transform:uppercase;margin-bottom:6px">Amount</div><input id="wa" type="number" min="1" step="0.01" placeholder="0.00" style="width:100%;background:#121428;border:1px solid #1e2240;color:#dce8ff;font-family:'DM Mono',monospace;font-size:13px;padding:9px 12px;outline:none"></div><div><div style="font-size:9px;letter-spacing:2px;color:#5a6a90;text-transform:uppercase;margin-bottom:6px">Destination</div><input id="wd" value="${acc.withdrawalAddress||''}" placeholder="Wallet address" style="width:100%;background:#121428;border:1px solid #1e2240;color:#dce8ff;font-family:'DM Mono',monospace;font-size:13px;padding:9px 12px;outline:none"></div><button onclick="mDoWithdraw()" style="width:100%;padding:13px;background:#00e676;border:none;color:#000;font-family:'Orbitron',sans-serif;font-size:12px;font-weight:700;letter-spacing:2px;cursor:pointer">CONFIRM WITHDRAWAL</button><div id="wmsg" style="display:none;font-size:11px;padding:9px 12px;border:1px solid"></div></div></div>
+    </div>
+  </div>`;
+  document.body.appendChild(o);o.addEventListener('click',e=>{if(e.target===o)o.remove();});mSwitch('ov');
+}
+function mSwitch(t){['ov','tx','st','wd'].forEach(x=>{const p=document.getElementById('mp-'+x);const b=document.getElementById('mt-'+x);if(p)p.style.display=x===t?'block':'none';if(b){b.style.borderBottomColor=x===t?'#00e676':'transparent';b.style.color=x===t?'#00e676':'#5a6a90';}});}
+function mSaveName(){const v=document.getElementById('mni')?.value?.trim();if(!v)return;const acc=loadAcc();if(!acc)return;acc.username=v;saveAcc(acc);const un=document.getElementById('usernameNav');if(un)un.textContent=v;const ok=document.getElementById('mok');if(ok){ok.style.display='block';setTimeout(()=>ok.style.display='none',2000);}}
+function mSaveWallet(){const v=document.getElementById('mwi')?.value?.trim()||'';const acc=loadAcc();if(!acc)return;acc.withdrawalAddress=v;saveAcc(acc);const ok=document.getElementById('mok');if(ok){ok.style.display='block';setTimeout(()=>ok.style.display='none',2000);}}
+function mDoWithdraw(){const cur=document.getElementById('wc')?.value;const amt=parseFloat(document.getElementById('wa')?.value);const addr=document.getElementById('wd')?.value?.trim();const msg=document.getElementById('wmsg');function sm(ok,m){if(msg){msg.style.display='block';msg.style.borderColor=ok?'#00e676':'#e94560';msg.style.color=ok?'#00e676':'#e94560';msg.textContent=m;}}if(!cur||!amt||amt<1||!addr){sm(false,'Fill all fields — min 1 coin.');return;}const acc=loadAcc();if(!acc)return;if((acc.balances[cur]||0)<amt){sm(false,'Insufficient balance.');return;}acc.balances[cur]-=amt;acc.transactions=acc.transactions||[];acc.transactions.push({type:'withdrawal',game:'Wallet',bet:amt,payout:0,profit:-amt,currency:cur,mult:0,address:addr,ts:Date.now()});saveAcc(acc);refreshDisplays();sm(true,`✓ Withdrawn ${amt.toFixed(2)} ${cur.toUpperCase()} → ${addr}`);}
+
+
+// Init
+window.addEventListener('DOMContentLoaded',()=>{
+  const acc=loadAcc();
+  if(!acc){window.location.href='../casino.html';return;}
+  refreshDisplays();
+});
+</script>
+</body>
+</html>

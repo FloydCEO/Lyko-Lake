@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Crash — Lyko's Casino</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=DM+Mono:ital,wght@0,300;0,400;1,300&display=swap');
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+:root{--void:#07080f;--deep:#0d0f1e;--surface:#121428;--border:#1e2240;--accent:#e94560;--gold:#f5a623;--cyan:#00e5ff;--lyko:#00e676;--text:#dce8ff;--dim:#5a6a90;}
+html,body{width:100%;min-height:100%;background:var(--void);color:var(--text);font-family:'DM Mono',monospace;overflow-x:hidden;cursor:none;}
+#cursor{position:fixed;top:0;left:0;width:12px;height:12px;background:var(--lyko);border-radius:50%;pointer-events:none;z-index:99999;transform:translate(-50%,-50%);transition:width .15s,height .15s;mix-blend-mode:difference;}
+#cursor.big{width:36px;height:36px;}
+body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(0,230,118,.03) 1px,transparent 1px),linear-gradient(90deg,rgba(0,230,118,.03) 1px,transparent 1px);background-size:40px 40px;pointer-events:none;z-index:0;}
+#shell{display:flex;min-height:100vh;position:relative;z-index:2;}
+/* sidebar */
+#sidebar{width:220px;min-height:100vh;background:var(--deep);border-right:1px solid var(--border);display:flex;flex-direction:column;position:sticky;top:0;height:100vh;flex-shrink:0;z-index:10;overflow-y:auto;}
+.sidebar-logo{padding:28px 24px 20px;border-bottom:1px solid var(--border);}
+.sidebar-logo a{font-family:'Orbitron',sans-serif;font-size:22px;font-weight:900;color:var(--lyko);text-decoration:none;letter-spacing:2px;display:flex;align-items:center;gap:10px;}
+.logo-icon{width:32px;height:32px;background:var(--lyko);border-radius:8px;display:flex;align-items:center;justify-content:center;font-family:'Orbitron',sans-serif;font-weight:900;font-size:16px;color:#000;}
+.sidebar-section{padding:16px 0;border-bottom:1px solid var(--border);}
+.sidebar-label{font-size:9px;letter-spacing:3px;color:var(--dim);text-transform:uppercase;padding:0 20px 10px;}
+.sidebar-item{display:flex;align-items:center;gap:12px;padding:10px 20px;color:var(--dim);text-decoration:none;font-size:12px;letter-spacing:1px;transition:color .2s,background .2s;cursor:none;}
+.sidebar-item:hover,.sidebar-item.active{color:var(--text);background:rgba(0,230,118,.05);}
+.sidebar-item.active{color:var(--lyko);border-left:2px solid var(--lyko);}
+.sidebar-icon{font-size:16px;width:20px;text-align:center;}
+.sidebar-wallet{margin-top:auto;padding:20px;border-top:1px solid var(--border);}
+.wallet-label{font-size:9px;letter-spacing:3px;color:var(--dim);text-transform:uppercase;margin-bottom:12px;}
+.wallet-row{display:flex;align-items:center;justify-content:space-between;padding:8px 12px;background:var(--surface);border:1px solid var(--border);border-radius:4px;cursor:none;transition:border-color .2s;margin-bottom:6px;}
+.wallet-row:hover{border-color:var(--lyko);}
+.wallet-row.active-currency{border-color:var(--lyko);background:rgba(0,230,118,.06);}
+.wallet-coin{display:flex;align-items:center;gap:8px;font-size:11px;}
+.coin-icon{width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:10px;}
+.coin-lyko{background:var(--lyko);color:#000;}.coin-gold{background:var(--gold);color:#000;}.coin-cyber{background:var(--cyan);color:#000;}
+.wallet-amount{font-size:11px;color:var(--text);font-weight:700;}
+#main{flex:1;display:flex;flex-direction:column;}
+#topbar{height:64px;background:var(--deep);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 32px;position:sticky;top:0;z-index:9;}
+.topbar-title{font-family:'Orbitron',sans-serif;font-size:14px;font-weight:700;color:var(--dim);letter-spacing:3px;}
+.topbar-right{display:flex;align-items:center;gap:12px;}
+.active-bal{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:700;padding:8px 16px;background:rgba(0,230,118,.08);border:1px solid rgba(0,230,118,.3);border-radius:4px;color:var(--lyko);}
+.back-btn{font-size:10px;letter-spacing:2px;color:var(--dim);text-decoration:none;padding:8px 14px;border:1px solid var(--border);transition:all .2s;cursor:none;}
+.back-btn:hover{color:var(--text);border-color:var(--dim);}
+#game-area{display:flex;flex:1;}
+/* BET PANEL */
+#bet-panel{width:260px;background:var(--deep);border-right:1px solid var(--border);padding:24px;flex-shrink:0;display:flex;flex-direction:column;gap:14px;}
+.panel-title{font-family:'Orbitron',sans-serif;font-size:11px;font-weight:700;color:var(--dim);letter-spacing:3px;text-transform:uppercase;}
+.input-group{display:flex;flex-direction:column;gap:6px;}
+.input-label{font-size:9px;letter-spacing:2px;color:var(--dim);text-transform:uppercase;}
+.input-row{display:flex;gap:6px;align-items:center;}
+.bet-input{flex:1;background:var(--surface);border:1px solid var(--border);color:var(--text);font-family:'DM Mono',monospace;font-size:13px;padding:10px 12px;outline:none;transition:border-color .2s;}
+.bet-input:focus{border-color:var(--lyko);}
+.half-btn,.double-btn{padding:8px 10px;background:var(--surface);border:1px solid var(--border);color:var(--dim);font-family:'DM Mono',monospace;font-size:10px;cursor:none;transition:all .2s;}
+.half-btn:hover,.double-btn:hover{border-color:var(--lyko);color:var(--lyko);}
+.play-btn{width:100%;padding:14px;background:var(--lyko);border:none;color:#000;font-family:'Orbitron',sans-serif;font-size:12px;font-weight:700;letter-spacing:2px;cursor:none;transition:all .2s;margin-top:4px;}
+.play-btn:hover{background:#00ff85;box-shadow:0 0 20px rgba(0,230,118,.4);}
+.play-btn:disabled{background:var(--dim);}
+.cashout-btn{width:100%;padding:14px;background:var(--accent);border:none;color:#fff;font-family:'Orbitron',sans-serif;font-size:12px;font-weight:700;letter-spacing:2px;cursor:none;transition:all .2s;display:none;}
+.cashout-btn:hover{background:#ff6070;box-shadow:0 0 20px rgba(233,69,96,.4);}
+.cashout-btn.show{display:block;}
+.stat-row{display:flex;justify-content:space-between;font-size:11px;padding:8px 0;border-bottom:1px solid var(--border);}
+.stat-label{color:var(--dim);}
+.stat-val{color:var(--text);font-weight:700;}
+.stat-val.green{color:var(--lyko);}
+.stat-val.red{color:var(--accent);}
+/* CRASH DISPLAY */
+#play-area{flex:1;display:flex;flex-direction:column;padding:24px;gap:16px;position:relative;}
+#crashCanvas{width:100%;flex:1;background:var(--deep);border:1px solid var(--border);min-height:300px;}
+.crash-mult-overlay{
+  position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
+  font-family:'Orbitron',sans-serif;font-size:80px;font-weight:900;
+  color:var(--lyko);text-shadow:0 0 40px rgba(0,230,118,.5);
+  pointer-events:none;transition:color .3s,text-shadow .3s;
+  letter-spacing:-2px;
+}
+.crash-mult-overlay.crashed{color:var(--accent);text-shadow:0 0 40px rgba(233,69,96,.5);animation:shake .4s ease;}
+.crash-mult-overlay.waiting{color:var(--dim);font-size:24px;letter-spacing:2px;text-shadow:none;}
+@keyframes shake{0%,100%{transform:translate(-50%,-50%)}20%{transform:translate(-53%,-50%)}40%{transform:translate(-47%,-50%)}60%{transform:translate(-52%,-50%)}80%{transform:translate(-49%,-50%)}}}
+.history-strip{display:flex;gap:6px;flex-wrap:wrap;}
+.hist-pill{padding:4px 10px;font-size:10px;border:1px solid;border-radius:2px;font-family:'Orbitron',sans-serif;font-weight:700;}
+.hist-pill.low{border-color:#e94560;color:#e94560;}
+.hist-pill.mid{border-color:#f5a623;color:#f5a623;}
+.hist-pill.high{border-color:#00e676;color:#00e676;}
+.hist-pill.moon{border-color:#00e5ff;color:#00e5ff;}
+.bets-live{display:flex;flex-direction:column;gap:4px;max-height:100px;overflow:hidden;}
+.live-bet-row{display:flex;justify-content:space-between;font-size:10px;padding:3px 0;}
+.auto-input-row{display:flex;gap:6px;align-items:center;}
+.auto-toggle{width:40px;height:22px;background:var(--surface);border:1px solid var(--border);border-radius:11px;cursor:pointer;position:relative;transition:background .2s;}
+.auto-toggle.on{background:var(--lyko);}
+.auto-toggle::after{content:'';position:absolute;top:2px;left:2px;width:16px;height:16px;border-radius:50%;background:#fff;transition:left .2s;}
+.auto-toggle.on::after{left:20px;}
+</style>
+</head>
+<body>
+<div id="cursor"></div>
+<div id="shell">
+  <aside id="sidebar">
+    <div class="sidebar-logo"><a href="../casino.html"><div class="logo-icon">L</div>LYKO</a></div>
+    <div class="sidebar-section">
+      <div class="sidebar-label">Originals</div>
+      <a class="sidebar-item active" href="crash.html"><span class="sidebar-icon">💥</span> Crash</a>
+      <a class="sidebar-item" href="hilo.html"><span class="sidebar-icon">🃏</span> HiLo</a>
+      <a class="sidebar-item" href="limbo.html"><span class="sidebar-icon">🎯</span> Limbo</a>
+      <a class="sidebar-item" href="plinko.html"><span class="sidebar-icon">⚪</span> Plinko</a>
+      <a class="sidebar-item" href="mines.html"><span class="sidebar-icon">💎</span> Mines</a>
+      <a class="sidebar-item" href="chicken.html"><span class="sidebar-icon">🐔</span> Chicken</a>
+      <a class="sidebar-item" href="keno.html"><span class="sidebar-icon">🔢</span> Keno</a>
+      <a class="sidebar-item" href="pump.html"><span class="sidebar-icon">🎈</span> Pump</a>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-label">Navigate</div>
+      <a class="sidebar-item" href="../casino.html"><span class="sidebar-icon">🎰</span> Casino Lobby</a>
+      <a class="sidebar-item" href="#" onclick="openAccount(event)"><span class="sidebar-icon">👤</span> <span id="usernameNav">Account</span></a>
+    </div>
+    <div class="sidebar-wallet">
+      <div class="wallet-label">Balances</div>
+      <div class="wallet-row active-currency" data-currency="lyko" onclick="setCurrency('lyko')"><div class="wallet-coin"><div class="coin-icon coin-lyko">L</div><span>LYKO</span></div><span class="wallet-amount" id="bal-lyko">—</span></div>
+      <div class="wallet-row" data-currency="gold" onclick="setCurrency('gold')"><div class="wallet-coin"><div class="coin-icon coin-gold">G</div><span>GOLD</span></div><span class="wallet-amount" id="bal-gold">—</span></div>
+      <div class="wallet-row" data-currency="cyber" onclick="setCurrency('cyber')"><div class="wallet-coin"><div class="coin-icon coin-cyber">C</div><span>CYBER</span></div><span class="wallet-amount" id="bal-cyber">—</span></div>
+      <button onclick="openAccount()" style="width:100%;margin-top:10px;padding:8px;background:rgba(0,230,118,.08);border:1px solid rgba(0,230,118,.3);color:#00e676;font-family:'DM Mono',monospace;font-size:10px;letter-spacing:2px;cursor:pointer;">VIEW ACCOUNT</button>
+    </div>
+  </aside>
+
+  <main id="main">
+    <div id="topbar">
+      <span class="topbar-title">CRASH</span>
+      <div class="topbar-right">
+        <div class="active-bal">
+          <span id="topCoinIcon" style="width:18px;height:18px;background:var(--lyko);border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:9px;font-weight:900;color:#000;">L</span>
+          <span id="activeCoinBal">—</span>
+          <span id="activeCoinName" style="font-size:9px;color:var(--dim)">LYKO</span>
+        </div>
+        <a href="../casino.html" class="back-btn">← LOBBY</a>
+      </div>
+    </div>
+
+    <div id="game-area">
+      <div id="bet-panel">
+        <div class="panel-title">Crash</div>
+        <div class="input-group">
+          <div class="input-label">Bet Amount</div>
+          <div class="input-row">
+            <input class="bet-input" id="betAmt" type="number" value="1" min="0.01" step="0.01">
+            <button class="half-btn" onclick="adjustBet(.5)">½</button>
+            <button class="double-btn" onclick="adjustBet(2)">2×</button>
+          </div>
+        </div>
+        <div class="input-group">
+          <div class="input-label" style="display:flex;align-items:center;justify-content:space-between;">
+            Auto Cashout
+            <div class="auto-toggle" id="autoToggle" onclick="toggleAuto()"></div>
+          </div>
+          <input class="bet-input" id="autoCashout" type="number" value="2.00" min="1.01" step="0.01" placeholder="e.g. 2.00">
+        </div>
+        <div class="stat-row"><span class="stat-label">Status</span><span class="stat-val" id="statusDisplay">Waiting</span></div>
+        <div class="stat-row"><span class="stat-label">Multiplier</span><span class="stat-val green" id="multDisplay">—</span></div>
+        <div class="stat-row"><span class="stat-label">Profit</span><span class="stat-val green" id="profitDisplay">—</span></div>
+        <button class="play-btn" id="betBtn" onclick="placeBet()">BET NEXT ROUND</button>
+        <button class="cashout-btn" id="cashoutBtn" onclick="cashout()">CASH OUT 💥</button>
+        <div style="margin-top:8px;">
+          <div class="input-label" style="margin-bottom:6px">Live Bets</div>
+          <div class="bets-live" id="liveBets"></div>
+        </div>
+      </div>
+
+      <div id="play-area">
+        <canvas id="crashCanvas"></canvas>
+        <div class="crash-mult-overlay waiting" id="multOverlay">WAITING...</div>
+        <div class="history-strip" id="histStrip"></div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script>
+// ─── Cookie / Account ─────────────────────────────
+function getCookie(n){const m=document.cookie.match(new RegExp('(?:^|; )'+n+'=([^;]*)'));if(!m)return null;try{return JSON.parse(decodeURIComponent(m[1]));}catch{return null;}}
+function setCookieRaw(n,v,days=3650){const d=new Date();d.setTime(d.getTime()+days*86400000);document.cookie=`${n}=${encodeURIComponent(JSON.stringify(v))};expires=${d.toUTCString()};path=/;SameSite=Lax`;}
+function loadAcc(){return getCookie('lyko_account');}
+function saveAcc(acc){if(acc.transactions&&acc.transactions.length>200)acc.transactions=acc.transactions.slice(-200);setCookieRaw('lyko_account',acc);}
+
+const COIN_META={lyko:{bg:'#00e676',fg:'#000',icon:'L'},gold:{bg:'#f5a623',fg:'#000',icon:'G'},cyber:{bg:'#00e5ff',fg:'#000',icon:'C'}};
+
+function refreshDisplays(){
+  const acc=loadAcc();if(!acc)return;
+  const cur=acc.activeCurrency||'lyko';
+  ['lyko','gold','cyber'].forEach(c=>{
+    const el=document.getElementById('bal-'+c);if(el)el.textContent=(acc.balances[c]||0).toFixed(2);
+    const row=document.querySelector(`.wallet-row[data-currency="${c}"]`);if(row)row.classList.toggle('active-currency',c===cur);
+  });
+  document.getElementById('activeCoinBal').textContent=(acc.balances[cur]||0).toFixed(2);
+  document.getElementById('activeCoinName').textContent=cur.toUpperCase();
+  const cm=COIN_META[cur];
+  const ic=document.getElementById('topCoinIcon');if(ic){ic.style.background=cm.bg;ic.style.color=cm.fg;ic.textContent=cm.icon;}
+  const un=document.getElementById('usernameNav');if(un)un.textContent=acc.username||'Account';
+}
+
+function setCurrency(c){const acc=loadAcc();if(!acc)return;acc.activeCurrency=c;saveAcc(acc);refreshDisplays();}
+
+function recordBet(game,bet,currency,payout,mult){
+  const acc=loadAcc();if(!acc)return;
+  acc.balances[currency]=Math.max(0,(acc.balances[currency]||0)-bet+payout);
+  acc.stats=acc.stats||{};
+  acc.stats.totalWagered=acc.stats.totalWagered||{};
+  acc.stats.totalWagered[currency]=(acc.stats.totalWagered[currency]||0)+bet;
+  if(payout>bet)acc.stats.totalWon=acc.stats.totalWon||{},acc.stats.totalWon[currency]=(acc.stats.totalWon[currency]||0)+(payout-bet);
+  acc.stats.gamesPlayed=(acc.stats.gamesPlayed||0)+1;
+  const profit=payout-bet;
+  if(profit>(acc.stats.biggestWin||0))acc.stats.biggestWin=profit;
+  if(mult>(acc.stats.biggestMult||0))acc.stats.biggestMult=mult;
+  acc.transactions=acc.transactions||[];
+  acc.transactions.push({type:payout>=bet?'win':'loss',game,bet,payout,profit:parseFloat((payout-bet).toFixed(4)),currency,mult:parseFloat(mult.toFixed(2)),ts:Date.now()});
+  saveAcc(acc);refreshDisplays();
+}
+
+function getBalance(){const acc=loadAcc();if(!acc)return 0;const cur=acc.activeCurrency||'lyko';return acc.balances[cur]||0;}
+function getActiveCurrency(){const acc=loadAcc();if(!acc)return 'lyko';return acc.activeCurrency||'lyko';}
+
+// ─── Account modal (compact) ─────────────────────
+function openAccount(e){if(e)e.preventDefault();showAccountModal();}
+function showAccountModal(){
+  const acc=loadAcc();if(!acc)return;
+  const old=document.getElementById('lykoModal');if(old)old.remove();
+  const txRows=[...(acc.transactions||[])].reverse().slice(0,50).map(tx=>{const c=tx.type==='withdrawal'?'#5a6a90':tx.profit>=0?'#00e676':'#e94560';const s=tx.profit>=0?'+':'';return`<tr><td style="color:#5a6a90;font-size:10px;white-space:nowrap">${new Date(tx.ts).toLocaleDateString()} ${new Date(tx.ts).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})}</td><td>${tx.game}</td><td>${(tx.bet||0).toFixed(2)} ${(tx.currency||'lyko').toUpperCase()}</td><td style="color:#5a6a90">${tx.mult>0?tx.mult.toFixed(2)+'×':'—'}</td><td style="color:${c};font-weight:700">${tx.type==='withdrawal'?'↑ Withdraw':s+(tx.profit||0).toFixed(2)}</td></tr>`;}).join('')||'<tr><td colspan="5" style="padding:20px;text-align:center;color:#5a6a90">No transactions yet</td></tr>';
+  const o=document.createElement('div');o.id='lykoModal';o.style.cssText='position:fixed;inset:0;z-index:10000;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.85);backdrop-filter:blur(4px);';
+  o.innerHTML=`<div style="background:#0d0f1e;border:1px solid #1e2240;width:min(720px,95vw);max-height:88vh;display:flex;flex-direction:column;overflow:hidden;">
+    <div style="padding:20px 24px;border-bottom:1px solid #1e2240;display:flex;justify-content:space-between;align-items:center;flex-shrink:0">
+      <div><div style="font-family:'Orbitron',sans-serif;font-size:18px;font-weight:900;color:#00e676">${acc.username}</div><div style="font-size:10px;color:#5a6a90;margin-top:2px">Member since ${new Date(acc.created).toLocaleDateString()}</div></div>
+      <button onclick="document.getElementById('lykoModal').remove()" style="background:none;border:1px solid #1e2240;color:#5a6a90;font-size:16px;padding:6px 12px;cursor:pointer">&times;</button>
+    </div>
+    <div style="display:flex;border-bottom:1px solid #1e2240;flex-shrink:0">
+      ${['ov:Overview','tx:History','st:Settings','wd:Withdraw'].map(x=>{const[id,label]=x.split(':');return`<button id="mt-${id}" class="m-tab-btn" onclick="mSwitch('${id}')" style="flex:1;padding:10px;background:none;border:none;border-bottom:2px solid transparent;color:#5a6a90;font-family:'DM Mono',monospace;font-size:10px;letter-spacing:2px;cursor:pointer;transition:all .2s">${label}</button>`;}).join('')}
+    </div>
+    <div style="overflow-y:auto;flex:1;padding:20px 24px">
+      <div id="mp-ov">
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin-bottom:18px">${[['Games',acc.stats?.gamesPlayed||0,'#dce8ff'],['Biggest Win',(acc.stats?.biggestWin||0).toFixed(2),'#00e676'],['Best Multi',(acc.stats?.biggestMult||0).toFixed(2)+'×','#f5a623'],['LYKO Wagered',(acc.stats?.totalWagered?.lyko||0).toFixed(2),'#00e676'],['GOLD Wagered',(acc.stats?.totalWagered?.gold||0).toFixed(2),'#f5a623'],['CYBER Wagered',(acc.stats?.totalWagered?.cyber||0).toFixed(2),'#00e5ff']].map(([l,v,c])=>`<div style="background:#121428;border:1px solid #1e2240;padding:14px"><div style="font-size:9px;letter-spacing:2px;color:#5a6a90;text-transform:uppercase;margin-bottom:6px">${l}</div><div style="font-family:'Orbitron',sans-serif;font-size:16px;font-weight:700;color:${c}">${v}</div></div>`).join('')}</div>
+        ${['lyko','gold','cyber'].map(c=>{const m=COIN_META[c];const usd=(acc.balances[c]||0)*(c==='lyko'?2:c==='gold'?1.5:0.8);return`<div style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:#121428;border:1px solid #1e2240;margin-bottom:8px"><div style="display:flex;align-items:center;gap:8px"><span style="width:24px;height:24px;border-radius:50%;background:${m.bg};color:${m.fg};display:inline-flex;align-items:center;justify-content:center;font-weight:900;font-size:11px">${m.icon}</span><span>${c.toUpperCase()}</span></div><div style="text-align:right"><div style="font-family:'Orbitron',sans-serif;font-weight:700;color:#dce8ff">${(acc.balances[c]||0).toFixed(2)}</div><div style="font-size:10px;color:#5a6a90">≈ $${usd.toFixed(2)}</div></div></div>`;}).join('')}
+      </div>
+      <div id="mp-tx" style="display:none"><div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:11px"><thead><tr style="border-bottom:1px solid #1e2240">${['Time','Game','Bet','Mult','Profit'].map(h=>`<th style="padding:7px 10px;text-align:left;color:#5a6a90;font-weight:400;font-size:9px;letter-spacing:2px;text-transform:uppercase">${h}</th>`).join('')}</tr></thead><tbody>${txRows}</tbody></table></div></div>
+      <div id="mp-st" style="display:none"><div style="display:flex;flex-direction:column;gap:12px;max-width:380px">
+        <div><div style="font-size:9px;letter-spacing:2px;color:#5a6a90;text-transform:uppercase;margin-bottom:8px">Display Name</div><div style="display:flex;gap:8px"><input id="mni" value="${acc.username}" style="flex:1;background:#121428;border:1px solid #1e2240;color:#dce8ff;font-family:'DM Mono',monospace;font-size:13px;padding:9px 12px;outline:none"><button onclick="mSaveName()" style="padding:9px 16px;background:#00e676;border:none;color:#000;font-family:'Orbitron',sans-serif;font-size:11px;font-weight:700;cursor:pointer">SAVE</button></div></div>
+        <div><div style="font-size:9px;letter-spacing:2px;color:#5a6a90;text-transform:uppercase;margin-bottom:8px">Withdrawal Address</div><div style="display:flex;gap:8px"><input id="mwi" value="${acc.withdrawalAddress||''}" placeholder="Address / username" style="flex:1;background:#121428;border:1px solid #1e2240;color:#dce8ff;font-family:'DM Mono',monospace;font-size:13px;padding:9px 12px;outline:none"><button onclick="mSaveWallet()" style="padding:9px 16px;background:#00e676;border:none;color:#000;font-family:'Orbitron',sans-serif;font-size:11px;font-weight:700;cursor:pointer">SAVE</button></div></div>
+        <div id="mok" style="display:none;color:#00e676;font-size:11px;letter-spacing:2px">✓ Saved!</div>
+      </div></div>
+      <div id="mp-wd" style="display:none"><div style="max-width:380px;display:flex;flex-direction:column;gap:12px">
+        <div style="padding:12px;background:rgba(0,230,118,.06);border:1px solid rgba(0,230,118,.2);font-size:11px;color:#00e676;line-height:1.7">Min 1 coin per withdrawal. 1 LYKO = $2.00 USD.</div>
+        <div><div style="font-size:9px;letter-spacing:2px;color:#5a6a90;text-transform:uppercase;margin-bottom:6px">Currency</div><select id="wc" style="width:100%;background:#121428;border:1px solid #1e2240;color:#dce8ff;font-family:'DM Mono',monospace;font-size:13px;padding:9px 12px;outline:none"><option value="lyko">LYKO (${(acc.balances.lyko||0).toFixed(2)})</option><option value="gold">GOLD (${(acc.balances.gold||0).toFixed(2)})</option><option value="cyber">CYBER (${(acc.balances.cyber||0).toFixed(2)})</option></select></div>
+        <div><div style="font-size:9px;letter-spacing:2px;color:#5a6a90;text-transform:uppercase;margin-bottom:6px">Amount</div><input id="wa" type="number" min="1" step="0.01" placeholder="0.00" style="width:100%;background:#121428;border:1px solid #1e2240;color:#dce8ff;font-family:'DM Mono',monospace;font-size:13px;padding:9px 12px;outline:none"></div>
+        <div><div style="font-size:9px;letter-spacing:2px;color:#5a6a90;text-transform:uppercase;margin-bottom:6px">Destination</div><input id="wd" value="${acc.withdrawalAddress||''}" placeholder="Wallet address" style="width:100%;background:#121428;border:1px solid #1e2240;color:#dce8ff;font-family:'DM Mono',monospace;font-size:13px;padding:9px 12px;outline:none"></div>
+        <button onclick="mDoWithdraw()" style="width:100%;padding:13px;background:#00e676;border:none;color:#000;font-family:'Orbitron',sans-serif;font-size:12px;font-weight:700;letter-spacing:2px;cursor:pointer">CONFIRM WITHDRAWAL</button>
+        <div id="wmsg" style="display:none;font-size:11px;padding:9px 12px;border:1px solid"></div>
+      </div></div>
+    </div>
+  </div>`;
+  document.body.appendChild(o);
+  o.addEventListener('click',e=>{if(e.target===o)o.remove();});
+  mSwitch('ov');
+}
+function mSwitch(t){['ov','tx','st','wd'].forEach(x=>{const p=document.getElementById('mp-'+x);const b=document.getElementById('mt-'+x);if(p)p.style.display=x===t?'block':'none';if(b){b.style.borderBottomColor=x===t?'#00e676':'transparent';b.style.color=x===t?'#00e676':'#5a6a90';}});}
+function mSaveName(){const v=document.getElementById('mni')?.value?.trim();if(!v)return;const acc=loadAcc();if(!acc)return;acc.username=v;saveAcc(acc);const un=document.getElementById('usernameNav');if(un)un.textContent=v;const ok=document.getElementById('mok');if(ok){ok.style.display='block';setTimeout(()=>ok.style.display='none',2000);}}
+function mSaveWallet(){const v=document.getElementById('mwi')?.value?.trim()||'';const acc=loadAcc();if(!acc)return;acc.withdrawalAddress=v;saveAcc(acc);const ok=document.getElementById('mok');if(ok){ok.style.display='block';setTimeout(()=>ok.style.display='none',2000);}}
+function mDoWithdraw(){const cur=document.getElementById('wc')?.value;const amt=parseFloat(document.getElementById('wa')?.value);const addr=document.getElementById('wd')?.value?.trim();const msg=document.getElementById('wmsg');function sm(ok,m){if(msg){msg.style.display='block';msg.style.borderColor=ok?'#00e676':'#e94560';msg.style.color=ok?'#00e676':'#e94560';msg.textContent=m;}}if(!cur||!amt||amt<1||!addr){sm(false,'Fill all fields — min 1 coin.');return;}const acc=loadAcc();if(!acc)return;if((acc.balances[cur]||0)<amt){sm(false,'Insufficient balance.');return;}acc.balances[cur]-=amt;acc.transactions=acc.transactions||[];acc.transactions.push({type:'withdrawal',game:'Wallet',bet:amt,payout:0,profit:-amt,currency:cur,mult:0,address:addr,ts:Date.now()});saveAcc(acc);refreshDisplays();sm(true,`✓ Withdrawn ${amt.toFixed(2)} ${cur.toUpperCase()} → ${addr}`);}
+
+// ─── Cursor ───────────────────────────────────────
+const cursor=document.getElementById('cursor');
+document.addEventListener('mousemove',e=>{cursor.style.left=e.clientX+'px';cursor.style.top=e.clientY+'px';});
+document.querySelectorAll('a,button,.wallet-row').forEach(el=>{el.addEventListener('mouseenter',()=>cursor.classList.add('big'));el.addEventListener('mouseleave',()=>cursor.classList.remove('big'));});
+
+// ─── CRASH GAME ───────────────────────────────────
+const canvas=document.getElementById('crashCanvas');
+const ctx=canvas.getContext('2d');
+let W,H;
+
+function resize(){
+  const rect=canvas.parentElement.getBoundingClientRect();
+  canvas.width=W=Math.floor(rect.width);
+  canvas.height=H=Math.floor(Math.max(280,rect.height-80));
+}
+
+// State
+let phase='waiting'; // waiting | betting | running | crashed
+let currentMult=1;
+let crashAt=1;
+let betPlaced=false;
+let betAmount=0;
+let hasBet=false;
+let autoOn=false;
+let autoCashoutVal=2;
+let countdown=5;
+let countdownTimer=null;
+let runInterval=null;
+let runStart=null;
+let chartPoints=[];
+let historyArr=[];
+
+// Simulated other players
+let simPlayers=[];
+
+function generateSimPlayers(){
+  simPlayers=[];
+  for(let i=0;i<Math.floor(Math.random()*6)+3;i++){
+    const names=['lyko_','neon_','void_','apex_','cyber_','ghost_'];
+    simPlayers.push({
+      name:names[Math.floor(Math.random()*names.length)]+Math.floor(Math.random()*999),
+      bet:+(Math.random()*50+1).toFixed(2),
+      autoCashout:Math.random()<.6?+(Math.random()*8+1.2).toFixed(2):null,
+      cashedOut:false,cashedAt:null
+    });
+  }
+  renderLiveBets();
+}
+
+function renderLiveBets(){
+  const el=document.getElementById('liveBets');if(!el)return;
+  el.innerHTML=simPlayers.filter(p=>!p.cashedOut).slice(0,5).map(p=>`
+    <div class="live-bet-row">
+      <span style="color:var(--cyan)">${p.name}</span>
+      <span style="color:var(--dim)">${p.bet.toFixed(2)}</span>
+      <span style="color:var(--lyko)">${currentMult.toFixed(2)}×</span>
+    </div>`).join('')+simPlayers.filter(p=>p.cashedOut).slice(0,3).map(p=>`
+    <div class="live-bet-row">
+      <span style="color:var(--dim);text-decoration:line-through">${p.name}</span>
+      <span style="color:var(--lyko)">✓ ${p.cashedAt?.toFixed(2)}×</span>
+    </div>`).join('');
+}
+
+function generateCrashPoint(){
+  const r=Math.random();
+  const crash=0.99/Math.max(r*r*r,0.001);
+  return Math.max(1.0, Math.min(crash, 10000));
+}
+
+function startCountdown(){
+  phase='betting';
+  countdown=5;
+  betPlaced=false;hasBet=false;betAmount=0;
+  document.getElementById('statusDisplay').textContent='Betting...';
+  document.getElementById('statusDisplay').style.color='var(--gold)';
+  document.getElementById('betBtn').disabled=false;
+  document.getElementById('betBtn').textContent='BET THIS ROUND';
+  const overlay=document.getElementById('multOverlay');
+  overlay.className='crash-mult-overlay waiting';
+  overlay.textContent='NEXT IN '+countdown+'s';
+  chartPoints=[];
+  generateSimPlayers();
+  draw();
+
+  countdownTimer=setInterval(()=>{
+    countdown--;
+    overlay.textContent=countdown>0?'NEXT IN '+countdown+'s':'STARTING...';
+    if(countdown<=0){clearInterval(countdownTimer);startRound();}
+  },1000);
+}
+
+function placeBet(){
+  const bet=parseFloat(document.getElementById('betAmt').value)||1;
+  if(bet>getBalance()||bet<0.01){
+    document.getElementById('betBtn').textContent='INSUFFICIENT FUNDS';
+    setTimeout(()=>document.getElementById('betBtn').textContent='BET THIS ROUND',1500);
+    return;
+  }
+  if(phase==='running'){
+    // Can't bet during active round
+    return;
+  }
+  betPlaced=true;betAmount=bet;
+  document.getElementById('betBtn').textContent='✓ BET PLACED: '+bet.toFixed(2);
+  document.getElementById('betBtn').disabled=true;
+}
+
+function startRound(){
+  phase='running';
+  crashAt=generateCrashPoint();
+  currentMult=1;
+  chartPoints=[];
+  runStart=Date.now();
+  hasBet=betPlaced;
+  autoOn=document.getElementById('autoToggle').classList.contains('on');
+  autoCashoutVal=parseFloat(document.getElementById('autoCashout').value)||2;
+
+  if(hasBet){
+    document.getElementById('cashoutBtn').classList.add('show');
+    document.getElementById('betBtn').textContent='BET NEXT ROUND';
+    document.getElementById('betBtn').disabled=true;
+  }
+  document.getElementById('statusDisplay').textContent='IN PROGRESS';
+  document.getElementById('statusDisplay').style.color='var(--lyko)';
+  const overlay=document.getElementById('multOverlay');
+  overlay.className='crash-mult-overlay';
+  overlay.textContent='1.00×';
+
+  runInterval=requestAnimationFrame(tick);
+}
+
+function tick(){
+  const elapsed=(Date.now()-runStart)/1000;
+  // Exponential growth: mult = e^(0.06*t)  — reaches 2x at ~11.5s, 10x at ~38s
+  currentMult=Math.pow(Math.E,0.06*elapsed);
+
+  // Sim players auto cashout
+  simPlayers.forEach(p=>{if(!p.cashedOut&&p.autoCashout&&currentMult>=p.autoCashout){p.cashedOut=true;p.cashedAt=currentMult;}});
+
+  chartPoints.push({t:elapsed,m:currentMult});
+  draw();
+  renderLiveBets();
+
+  document.getElementById('multOverlay').textContent=currentMult.toFixed(2)+'×';
+  document.getElementById('multDisplay').textContent=currentMult.toFixed(2)+'×';
+  if(hasBet){
+    document.getElementById('profitDisplay').textContent=(betAmount*currentMult-betAmount).toFixed(2);
+  }
+
+  // Auto cashout
+  if(hasBet&&autoOn&&currentMult>=autoCashoutVal){cashout();return;}
+
+  if(currentMult>=crashAt){crash();return;}
+  runInterval=requestAnimationFrame(tick);
+}
+
+function cashout(){
+  if(!hasBet||phase!=='running')return;
+  const payout=betAmount*currentMult;
+  recordBet('Crash',betAmount,getActiveCurrency(),payout,currentMult);
+  hasBet=false;
+  document.getElementById('cashoutBtn').classList.remove('show');
+  document.getElementById('profitDisplay').textContent='+'+(payout-betAmount).toFixed(2);
+  document.getElementById('profitDisplay').style.color='var(--lyko)';
+  simPlayers.push({name:loadAcc()?.username||'You',bet:betAmount,autoCashout:null,cashedOut:true,cashedAt:currentMult});
+}
+
+function crash(){
+  if(runInterval)cancelAnimationFrame(runInterval);
+  phase='crashed';
+  const finalMult=crashAt;
+  // Player lost if still in
+  if(hasBet){
+    recordBet('Crash',betAmount,getActiveCurrency(),0,currentMult);
+    hasBet=false;
+  }
+  document.getElementById('cashoutBtn').classList.remove('show');
+  document.getElementById('statusDisplay').textContent='CRASHED';
+  document.getElementById('statusDisplay').style.color='var(--accent)';
+  const overlay=document.getElementById('multOverlay');
+  overlay.className='crash-mult-overlay crashed';
+  overlay.textContent=finalMult.toFixed(2)+'×';
+  document.getElementById('betBtn').textContent='BET NEXT ROUND';
+  document.getElementById('betBtn').disabled=false;
+  addHistory(finalMult);
+  draw(true);
+  setTimeout(startCountdown,3000);
+}
+
+// ─── Canvas drawing ───────────────────────────────
+function draw(crashed=false){
+  if(!W||!H)resize();
+  ctx.clearRect(0,0,W,H);
+  ctx.fillStyle='#0d0f1e';
+  ctx.fillRect(0,0,W,H);
+
+  // Grid lines
+  ctx.strokeStyle='rgba(30,34,64,.8)';ctx.lineWidth=1;
+  for(let i=0;i<=4;i++){const y=H*(i/4);ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke();}
+  for(let i=0;i<=6;i++){const x=W*(i/6);ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,H);ctx.stroke();}
+
+  if(chartPoints.length<2)return;
+  const maxT=Math.max(chartPoints[chartPoints.length-1].t,5);
+  const maxM=Math.max(currentMult,1.5);
+
+  function toX(t){return(t/maxT)*W*0.9+W*0.05;}
+  function toY(m){return H-((Math.log(m)/Math.log(maxM))*H*0.85)-H*0.05;}
+
+  // Fill under curve
+  const grad=ctx.createLinearGradient(0,0,0,H);
+  grad.addColorStop(0,crashed?'rgba(233,69,96,.2)':'rgba(0,230,118,.2)');
+  grad.addColorStop(1,'rgba(0,0,0,0)');
+  ctx.beginPath();ctx.moveTo(toX(0),H);
+  chartPoints.forEach(p=>ctx.lineTo(toX(p.t),toY(p.m)));
+  ctx.lineTo(toX(chartPoints[chartPoints.length-1].t),H);
+  ctx.closePath();ctx.fillStyle=grad;ctx.fill();
+
+  // Line
+  ctx.beginPath();ctx.moveTo(toX(chartPoints[0].t),toY(chartPoints[0].m));
+  chartPoints.forEach(p=>ctx.lineTo(toX(p.t),toY(p.m)));
+  ctx.strokeStyle=crashed?'#e94560':'#00e676';ctx.lineWidth=3;ctx.stroke();
+
+  // Dot at tip
+  if(chartPoints.length>0){
+    const last=chartPoints[chartPoints.length-1];
+    ctx.beginPath();ctx.arc(toX(last.t),toY(last.m),6,0,Math.PI*2);
+    ctx.fillStyle=crashed?'#e94560':'#00e676';
+    ctx.shadowColor=crashed?'#e94560':'#00e676';ctx.shadowBlur=16;ctx.fill();ctx.shadowBlur=0;
+  }
+}
+
+function addHistory(mult){
+  historyArr.unshift(mult);
+  if(historyArr.length>12)historyArr.pop();
+  const strip=document.getElementById('histStrip');
+  strip.innerHTML=historyArr.map(m=>{
+    const cls=m<2?'low':m<5?'mid':m<20?'high':'moon';
+    return`<div class="hist-pill ${cls}">${m.toFixed(2)}×</div>`;
+  }).join('');
+}
+
+function toggleAuto(){
+  const t=document.getElementById('autoToggle');
+  t.classList.toggle('on');
+  autoOn=t.classList.contains('on');
+}
+
+function adjustBet(m){const i=document.getElementById('betAmt');i.value=Math.max(0.01,(parseFloat(i.value)||1)*m).toFixed(2);}
+
+// ─── Init ─────────────────────────────────────────
+window.addEventListener('DOMContentLoaded',()=>{
+  const acc=loadAcc();
+  if(!acc){window.location.href='../casino.html';return;}
+  refreshDisplays();
+  resize();
+  startCountdown();
+});
+window.addEventListener('resize',()=>{resize();draw();});
+</script>
+</body>
+</html>

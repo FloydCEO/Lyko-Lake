@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HiLo — Lyko's Casino</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=DM+Mono:ital,wght@0,300;0,400;1,300&display=swap');
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+:root{--void:#07080f;--deep:#0d0f1e;--surface:#121428;--border:#1e2240;--accent:#e94560;--gold:#f5a623;--cyan:#00e5ff;--lyko:#00e676;--text:#dce8ff;--dim:#5a6a90;}
+html,body{width:100%;min-height:100%;background:var(--void);color:var(--text);font-family:'DM Mono',monospace;overflow-x:hidden;cursor:none;}
+#cursor{position:fixed;top:0;left:0;width:12px;height:12px;background:var(--lyko);border-radius:50%;pointer-events:none;z-index:99999;transform:translate(-50%,-50%);transition:width .15s,height .15s;mix-blend-mode:difference;}
+#cursor.big{width:36px;height:36px;}
+body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(0,230,118,.03) 1px,transparent 1px),linear-gradient(90deg,rgba(0,230,118,.03) 1px,transparent 1px);background-size:40px 40px;pointer-events:none;z-index:0;}
+
+#shell{display:flex;min-height:100vh;position:relative;z-index:2;}
+
+/* SIDEBAR */
+#sidebar{width:220px;min-height:100vh;background:var(--deep);border-right:1px solid var(--border);display:flex;flex-direction:column;padding:0;position:sticky;top:0;height:100vh;flex-shrink:0;z-index:10;overflow-y:auto;}
+.sidebar-logo{padding:28px 24px 20px;border-bottom:1px solid var(--border);}
+.sidebar-logo a{font-family:'Orbitron',sans-serif;font-size:22px;font-weight:900;color:var(--lyko);text-decoration:none;letter-spacing:2px;display:flex;align-items:center;gap:10px;}
+.logo-icon{width:32px;height:32px;background:var(--lyko);border-radius:8px;display:flex;align-items:center;justify-content:center;font-family:'Orbitron',sans-serif;font-weight:900;font-size:16px;color:#000;}
+.sidebar-section{padding:16px 0;border-bottom:1px solid var(--border);}
+.sidebar-label{font-size:9px;letter-spacing:3px;color:var(--dim);text-transform:uppercase;padding:0 20px 10px;}
+.sidebar-item{display:flex;align-items:center;gap:12px;padding:10px 20px;color:var(--dim);text-decoration:none;font-size:12px;letter-spacing:1px;transition:color .2s,background .2s;cursor:none;}
+.sidebar-item:hover,.sidebar-item.active{color:var(--text);background:rgba(0,230,118,.05);}
+.sidebar-item.active{color:var(--lyko);border-left:2px solid var(--lyko);}
+.sidebar-icon{font-size:16px;width:20px;text-align:center;}
+.sidebar-wallet{margin-top:auto;padding:20px;border-top:1px solid var(--border);}
+.wallet-label{font-size:9px;letter-spacing:3px;color:var(--dim);text-transform:uppercase;margin-bottom:12px;}
+.wallet-row{display:flex;align-items:center;justify-content:space-between;padding:8px 12px;background:var(--surface);border:1px solid var(--border);border-radius:4px;cursor:none;transition:border-color .2s;margin-bottom:6px;}
+.wallet-row:hover{border-color:var(--lyko);}
+.wallet-row.active-currency{border-color:var(--lyko);background:rgba(0,230,118,.06);}
+.wallet-coin{display:flex;align-items:center;gap:8px;font-size:11px;}
+.coin-icon{width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:10px;}
+.coin-lyko{background:var(--lyko);color:#000;}
+.coin-gold{background:var(--gold);color:#000;}
+.coin-cyber{background:var(--cyan);color:#000;}
+.wallet-amount{font-size:11px;color:var(--text);font-weight:700;}
+
+/* TOPBAR */
+#main{flex:1;display:flex;flex-direction:column;}
+#topbar{height:64px;background:var(--deep);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 32px;position:sticky;top:0;z-index:9;}
+.topbar-title{font-family:'Orbitron',sans-serif;font-size:14px;font-weight:700;color:var(--dim);letter-spacing:3px;}
+.topbar-right{display:flex;align-items:center;gap:16px;}
+.active-bal{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:700;padding:8px 16px;background:rgba(0,230,118,.08);border:1px solid rgba(0,230,118,.3);border-radius:4px;color:var(--lyko);}
+.back-btn{font-size:10px;letter-spacing:2px;color:var(--dim);text-decoration:none;padding:8px 16px;border:1px solid var(--border);border-radius:4px;transition:all .2s;cursor:none;}
+.back-btn:hover{color:var(--text);border-color:var(--dim);}
+
+/* GAME LAYOUT */
+#game-area{display:flex;gap:0;flex:1;}
+#bet-panel{width:260px;min-height:100%;background:var(--deep);border-right:1px solid var(--border);padding:24px;flex-shrink:0;display:flex;flex-direction:column;gap:16px;}
+#play-area{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px;min-height:500px;}
+
+/* BET PANEL */
+.panel-title{font-family:'Orbitron',sans-serif;font-size:11px;font-weight:700;color:var(--dim);letter-spacing:3px;text-transform:uppercase;margin-bottom:4px;}
+.input-group{display:flex;flex-direction:column;gap:6px;}
+.input-label{font-size:9px;letter-spacing:2px;color:var(--dim);text-transform:uppercase;}
+.input-row{display:flex;gap:6px;align-items:center;}
+.bet-input{flex:1;background:var(--surface);border:1px solid var(--border);color:var(--text);font-family:'DM Mono',monospace;font-size:13px;padding:10px 12px;outline:none;transition:border-color .2s;}
+.bet-input:focus{border-color:var(--lyko);}
+.half-btn,.double-btn{padding:8px 10px;background:var(--surface);border:1px solid var(--border);color:var(--dim);font-family:'DM Mono',monospace;font-size:10px;cursor:none;transition:all .2s;}
+.half-btn:hover,.double-btn:hover{border-color:var(--lyko);color:var(--lyko);}
+.play-btn{width:100%;padding:14px;background:var(--lyko);border:none;color:#000;font-family:'Orbitron',sans-serif;font-size:12px;font-weight:700;letter-spacing:2px;cursor:none;transition:all .2s;margin-top:4px;}
+.play-btn:hover{background:#00ff85;box-shadow:0 0 20px rgba(0,230,118,.4);}
+.play-btn:disabled{background:var(--dim);cursor:not-allowed;box-shadow:none;}
+.cashout-btn{width:100%;padding:14px;background:var(--accent);border:none;color:#fff;font-family:'Orbitron',sans-serif;font-size:12px;font-weight:700;letter-spacing:2px;cursor:none;transition:all .2s;display:none;}
+.cashout-btn:hover{background:#ff6070;box-shadow:0 0 20px rgba(233,69,96,.4);}
+.cashout-btn.show{display:block;}
+.stat-row{display:flex;justify-content:space-between;font-size:11px;padding:8px 0;border-bottom:1px solid var(--border);}
+.stat-label{color:var(--dim);}
+.stat-val{color:var(--text);font-weight:700;}
+.stat-val.green{color:var(--lyko);}
+.stat-val.red{color:var(--accent);}
+
+/* HILO SPECIFIC */
+#hilo-stage{display:flex;flex-direction:column;align-items:center;gap:32px;width:100%;}
+.cards-row{display:flex;align-items:center;gap:24px;}
+.playing-card{
+  width:120px;height:170px;
+  background:var(--surface);
+  border:2px solid var(--border);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  font-family:'Orbitron',sans-serif;position:relative;
+  transition:transform .3s,border-color .3s;
+}
+.playing-card.revealed{border-color:var(--lyko);animation:cardReveal .4s ease;}
+.playing-card.win-card{border-color:var(--lyko);background:rgba(0,230,118,.08);}
+.playing-card.lose-card{border-color:var(--accent);background:rgba(233,69,96,.08);}
+.playing-card.face-down{background:var(--deep);}
+@keyframes cardReveal{0%{transform:rotateY(90deg)}100%{transform:rotateY(0)}}
+.card-rank{font-size:42px;font-weight:900;line-height:1;}
+.card-suit{font-size:24px;margin-top:4px;}
+.card-tl{position:absolute;top:8px;left:10px;font-size:14px;font-weight:700;}
+.card-br{position:absolute;bottom:8px;right:10px;font-size:14px;font-weight:700;transform:rotate(180deg);}
+.card-back{font-size:48px;color:var(--dim);}
+.card-label{font-size:9px;letter-spacing:3px;color:var(--dim);text-transform:uppercase;margin-top:8px;}
+.choice-btns{display:flex;gap:16px;}
+.choice-btn{
+  padding:14px 32px;
+  font-family:'Orbitron',sans-serif;font-size:13px;font-weight:700;letter-spacing:2px;
+  border:2px solid;cursor:none;transition:all .2s;
+  background:transparent;
+}
+.higher-btn{border-color:var(--lyko);color:var(--lyko);}
+.higher-btn:hover{background:var(--lyko);color:#000;box-shadow:0 0 20px rgba(0,230,118,.3);}
+.lower-btn{border-color:var(--accent);color:var(--accent);}
+.lower-btn:hover{background:var(--accent);color:#fff;box-shadow:0 0 20px rgba(233,69,96,.3);}
+.choice-btn:disabled{opacity:.3;cursor:not-allowed;}
+.skip-btn{padding:10px 24px;font-family:'DM Mono',monospace;font-size:11px;letter-spacing:2px;border:1px solid var(--border);color:var(--dim);background:transparent;cursor:none;transition:all .2s;}
+.skip-btn:hover{border-color:var(--dim);color:var(--text);}
+.skip-btn:disabled{opacity:.3;}
+.mult-display{font-family:'Orbitron',sans-serif;font-size:40px;font-weight:900;color:var(--lyko);text-shadow:0 0 30px rgba(0,230,118,.4);}
+.result-msg{font-size:14px;letter-spacing:3px;text-transform:uppercase;padding:12px 24px;border:1px solid;border-radius:2px;}
+.result-msg.win{border-color:var(--lyko);color:var(--lyko);background:rgba(0,230,118,.08);}
+.result-msg.lose{border-color:var(--accent);color:var(--accent);background:rgba(233,69,96,.08);}
+.odds-row{display:flex;gap:24px;font-size:11px;}
+.odds-item{display:flex;flex-direction:column;gap:4px;align-items:center;}
+.odds-label{color:var(--dim);font-size:9px;letter-spacing:2px;text-transform:uppercase;}
+.odds-val{color:var(--text);font-weight:700;}
+</style>
+</head>
+<body>
+<div id="cursor"></div>
+<div id="shell">
+  <aside id="sidebar">
+    <div class="sidebar-logo"><a href="../casino.html"><div class="logo-icon">L</div>LYKO</a></div>
+    <div class="sidebar-section">
+      <div class="sidebar-label">Originals</div>
+      <a class="sidebar-item active" href="hilo.html"><span class="sidebar-icon">🃏</span> HiLo</a>
+      <a class="sidebar-item" href="limbo.html"><span class="sidebar-icon">🎯</span> Limbo</a>
+      <a class="sidebar-item" href="plinko.html"><span class="sidebar-icon">⚪</span> Plinko</a>
+      <a class="sidebar-item" href="mines.html"><span class="sidebar-icon">💎</span> Mines</a>
+      <a class="sidebar-item" href="chicken.html"><span class="sidebar-icon">🐔</span> Chicken</a>
+      <a class="sidebar-item" href="keno.html"><span class="sidebar-icon">🔢</span> Keno</a>
+      <a class="sidebar-item" href="pump.html"><span class="sidebar-icon">🎈</span> Pump</a>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-label">Navigate</div>
+      <a class="sidebar-item" href="../casino.html"><span class="sidebar-icon">🎰</span> Casino Lobby</a>
+      <a class="sidebar-item" href="#" onclick="openAccount(event)"><span class="sidebar-icon">👤</span> <span id="usernameNav">Account</span></a>
+    </div>
+    <div class="sidebar-wallet">
+      <div class="wallet-label">Balances</div>
+      <div class="wallet-row active-currency" data-currency="lyko" onclick="setCurrency('lyko')">
+        <div class="wallet-coin"><div class="coin-icon coin-lyko">L</div><span>LYKO</span></div>
+        <span class="wallet-amount" id="bal-lyko">0.00</span>
+      </div>
+      <div class="wallet-row" data-currency="gold" onclick="setCurrency('gold')">
+        <div class="wallet-coin"><div class="coin-icon coin-gold">G</div><span>GOLD</span></div>
+        <span class="wallet-amount" id="bal-gold">0.00</span>
+      </div>
+      <div class="wallet-row" data-currency="cyber" onclick="setCurrency('cyber')">
+        <div class="wallet-coin"><div class="coin-icon coin-cyber">C</div><span>CYBER</span></div>
+        <span class="wallet-amount" id="bal-cyber">0.00</span>
+      </div>
+    </div>
+  </aside>
+
+  <main id="main">
+    <div id="topbar">
+      <span class="topbar-title">HILO</span>
+      <div class="topbar-right">
+        <div class="active-bal">
+          <span id="topCoinIcon" style="width:18px;height:18px;background:var(--lyko);border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:9px;font-weight:900;color:#000;">L</span>
+          <span id="activeCoinBal">0.00</span>
+          <span id="activeCoinName" style="font-size:9px;color:var(--dim)">LYKO</span>
+        </div>
+        <a href="../casino.html" class="back-btn">← LOBBY</a>
+      </div>
+    </div>
+
+    <div id="game-area">
+      <div id="bet-panel">
+        <div class="panel-title">HiLo</div>
+        <div class="input-group">
+          <div class="input-label">Bet Amount</div>
+          <div class="input-row">
+            <input class="bet-input" id="betAmt" type="number" value="1" min="0.01" step="0.01">
+            <button class="half-btn" onclick="setBet(0.5)">½</button>
+            <button class="double-btn" onclick="setBet(2)">2×</button>
+          </div>
+        </div>
+        <div class="stat-row"><span class="stat-label">Profit on Win</span><span class="stat-val green" id="profitDisplay">0.00</span></div>
+        <div class="stat-row"><span class="stat-label">Multiplier</span><span class="stat-val" id="multDisplay">1.00×</span></div>
+        <div class="stat-row"><span class="stat-label">Streak</span><span class="stat-val" id="streakDisplay">0</span></div>
+        <button class="play-btn" id="startBtn" onclick="startGame()">BET</button>
+        <button class="cashout-btn" id="cashoutBtn" onclick="cashout()">CASH OUT</button>
+      </div>
+
+      <div id="play-area">
+        <div id="hilo-stage">
+          <div class="mult-display" id="multBig">1.00×</div>
+
+          <div class="cards-row">
+            <div style="display:flex;flex-direction:column;align-items:center;">
+              <div class="playing-card face-down" id="prevCard"><span class="card-back">🂠</span></div>
+              <div class="card-label">Previous</div>
+            </div>
+            <div style="font-size:24px;color:var(--dim)">→</div>
+            <div style="display:flex;flex-direction:column;align-items:center;">
+              <div class="playing-card" id="currCard">
+                <div class="card-tl" id="curr-tl">?</div>
+                <div class="card-rank" id="curr-rank">?</div>
+                <div class="card-suit" id="curr-suit"></div>
+                <div class="card-br" id="curr-br">?</div>
+              </div>
+              <div class="card-label">Current</div>
+            </div>
+          </div>
+
+          <div class="odds-row" id="oddsRow">
+            <div class="odds-item">
+              <span class="odds-label">Higher</span>
+              <span class="odds-val" id="higherOdds">—</span>
+            </div>
+            <div class="odds-item">
+              <span class="odds-label">Win Chance</span>
+              <span class="odds-val" id="winChance">—</span>
+            </div>
+            <div class="odds-item">
+              <span class="odds-label">Lower</span>
+              <span class="odds-val" id="lowerOdds">—</span>
+            </div>
+          </div>
+
+          <div class="choice-btns">
+            <button class="choice-btn higher-btn" id="higherBtn" onclick="guess('higher')" disabled>▲ HIGHER</button>
+            <button class="choice-btn skip-btn" id="skipBtn" onclick="skipCard()" disabled>SKIP →</button>
+            <button class="choice-btn lower-btn" id="lowerBtn" onclick="guess('lower')" disabled>▼ LOWER</button>
+          </div>
+
+          <div class="result-msg" id="resultMsg" style="display:none;"></div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script>
+// Cursor
+const cursor=document.getElementById('cursor');
+document.addEventListener('mousemove',e=>{cursor.style.left=e.clientX+'px';cursor.style.top=e.clientY+'px';});
+document.querySelectorAll('a,button,.wallet-row').forEach(el=>{el.addEventListener('mouseenter',()=>cursor.classList.add('big'));el.addEventListener('mouseleave',()=>cursor.classList.remove('big'));});
+
+// Currency
+const currencies={lyko:{icon:'L',color:'var(--lyko)',bal:parseFloat(||'1000')},gold:{icon:'G',color:'var(--gold)',bal:parseFloat(localStorage.getItem('bal_gold')||'500')},cyber:{icon:'C',color:'var(--cyan)',bal:parseFloat(localStorage.getItem('bal_cyber')||'250')}};
+
+
+
+
+/* getBalance provided by shared system */
+
+
+
+function setBet(mult){const i=document.getElementById('betAmt');i.value=Math.max(0.01,(parseFloat(i.value)||1)*mult).toFixed(2);}
+
+// Cards
+const ranks=['2','3','4','5','6','7','8','9','10','J','Q','K','A'];
+const suits=['♠','♥','♦','♣'];
+const suitColors={'♠':'#dce8ff','♣':'#dce8ff','♥':'#e94560','♦':'#e94560'};
+let deck=[];
+let currentCard=null;
+let currentMult=1;
+let betAmount=0;
+let gameActive=false;
+let streak=0;
+
+function buildDeck(){deck=[];for(let r of ranks)for(let s of suits)deck.push({rank:r,suit:s,val:ranks.indexOf(r)});}
+function drawCard(){if(deck.length===0)buildDeck();const i=Math.floor(Math.random()*deck.length);return deck.splice(i,1)[0];}
+function renderCard(el,card){const tl=el.querySelector('.card-tl')||{textContent:''};const br=el.querySelector('.card-br')||{textContent:''};el.querySelector('#curr-tl').textContent=card.rank;el.querySelector('#curr-br').textContent=card.rank;el.querySelector('#curr-rank').textContent=card.rank;el.querySelector('#curr-suit').textContent=card.suit;el.querySelector('#curr-suit').style.color=suitColors[card.suit];el.querySelector('#curr-tl').style.color=suitColors[card.suit];el.querySelector('#curr-br').style.color=suitColors[card.suit];}
+function calcOdds(card){const v=card.val;const higher=ranks.length-1-v;const lower=v;const equal=3;const total=deck.length||51;const hProb=higher*4/total;const lProb=lower*4/total;return{hProb,lProb,hMult:hProb>0?((0.97/hProb)).toFixed(2):'∞',lMult:lProb>0?((0.97/lProb)).toFixed(2):'∞'};}
+function updateOdds(){if(!currentCard)return;const o=calcOdds(currentCard);document.getElementById('higherOdds').textContent=o.hMult+'×';document.getElementById('lowerOdds').textContent=o.lMult+'×';const total=Math.min(deck.length,51);const v=currentCard.val;const winCards=(ranks.length-1-v+v)*4;document.getElementById('winChance').textContent=Math.round(winCards/total*50)+'%';}
+
+function startGame(){
+  const bet=parseFloat(document.getElementById('betAmt').value)||1;
+  if(bet>getBalance()){showResult('Insufficient balance!','lose');return;}
+  adjustBalance(-bet);betAmount=bet;currentMult=1;streak=0;gameActive=true;
+  buildDeck();currentCard=drawCard();
+  renderCard(document.getElementById('currCard'),currentCard);
+  document.getElementById('currCard').className='playing-card revealed';
+  document.getElementById('prevCard').innerHTML='<span class="card-back">🂠</span>';
+  document.getElementById('prevCard').className='playing-card face-down';
+  document.getElementById('multBig').textContent='1.00×';
+  document.getElementById('multDisplay').textContent='1.00×';
+  document.getElementById('streakDisplay').textContent='0';
+  document.getElementById('profitDisplay').textContent=(bet*(1)-bet).toFixed(2);
+  document.getElementById('higherBtn').disabled=false;
+  document.getElementById('lowerBtn').disabled=false;
+  document.getElementById('skipBtn').disabled=false;
+  document.getElementById('startBtn').disabled=true;
+  document.getElementById('cashoutBtn').classList.add('show');
+  document.getElementById('resultMsg').style.display='none';
+  updateOdds();
+}
+
+function guess(dir){
+  if(!gameActive)return;
+  const next=drawCard();
+  // Copy current to prev
+  const prevEl=document.getElementById('prevCard');
+  prevEl.innerHTML=`<div class="card-tl" style="color:${suitColors[currentCard.suit]}">${currentCard.rank}</div><div class="card-rank" style="font-size:42px;font-weight:900">${currentCard.rank}</div><div class="card-suit" style="font-size:24px;margin-top:4px;color:${suitColors[currentCard.suit]}">${currentCard.suit}</div><div class="card-br" style="color:${suitColors[currentCard.suit]};transform:rotate(180deg)">${currentCard.rank}</div>`;
+  prevEl.className='playing-card';
+  
+  const correct=(dir==='higher'&&next.val>currentCard.val)||(dir==='lower'&&next.val<currentCard.val);
+  currentCard=next;
+  renderCard(document.getElementById('currCard'),currentCard);
+  document.getElementById('currCard').className='playing-card revealed '+(correct?'win-card':'lose-card');
+  
+  if(correct){
+    const o=calcOdds({val:next.val});
+    const stepMult=dir==='higher'?parseFloat(o.hMult)||1.5:parseFloat(o.lMult)||1.5;
+    currentMult*=Math.max(1.01,stepMult*0.5+0.7);
+    streak++;
+    document.getElementById('multBig').textContent=currentMult.toFixed(2)+'×';
+    document.getElementById('multDisplay').textContent=currentMult.toFixed(2)+'×';
+    document.getElementById('streakDisplay').textContent=streak;
+    document.getElementById('profitDisplay').textContent=(betAmount*currentMult-betAmount).toFixed(2);
+    updateOdds();
+  } else {
+    gameActive=false;
+    document.getElementById('higherBtn').disabled=true;
+    document.getElementById('lowerBtn').disabled=true;
+    document.getElementById('skipBtn').disabled=true;
+    document.getElementById('startBtn').disabled=false;
+    document.getElementById('cashoutBtn').classList.remove('show');
+    showResult('💥 Wrong! Lost '+betAmount.toFixed(2)+' '+getActiveCurrency().toUpperCase(),'lose');
+    streak=0;
+  }
+}
+
+function skipCard(){
+  if(!gameActive)return;
+  const next=drawCard();
+  document.getElementById('prevCard').innerHTML=`<div class="card-tl" style="color:${suitColors[currentCard.suit]}">${currentCard.rank}</div><div class="card-rank" style="font-size:42px;font-weight:900">${currentCard.rank}</div><div class="card-suit" style="font-size:24px;margin-top:4px;color:${suitColors[currentCard.suit]}">${currentCard.suit}</div><div class="card-br" style="color:${suitColors[currentCard.suit]};transform:rotate(180deg)">${currentCard.rank}</div>`;
+  currentCard=next;
+  renderCard(document.getElementById('currCard'),currentCard);
+  document.getElementById('currCard').className='playing-card revealed';
+  updateOdds();
+}
+
+function cashout(){
+  if(!gameActive)return;
+  const payout=betAmount*currentMult;
+  adjustBalance(payout);
+  gameActive=false;
+  document.getElementById('higherBtn').disabled=true;
+  document.getElementById('lowerBtn').disabled=true;
+  document.getElementById('skipBtn').disabled=true;
+  document.getElementById('startBtn').disabled=false;
+  document.getElementById('cashoutBtn').classList.remove('show');
+  showResult('✓ Cashed out! Won '+(payout-betAmount).toFixed(2)+' '+getActiveCurrency().toUpperCase(),'win');
+}
+
+function showResult(msg,type){
+  const el=document.getElementById('resultMsg');
+  el.textContent=msg;el.className='result-msg '+type;el.style.display='block';
+}
+buildDeck();
+// LYKO CASINO SHARED ACCOUNT SYSTEM - COOKIE BASED
+// Include this snippet in each game page's <script> block
+
+function getCookie(n){const m=document.cookie.match(new RegExp('(?:^|; )'+n+'=([^;]*)'));if(!m)return null;try{return JSON.parse(decodeURIComponent(m[1]));}catch{return null;}}
+function setCookieRaw(n,v,days=3650){const d=new Date();d.setTime(d.getTime()+days*86400000);document.cookie=`${n}=${encodeURIComponent(JSON.stringify(v))};expires=${d.toUTCString()};path=/;SameSite=Lax`;}
+function loadAcc(){return getCookie('lyko_account');}
+function saveAcc(acc){if(acc.transactions&&acc.transactions.length>200)acc.transactions=acc.transactions.slice(-200);setCookieRaw('lyko_account',acc);}
+
+const COIN_META={lyko:{bg:'#00e676',fg:'#000',icon:'L'},gold:{bg:'#f5a623',fg:'#000',icon:'G'},cyber:{bg:'#00e5ff',fg:'#000',icon:'C'}};
+
+function refreshDisplays(){
+  const acc=loadAcc();if(!acc)return;
+  const cur=acc.activeCurrency||'lyko';
+  ['lyko','gold','cyber'].forEach(c=>{
+    const el=document.getElementById('bal-'+c);if(el)el.textContent=(acc.balances[c]||0).toFixed(2);
+    const row=document.querySelector(`.wallet-row[data-currency="${c}"]`);if(row)row.classList.toggle('active-currency',c===cur);
+  });
+  const balEl=document.getElementById('activeCoinBal');if(balEl)balEl.textContent=(acc.balances[cur]||0).toFixed(2);
+  const nameEl=document.getElementById('activeCoinName');if(nameEl)nameEl.textContent=cur.toUpperCase();
+  const cm=COIN_META[cur];
+  const ic=document.getElementById('topCoinIcon');if(ic){ic.style.background=cm.bg;ic.style.color=cm.fg;ic.textContent=cm.icon;}
+  const un=document.getElementById('usernameNav');if(un)un.textContent=acc.username||'Account';
+}
+
+function setCurrency(c){const acc=loadAcc();if(!acc)return;acc.activeCurrency=c;saveAcc(acc);refreshDisplays();}
+
+function recordBet(game,bet,currency,payout,mult){
+  const acc=loadAcc();if(!acc)return;
+  acc.balances[currency]=Math.max(0,(acc.balances[currency]||0)-bet+payout);
+  acc.stats=acc.stats||{totalWagered:{},totalWon:{},gamesPlayed:0,biggestWin:0,biggestMult:0};
+  acc.stats.totalWagered[currency]=(acc.stats.totalWagered[currency]||0)+bet;
+  if(payout>bet){acc.stats.totalWon=acc.stats.totalWon||{};acc.stats.totalWon[currency]=(acc.stats.totalWon[currency]||0)+(payout-bet);}
+  acc.stats.gamesPlayed=(acc.stats.gamesPlayed||0)+1;
+  const profit=payout-bet;
+  if(profit>(acc.stats.biggestWin||0))acc.stats.biggestWin=profit;
+  if(mult>(acc.stats.biggestMult||0))acc.stats.biggestMult=mult;
+  acc.transactions=acc.transactions||[];
+  acc.transactions.push({type:payout>=bet?'win':'loss',game,bet,payout,profit:parseFloat((payout-bet).toFixed(4)),currency,mult:parseFloat(mult.toFixed(2)),ts:Date.now()});
+  saveAcc(acc);refreshDisplays();
+}
+
+function getBalance(){const acc=loadAcc();if(!acc)return 0;return acc.balances[acc.activeCurrency||'lyko']||0;}
+function getActiveCurrency(){const acc=loadAcc();return acc?.activeCurrency||'lyko';}
+
+function openAccount(e){if(e)e.preventDefault();showAccountModal();}
+function showAccountModal(){
+  const acc=loadAcc();if(!acc)return;
+  const old=document.getElementById('lykoModal');if(old)old.remove();
+  const txRows=[...(acc.transactions||[])].reverse().slice(0,60).map(tx=>{const c=tx.type==='withdrawal'?'#5a6a90':tx.profit>=0?'#00e676':'#e94560';const s=tx.profit>=0?'+':'';return`<tr><td style="color:#5a6a90;font-size:10px;white-space:nowrap">${new Date(tx.ts).toLocaleDateString()} ${new Date(tx.ts).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})}</td><td>${tx.game}</td><td>${(tx.bet||0).toFixed(2)} ${(tx.currency||'lyko').toUpperCase()}</td><td style="color:#5a6a90">${tx.mult>0?tx.mult.toFixed(2)+'×':'—'}</td><td style="color:${c};font-weight:700">${tx.type==='withdrawal'?'↑ Withdraw':s+(tx.profit||0).toFixed(2)}</td></tr>`;}).join('')||'<tr><td colspan="5" style="padding:20px;text-align:center;color:#5a6a90">No transactions yet</td></tr>';
+  const o=document.createElement('div');o.id='lykoModal';o.style.cssText='position:fixed;inset:0;z-index:10000;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.85);backdrop-filter:blur(4px);';
+  o.innerHTML=`<div style="background:#0d0f1e;border:1px solid #1e2240;width:min(720px,95vw);max-height:88vh;display:flex;flex-direction:column;overflow:hidden;">
+    <div style="padding:20px 24px;border-bottom:1px solid #1e2240;display:flex;justify-content:space-between;align-items:center;flex-shrink:0"><div><div style="font-family:'Orbitron',sans-serif;font-size:18px;font-weight:900;color:#00e676">${acc.username}</div><div style="font-size:10px;color:#5a6a90;margin-top:2px">Member since ${new Date(acc.created).toLocaleDateString()}</div></div><button onclick="document.getElementById('lykoModal').remove()" style="background:none;border:1px solid #1e2240;color:#5a6a90;font-size:16px;padding:6px 12px;cursor:pointer">&times;</button></div>
+    <div style="display:flex;border-bottom:1px solid #1e2240;flex-shrink:0">${['ov:Overview','tx:History','st:Settings','wd:Withdraw'].map(x=>{const[id,label]=x.split(':');return`<button id="mt-${id}" onclick="mSwitch('${id}')" style="flex:1;padding:10px;background:none;border:none;border-bottom:2px solid transparent;color:#5a6a90;font-family:'DM Mono',monospace;font-size:10px;letter-spacing:2px;cursor:pointer;transition:all .2s">${label}</button>`;}).join('')}</div>
+    <div style="overflow-y:auto;flex:1;padding:20px 24px">
+      <div id="mp-ov"><div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin-bottom:18px">${[['Games',acc.stats?.gamesPlayed||0,'#dce8ff'],['Biggest Win',(acc.stats?.biggestWin||0).toFixed(2),'#00e676'],['Best Multi',(acc.stats?.biggestMult||0).toFixed(2)+'×','#f5a623'],['LYKO Wagered',(acc.stats?.totalWagered?.lyko||0).toFixed(2),'#00e676'],['GOLD Wagered',(acc.stats?.totalWagered?.gold||0).toFixed(2),'#f5a623'],['CYBER Wagered',(acc.stats?.totalWagered?.cyber||0).toFixed(2),'#00e5ff']].map(([l,v,c])=>`<div style="background:#121428;border:1px solid #1e2240;padding:14px"><div style="font-size:9px;letter-spacing:2px;color:#5a6a90;text-transform:uppercase;margin-bottom:6px">${l}</div><div style="font-family:'Orbitron',sans-serif;font-size:16px;font-weight:700;color:${c}">${v}</div></div>`).join('')}</div>${['lyko','gold','cyber'].map(c=>{const m=COIN_META[c];const usd=(acc.balances[c]||0)*(c==='lyko'?2:c==='gold'?1.5:0.8);return`<div style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:#121428;border:1px solid #1e2240;margin-bottom:8px"><div style="display:flex;align-items:center;gap:8px"><span style="width:24px;height:24px;border-radius:50%;background:${m.bg};color:${m.fg};display:inline-flex;align-items:center;justify-content:center;font-weight:900;font-size:11px">${m.icon}</span><span>${c.toUpperCase()}</span></div><div style="text-align:right"><div style="font-family:'Orbitron',sans-serif;font-weight:700;color:#dce8ff">${(acc.balances[c]||0).toFixed(2)}</div><div style="font-size:10px;color:#5a6a90">≈ $${usd.toFixed(2)}</div></div></div>`;}).join('')}</div>
+      <div id="mp-tx" style="display:none"><div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:11px"><thead><tr style="border-bottom:1px solid #1e2240">${['Time','Game','Bet','Mult','Profit'].map(h=>`<th style="padding:7px 10px;text-align:left;color:#5a6a90;font-weight:400;font-size:9px;letter-spacing:2px;text-transform:uppercase">${h}</th>`).join('')}</tr></thead><tbody>${txRows}</tbody></table></div></div>
+      <div id="mp-st" style="display:none"><div style="display:flex;flex-direction:column;gap:12px;max-width:380px"><div><div style="font-size:9px;letter-spacing:2px;color:#5a6a90;text-transform:uppercase;margin-bottom:8px">Display Name</div><div style="display:flex;gap:8px"><input id="mni" value="${acc.username}" style="flex:1;background:#121428;border:1px solid #1e2240;color:#dce8ff;font-family:'DM Mono',monospace;font-size:13px;padding:9px 12px;outline:none"><button onclick="mSaveName()" style="padding:9px 16px;background:#00e676;border:none;color:#000;font-family:'Orbitron',sans-serif;font-size:11px;font-weight:700;cursor:pointer">SAVE</button></div></div><div><div style="font-size:9px;letter-spacing:2px;color:#5a6a90;text-transform:uppercase;margin-bottom:8px">Withdrawal Address</div><div style="display:flex;gap:8px"><input id="mwi" value="${acc.withdrawalAddress||''}" placeholder="Address / username" style="flex:1;background:#121428;border:1px solid #1e2240;color:#dce8ff;font-family:'DM Mono',monospace;font-size:13px;padding:9px 12px;outline:none"><button onclick="mSaveWallet()" style="padding:9px 16px;background:#00e676;border:none;color:#000;font-family:'Orbitron',sans-serif;font-size:11px;font-weight:700;cursor:pointer">SAVE</button></div></div><div id="mok" style="display:none;color:#00e676;font-size:11px;letter-spacing:2px">✓ Saved!</div></div></div>
+      <div id="mp-wd" style="display:none"><div style="max-width:380px;display:flex;flex-direction:column;gap:12px"><div style="padding:12px;background:rgba(0,230,118,.06);border:1px solid rgba(0,230,118,.2);font-size:11px;color:#00e676;line-height:1.7">Min 1 coin per withdrawal. 1 LYKO = $2.00 USD.</div><div><div style="font-size:9px;letter-spacing:2px;color:#5a6a90;text-transform:uppercase;margin-bottom:6px">Currency</div><select id="wc" style="width:100%;background:#121428;border:1px solid #1e2240;color:#dce8ff;font-family:'DM Mono',monospace;font-size:13px;padding:9px 12px;outline:none"><option value="lyko">LYKO (${(acc.balances.lyko||0).toFixed(2)})</option><option value="gold">GOLD (${(acc.balances.gold||0).toFixed(2)})</option><option value="cyber">CYBER (${(acc.balances.cyber||0).toFixed(2)})</option></select></div><div><div style="font-size:9px;letter-spacing:2px;color:#5a6a90;text-transform:uppercase;margin-bottom:6px">Amount</div><input id="wa" type="number" min="1" step="0.01" placeholder="0.00" style="width:100%;background:#121428;border:1px solid #1e2240;color:#dce8ff;font-family:'DM Mono',monospace;font-size:13px;padding:9px 12px;outline:none"></div><div><div style="font-size:9px;letter-spacing:2px;color:#5a6a90;text-transform:uppercase;margin-bottom:6px">Destination</div><input id="wd" value="${acc.withdrawalAddress||''}" placeholder="Wallet address" style="width:100%;background:#121428;border:1px solid #1e2240;color:#dce8ff;font-family:'DM Mono',monospace;font-size:13px;padding:9px 12px;outline:none"></div><button onclick="mDoWithdraw()" style="width:100%;padding:13px;background:#00e676;border:none;color:#000;font-family:'Orbitron',sans-serif;font-size:12px;font-weight:700;letter-spacing:2px;cursor:pointer">CONFIRM WITHDRAWAL</button><div id="wmsg" style="display:none;font-size:11px;padding:9px 12px;border:1px solid"></div></div></div>
+    </div>
+  </div>`;
+  document.body.appendChild(o);o.addEventListener('click',e=>{if(e.target===o)o.remove();});mSwitch('ov');
+}
+function mSwitch(t){['ov','tx','st','wd'].forEach(x=>{const p=document.getElementById('mp-'+x);const b=document.getElementById('mt-'+x);if(p)p.style.display=x===t?'block':'none';if(b){b.style.borderBottomColor=x===t?'#00e676':'transparent';b.style.color=x===t?'#00e676':'#5a6a90';}});}
+function mSaveName(){const v=document.getElementById('mni')?.value?.trim();if(!v)return;const acc=loadAcc();if(!acc)return;acc.username=v;saveAcc(acc);const un=document.getElementById('usernameNav');if(un)un.textContent=v;const ok=document.getElementById('mok');if(ok){ok.style.display='block';setTimeout(()=>ok.style.display='none',2000);}}
+function mSaveWallet(){const v=document.getElementById('mwi')?.value?.trim()||'';const acc=loadAcc();if(!acc)return;acc.withdrawalAddress=v;saveAcc(acc);const ok=document.getElementById('mok');if(ok){ok.style.display='block';setTimeout(()=>ok.style.display='none',2000);}}
+function mDoWithdraw(){const cur=document.getElementById('wc')?.value;const amt=parseFloat(document.getElementById('wa')?.value);const addr=document.getElementById('wd')?.value?.trim();const msg=document.getElementById('wmsg');function sm(ok,m){if(msg){msg.style.display='block';msg.style.borderColor=ok?'#00e676':'#e94560';msg.style.color=ok?'#00e676':'#e94560';msg.textContent=m;}}if(!cur||!amt||amt<1||!addr){sm(false,'Fill all fields — min 1 coin.');return;}const acc=loadAcc();if(!acc)return;if((acc.balances[cur]||0)<amt){sm(false,'Insufficient balance.');return;}acc.balances[cur]-=amt;acc.transactions=acc.transactions||[];acc.transactions.push({type:'withdrawal',game:'Wallet',bet:amt,payout:0,profit:-amt,currency:cur,mult:0,address:addr,ts:Date.now()});saveAcc(acc);refreshDisplays();sm(true,`✓ Withdrawn ${amt.toFixed(2)} ${cur.toUpperCase()} → ${addr}`);}
+
+
+// Init
+window.addEventListener('DOMContentLoaded',()=>{
+  const acc=loadAcc();
+  if(!acc){window.location.href='../casino.html';return;}
+  refreshDisplays();
+});
+</script>
+</body>
+</html>
