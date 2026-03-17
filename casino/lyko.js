@@ -7,7 +7,7 @@
 (function () {
   // ── CONFIG ──────────────────────────────────────────────────────────────────
   // Change this to your deployed worker URL after: wrangler deploy
-  const API = 'https://lyko-casino.lillykobusiness69.workers.dev';
+  const API = 'https://lyko-casino.YOUR-SUBDOMAIN.workers.dev';
   // For local dev use: const API = 'http://localhost:8787';
 
   // ── STORAGE ─────────────────────────────────────────────────────────────────
@@ -498,7 +498,7 @@
     <button id="authTabLogin" onclick="authTab('login')" style="flex:1;padding:10px;background:#00e676;border:none;color:#000;font-family:'Orbitron',sans-serif;font-size:10px;font-weight:900;letter-spacing:2px;cursor:pointer">SIGN IN</button>
     <button id="authTabRegister" onclick="authTab('register')" style="flex:1;padding:10px;background:#121428;border:1px solid #1e2240;color:#5a6a90;font-family:'Orbitron',sans-serif;font-size:10px;font-weight:900;letter-spacing:2px;cursor:pointer">REGISTER</button>
   </div>
-  <input class="ob-input" id="obUser" type="text" maxlength="20" placeholder="Username" autocomplete="off">
+  <input class="ob-input" id="obUser" type="text" maxlength="50" placeholder="Username or email" autocomplete="off">
   <input class="ob-input" id="obPass" type="password" maxlength="60" placeholder="Password" autocomplete="off" style="margin-top:8px">
   <div id="obConfirmWrap" style="display:none;margin-top:8px">
     <input class="ob-input" id="obConf" type="password" maxlength="60" placeholder="Confirm Password" autocomplete="off">
