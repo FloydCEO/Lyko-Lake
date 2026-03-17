@@ -7,7 +7,7 @@
 (function () {
   // ── CONFIG ──────────────────────────────────────────────────────────────────
   // Change this to your deployed worker URL after: wrangler deploy
-  const API = 'https://lyko-casino.YOUR-SUBDOMAIN.workers.dev';
+  const API = 'https://lyko-casino.lillykobusiness69.workers.dev';
   // For local dev use: const API = 'http://localhost:8787';
 
   // ── STORAGE ─────────────────────────────────────────────────────────────────
