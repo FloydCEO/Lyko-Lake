@@ -258,7 +258,7 @@ document.querySelectorAll('.game-card').forEach(card => {
   });
 });
 
-// ── Feed status indicator ─────────────────────────────────────────────────────
+// ── WebSocket status indicator ────────────────────────────────────────────────
 Lyko.onFeedEvent(msg => {
   if (msg.type === 'history' || msg.type === 'bet') {
     const el = document.getElementById('wsStatus');

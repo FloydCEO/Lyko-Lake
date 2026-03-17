@@ -1,0 +1,613 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Leaderboard — Lyko's Casino</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=DM+Mono:ital,wght@0,300;0,400;1,300&display=swap');
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --void:#07080f;--deep:#0d0f1e;--surface:#121428;--card:#0f1120;
+  --border:#1e2240;--accent:#e94560;--gold:#f5a623;--cyan:#00e5ff;
+  --lyko:#00e676;--text:#dce8ff;--dim:#5a6a90;
+  --rank1:#f5a623;--rank2:#c0cfe0;--rank3:#cd7f32;
+}
+html,body{width:100%;min-height:100%;background:var(--void);color:var(--text);font-family:'DM Mono',monospace;overflow-x:hidden;cursor:none;}
+#cursor{position:fixed;top:0;left:0;width:12px;height:12px;background:var(--lyko);border-radius:50%;pointer-events:none;z-index:99999;transform:translate(-50%,-50%);transition:width .15s,height .15s;mix-blend-mode:difference;}
+#cursor.big{width:36px;height:36px;}
+body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(0,230,118,.03) 1px,transparent 1px),linear-gradient(90deg,rgba(0,230,118,.03) 1px,transparent 1px);background-size:40px 40px;pointer-events:none;z-index:0;}
+
+/* Layout */
+#shell{display:flex;min-height:100vh;position:relative;z-index:2;}
+#sidebar{width:220px;min-height:100vh;background:var(--deep);border-right:1px solid var(--border);display:flex;flex-direction:column;position:sticky;top:0;height:100vh;flex-shrink:0;z-index:10;overflow-y:auto;}
+.sidebar-logo{padding:28px 24px 20px;border-bottom:1px solid var(--border);}
+.sidebar-logo a{font-family:'Orbitron',sans-serif;font-size:22px;font-weight:900;color:var(--lyko);text-decoration:none;letter-spacing:2px;display:flex;align-items:center;gap:10px;}
+.logo-icon{width:32px;height:32px;background:var(--lyko);border-radius:8px;display:flex;align-items:center;justify-content:center;font-family:'Orbitron',sans-serif;font-weight:900;font-size:16px;color:#000;}
+.sidebar-section{padding:16px 0;border-bottom:1px solid var(--border);}
+.sidebar-label{font-size:9px;letter-spacing:3px;color:var(--dim);text-transform:uppercase;padding:0 20px 10px;}
+.sidebar-item{display:flex;align-items:center;gap:12px;padding:10px 20px;color:var(--dim);text-decoration:none;font-size:12px;letter-spacing:1px;transition:color .2s,background .2s;cursor:none;}
+.sidebar-item:hover,.sidebar-item.active{color:var(--text);background:rgba(0,230,118,.05);}
+.sidebar-item.active{color:var(--lyko);border-left:2px solid var(--lyko);}
+.sidebar-icon{font-size:16px;width:20px;text-align:center;}
+.sidebar-wallet{margin-top:auto;padding:20px;border-top:1px solid var(--border);}
+.wallet-label{font-size:9px;letter-spacing:3px;color:var(--dim);text-transform:uppercase;margin-bottom:12px;}
+.wallet-row{display:flex;align-items:center;justify-content:space-between;padding:8px 12px;background:var(--surface);border:1px solid var(--border);border-radius:4px;cursor:none;transition:border-color .2s;margin-bottom:6px;}
+.wallet-row:hover{border-color:var(--lyko);}
+.wallet-row.active-currency{border-color:var(--lyko);background:rgba(0,230,118,.06);}
+.wallet-coin{display:flex;align-items:center;gap:8px;font-size:11px;}
+.coin-icon{width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:10px;}
+.coin-lyko{background:var(--lyko);color:#000;}.coin-gold{background:var(--gold);color:#000;}.coin-cyber{background:var(--cyan);color:#000;}
+.wallet-amount{font-size:11px;color:var(--text);font-weight:700;}
+#main{flex:1;overflow-y:auto;}
+#topbar{height:64px;background:var(--deep);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 32px;position:sticky;top:0;z-index:9;}
+.topbar-title{font-family:'Orbitron',sans-serif;font-size:14px;font-weight:700;color:var(--dim);letter-spacing:3px;}
+.topbar-right{display:flex;align-items:center;gap:12px;}
+.active-bal{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:700;padding:8px 16px;background:rgba(0,230,118,.08);border:1px solid rgba(0,230,118,.3);border-radius:4px;color:var(--lyko);}
+.back-btn{font-size:10px;letter-spacing:2px;color:var(--dim);text-decoration:none;padding:8px 14px;border:1px solid var(--border);transition:all .2s;cursor:none;}
+.back-btn:hover{color:var(--text);border-color:var(--dim);}
+
+/* Page content */
+#page{padding:48px 40px 80px;max-width:960px;margin:0 auto;}
+
+/* Header */
+.lb-eyebrow{font-size:9px;letter-spacing:4px;color:var(--dim);text-transform:uppercase;margin-bottom:14px;display:flex;align-items:center;gap:10px;}
+.lb-eyebrow::before{content:'';width:20px;height:1px;background:var(--gold);}
+.lb-title{font-family:'Orbitron',sans-serif;font-size:clamp(28px,4vw,48px);font-weight:900;line-height:1.1;margin-bottom:8px;}
+.lb-title .g{color:var(--gold);}
+.lb-sub{font-size:10px;color:var(--dim);letter-spacing:1px;margin-bottom:40px;display:flex;align-items:center;gap:16px;}
+.lb-live-dot{width:6px;height:6px;border-radius:50%;background:var(--lyko);box-shadow:0 0 8px var(--lyko);animation:pulse 1.5s infinite;display:inline-block;}
+.refresh-btn{font-size:9px;letter-spacing:2px;color:var(--dim);padding:5px 12px;border:1px solid var(--border);background:none;cursor:pointer;font-family:'DM Mono',monospace;transition:all .2s;}
+.refresh-btn:hover{color:var(--lyko);border-color:var(--lyko);}
+.refresh-btn.spinning{animation:spin .6s linear infinite;}
+
+/* Tabs */
+.lb-tabs{display:flex;gap:0;border-bottom:1px solid var(--border);margin-bottom:32px;}
+.lb-tab{padding:10px 20px;background:none;border:none;border-bottom:2px solid transparent;color:var(--dim);font-family:'DM Mono',monospace;font-size:10px;letter-spacing:2px;text-transform:uppercase;cursor:pointer;transition:all .2s;}
+.lb-tab.active{border-bottom-color:var(--gold);color:var(--gold);}
+.lb-tab:hover:not(.active){color:var(--text);}
+
+/* Podium */
+#podium{display:flex;align-items:flex-end;justify-content:center;gap:0;margin-bottom:48px;height:240px;position:relative;}
+.podium-slot{display:flex;flex-direction:column;align-items:center;position:relative;flex:1;max-width:200px;}
+.podium-avatar{width:56px;height:56px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Orbitron',sans-serif;font-weight:900;font-size:22px;margin-bottom:10px;position:relative;z-index:2;border:3px solid;}
+.podium-slot:nth-child(1) .podium-avatar{border-color:var(--rank2);background:rgba(192,207,224,.1);color:var(--rank2);}
+.podium-slot:nth-child(2) .podium-avatar{border-color:var(--rank1);background:rgba(245,166,35,.1);color:var(--rank1);width:68px;height:68px;font-size:26px;}
+.podium-slot:nth-child(3) .podium-avatar{border-color:var(--rank3);background:rgba(205,127,50,.1);color:var(--rank3);}
+.podium-crown{position:absolute;top:-22px;font-size:20px;animation:bob 2s ease-in-out infinite;}
+.podium-name{font-family:'Orbitron',sans-serif;font-size:11px;font-weight:700;color:#fff;margin-bottom:4px;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:160px;}
+.podium-won{font-size:10px;color:var(--lyko);font-weight:700;margin-bottom:10px;}
+.podium-block{width:100%;position:relative;display:flex;align-items:center;justify-content:center;border-top:2px solid;}
+.podium-slot:nth-child(1) .podium-block{height:80px;background:linear-gradient(180deg,rgba(192,207,224,.12),rgba(192,207,224,.04));border-color:var(--rank2);}
+.podium-slot:nth-child(2) .podium-block{height:120px;background:linear-gradient(180deg,rgba(245,166,35,.18),rgba(245,166,35,.04));border-color:var(--rank1);}
+.podium-slot:nth-child(3) .podium-block{height:60px;background:linear-gradient(180deg,rgba(205,127,50,.12),rgba(205,127,50,.04));border-color:var(--rank3);}
+.podium-rank{font-family:'Orbitron',sans-serif;font-weight:900;opacity:.3;}
+.podium-slot:nth-child(1) .podium-rank{font-size:40px;color:var(--rank2);}
+.podium-slot:nth-child(2) .podium-rank{font-size:52px;color:var(--rank1);}
+.podium-slot:nth-child(3) .podium-rank{font-size:32px;color:var(--rank3);}
+
+/* Table */
+.lb-table-wrap{background:var(--card);border:1px solid var(--border);overflow:hidden;}
+.lb-table-header{display:grid;grid-template-columns:56px 1fr 140px 120px 100px 100px;align-items:center;padding:12px 20px;border-bottom:1px solid var(--border);font-size:9px;letter-spacing:3px;color:var(--dim);text-transform:uppercase;}
+.lb-row{display:grid;grid-template-columns:56px 1fr 140px 120px 100px 100px;align-items:center;padding:14px 20px;border-bottom:1px solid rgba(30,34,64,.5);transition:background .2s;position:relative;animation:rowIn .4s ease both;}
+.lb-row:last-child{border-bottom:none;}
+.lb-row:hover{background:rgba(0,230,118,.03);}
+.lb-row.is-me{background:rgba(0,230,118,.05);border-left:2px solid var(--lyko);}
+.lb-row.rank-1{background:rgba(245,166,35,.05);}
+.lb-row.rank-2{background:rgba(192,207,224,.03);}
+.lb-row.rank-3{background:rgba(205,127,50,.04);}
+
+.rank-badge{width:32px;height:32px;border-radius:4px;display:flex;align-items:center;justify-content:center;font-family:'Orbitron',sans-serif;font-size:13px;font-weight:900;}
+.rank-badge.r1{background:rgba(245,166,35,.15);color:var(--rank1);border:1px solid rgba(245,166,35,.3);}
+.rank-badge.r2{background:rgba(192,207,224,.1);color:var(--rank2);border:1px solid rgba(192,207,224,.2);}
+.rank-badge.r3{background:rgba(205,127,50,.12);color:var(--rank3);border:1px solid rgba(205,127,50,.25);}
+.rank-badge.rn{background:var(--surface);color:var(--dim);border:1px solid var(--border);font-size:11px;}
+
+.player-cell{display:flex;align-items:center;gap:12px;min-width:0;}
+.player-avatar{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Orbitron',sans-serif;font-weight:900;font-size:13px;flex-shrink:0;}
+.player-name{font-size:12px;color:#fff;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.player-you{font-size:8px;letter-spacing:2px;color:var(--lyko);margin-left:6px;padding:1px 6px;border:1px solid rgba(0,230,118,.3);border-radius:2px;}
+
+.won-cell{font-family:'Orbitron',sans-serif;font-size:13px;font-weight:900;color:var(--lyko);}
+.stat-cell{font-size:11px;color:var(--text);}
+.stat-cell.dim{color:var(--dim);}
+
+/* Win-rate bar */
+.wr-cell{display:flex;align-items:center;gap:8px;}
+.wr-bar-track{flex:1;height:4px;background:var(--surface);border-radius:2px;overflow:hidden;}
+.wr-bar-fill{height:100%;border-radius:2px;transition:width 1s cubic-bezier(.22,1,.36,1);}
+.wr-label{font-size:10px;width:36px;text-align:right;flex-shrink:0;}
+
+/* Won bar (relative to #1) */
+.won-bar-track{position:absolute;bottom:0;left:0;width:100%;height:2px;background:var(--surface);}
+.won-bar-fill{height:100%;transition:width 1.2s cubic-bezier(.22,1,.36,1);}
+
+/* Loading skeleton */
+.skeleton-row{display:grid;grid-template-columns:56px 1fr 140px 120px 100px 100px;align-items:center;padding:14px 20px;border-bottom:1px solid rgba(30,34,64,.5);gap:8px;}
+.skel{background:linear-gradient(90deg,var(--surface) 25%,rgba(30,34,64,.8) 50%,var(--surface) 75%);background-size:200% 100%;animation:shimmer 1.5s infinite;border-radius:3px;}
+.skel-sm{height:10px;width:70%;}
+.skel-md{height:12px;width:80%;}
+.skel-c{height:32px;width:32px;border-radius:4px;}
+.skel-av{height:34px;width:34px;border-radius:50%;}
+
+/* Your rank callout */
+#my-rank-bar{background:rgba(0,230,118,.06);border:1px solid rgba(0,230,118,.2);padding:14px 20px;margin-bottom:16px;display:none;align-items:center;justify-content:space-between;}
+.my-rank-text{font-size:11px;color:var(--lyko);letter-spacing:1px;}
+.my-rank-num{font-family:'Orbitron',sans-serif;font-size:18px;font-weight:900;color:var(--lyko);}
+
+/* Empty state */
+#empty-state{padding:60px 20px;text-align:center;display:none;}
+.empty-icon{font-size:48px;margin-bottom:16px;opacity:.3;}
+.empty-text{font-size:11px;color:var(--dim);letter-spacing:2px;}
+
+/* Auth modal */
+.ob-box{background:var(--deep);border:1px solid var(--border);padding:48px;width:min(460px,90vw);text-align:center;animation:fadeUp .6s ease both;}
+.ob-logo{width:64px;height:64px;background:var(--lyko);border-radius:16px;display:inline-flex;align-items:center;justify-content:center;font-family:'Orbitron',sans-serif;font-weight:900;font-size:32px;color:#000;margin-bottom:24px;}
+.ob-title{font-family:'Orbitron',sans-serif;font-size:26px;font-weight:900;color:#fff;margin-bottom:8px;}
+.ob-sub{font-size:10px;color:var(--dim);letter-spacing:3px;text-transform:uppercase;margin-bottom:24px;}
+.ob-input{width:100%;background:var(--surface);border:1px solid var(--border);color:var(--text);font-family:'DM Mono',monospace;font-size:16px;padding:14px;outline:none;text-align:center;letter-spacing:2px;transition:border-color .2s;}
+.ob-input:focus{border-color:var(--lyko);}
+.ob-btn{width:100%;padding:16px;background:var(--lyko);border:none;color:#000;font-family:'Orbitron',sans-serif;font-size:13px;font-weight:900;letter-spacing:3px;cursor:pointer;transition:all .2s;}
+.ob-btn:hover{background:#00ff85;box-shadow:0 0 30px rgba(0,230,118,.5);}
+.ob-starting{margin-top:16px;font-size:10px;color:var(--dim);letter-spacing:1px;}
+.ob-starting b{color:var(--lyko);}
+.m-overlay{position:fixed;inset:0;z-index:10000;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.85);backdrop-filter:blur(4px);}
+.m-box{background:#0d0f1e;border:1px solid #1e2240;width:min(740px,95vw);max-height:90vh;display:flex;flex-direction:column;overflow:hidden;}
+.m-header{padding:22px 28px;border-bottom:1px solid #1e2240;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
+.m-tabs{display:flex;border-bottom:1px solid #1e2240;flex-shrink:0;}
+.m-tab{flex:1;padding:11px;background:none;border:none;border-bottom:2px solid transparent;color:#5a6a90;font-family:'DM Mono',monospace;font-size:10px;letter-spacing:2px;text-transform:uppercase;cursor:pointer;transition:all .2s;}
+.m-tab.on{border-bottom-color:#00e676;color:#00e676;}
+.m-body{overflow-y:auto;flex:1;padding:22px 28px;}
+.m-stat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin-bottom:20px;}
+.m-stat{background:#121428;border:1px solid #1e2240;padding:14px;}
+.m-stat-label{font-size:9px;letter-spacing:2px;color:#5a6a90;text-transform:uppercase;margin-bottom:6px;}
+.m-stat-val{font-family:'Orbitron',sans-serif;font-size:17px;font-weight:700;}
+.m-input{width:100%;background:#121428;border:1px solid #1e2240;color:#dce8ff;font-family:'DM Mono',monospace;font-size:13px;padding:10px 12px;outline:none;transition:border-color .2s;}
+.m-input:focus{border-color:#00e676;}
+.m-btn{padding:10px 18px;background:#00e676;border:none;color:#000;font-family:'Orbitron',sans-serif;font-size:11px;font-weight:700;letter-spacing:1px;cursor:pointer;transition:all .2s;}
+.m-btn:hover{background:#00ff85;}
+.m-btn-full{width:100%;padding:14px;font-size:12px;letter-spacing:2px;}
+.m-row{display:flex;align-items:center;justify-content:space-between;padding:11px 14px;background:#121428;border:1px solid #1e2240;margin-bottom:8px;}
+.m-close{background:none;border:1px solid #1e2240;color:#5a6a90;font-size:18px;padding:6px 12px;cursor:pointer;}
+.m-section-label{font-size:9px;letter-spacing:3px;color:#5a6a90;text-transform:uppercase;margin-bottom:10px;}
+.tx-table{width:100%;border-collapse:collapse;font-size:11px;}
+.tx-table th{padding:7px 10px;text-align:left;color:#5a6a90;font-weight:400;letter-spacing:2px;font-size:9px;text-transform:uppercase;border-bottom:1px solid #1e2240;}
+.tx-table td{padding:8px 10px;}
+select.m-input{appearance:none;}
+
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+@keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
+@keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+@keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+@keyframes rowIn{from{opacity:0;transform:translateX(-8px)}to{opacity:1;transform:translateX(0)}}
+@keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+@keyframes podiumRise{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:translateY(0)}}
+
+/* Responsive */
+@media(max-width:720px){
+  #sidebar{display:none;}
+  .lb-table-header,.lb-row,.skeleton-row{grid-template-columns:48px 1fr 110px 80px;}
+  .lb-table-header > *:nth-child(5),
+  .lb-table-header > *:nth-child(6),
+  .lb-row > *:nth-child(5),
+  .lb-row > *:nth-child(6),
+  .skeleton-row > *:nth-child(5),
+  .skeleton-row > *:nth-child(6){display:none;}
+  #page{padding:24px 16px 60px;}
+}
+</style>
+</head>
+<body>
+<div id="cursor"></div>
+
+<div id="shell">
+  <aside id="sidebar">
+    <div class="sidebar-logo"><a href="../casino.html"><div class="logo-icon">L</div>LYKO</a></div>
+    <div class="sidebar-section">
+      <div class="sidebar-label">Originals</div>
+      <a class="sidebar-item" href="casino/crash.html"><span class="sidebar-icon">💥</span> Crash</a>
+      <a class="sidebar-item" href="casino/hilo.html"><span class="sidebar-icon">🃏</span> HiLo</a>
+      <a class="sidebar-item" href="casino/limbo.html"><span class="sidebar-icon">🎯</span> Limbo</a>
+      <a class="sidebar-item" href="casino/plinko.html"><span class="sidebar-icon">⚪</span> Plinko</a>
+      <a class="sidebar-item" href="casino/mines.html"><span class="sidebar-icon">💎</span> Mines</a>
+      <a class="sidebar-item" href="casino/chicken.html"><span class="sidebar-icon">🐔</span> Chicken</a>
+      <a class="sidebar-item" href="casino/keno.html"><span class="sidebar-icon">🔢</span> Keno</a>
+      <a class="sidebar-item" href="casino/pump.html"><span class="sidebar-icon">🎈</span> Pump</a>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-label">Navigate</div>
+      <a class="sidebar-item" href="casino.html"><span class="sidebar-icon">🎰</span> Casino Lobby</a>
+      <a class="sidebar-item active" href="leaderboard.html"><span class="sidebar-icon">🏆</span> Leaderboard</a>
+      <a class="sidebar-item" href="#" onclick="openAccount(event)"><span class="sidebar-icon">👤</span> <span id="usernameNav">Account</span></a>
+    </div>
+    <div class="sidebar-wallet">
+      <div class="wallet-label">Balances</div>
+      <div class="wallet-row active-currency" data-currency="lyko" onclick="setCurrency('lyko')">
+        <div class="wallet-coin"><div class="coin-icon coin-lyko">L</div><span>LYKO</span></div>
+        <span class="wallet-amount" id="bal-lyko">—</span>
+      </div>
+      <div class="wallet-row" data-currency="gold" onclick="setCurrency('gold')">
+        <div class="wallet-coin"><div class="coin-icon coin-gold">G</div><span>GOLD</span></div>
+        <span class="wallet-amount" id="bal-gold">—</span>
+      </div>
+      <div class="wallet-row" data-currency="cyber" onclick="setCurrency('cyber')">
+        <div class="wallet-coin"><div class="coin-icon coin-cyber">C</div><span>CYBER</span></div>
+        <span class="wallet-amount" id="bal-cyber">—</span>
+      </div>
+      <button onclick="openAccount()" style="width:100%;margin-top:10px;padding:8px;background:rgba(0,230,118,.08);border:1px solid rgba(0,230,118,.3);color:#00e676;font-family:'DM Mono',monospace;font-size:10px;letter-spacing:2px;cursor:pointer;">VIEW ACCOUNT</button>
+    </div>
+  </aside>
+
+  <main id="main">
+    <div id="topbar">
+      <span class="topbar-title">LEADERBOARD</span>
+      <div class="topbar-right">
+        <div class="active-bal">
+          <span id="topCoinIcon" style="width:18px;height:18px;background:var(--lyko);border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:9px;font-weight:900;color:#000;">L</span>
+          <span id="activeCoinBal">—</span>
+          <span id="activeCoinName" style="font-size:9px;color:var(--dim)">LYKO</span>
+        </div>
+        <button class="back-btn" onclick="openAccount()">
+          <span id="topbarUser">Account</span>
+        </button>
+        <a href="casino.html" class="back-btn">← LOBBY</a>
+      </div>
+    </div>
+
+    <div id="page">
+      <div class="lb-eyebrow">Season All-Time</div>
+      <h1 class="lb-title">TOP <span class="g">WINNERS</span></h1>
+      <div class="lb-sub">
+        <span class="lb-live-dot"></span>
+        <span id="lbSubText">Loading rankings...</span>
+        <button class="refresh-btn" id="refreshBtn" onclick="loadLeaderboard()">↻ REFRESH</button>
+      </div>
+
+      <!-- Tabs -->
+      <div class="lb-tabs">
+        <button class="lb-tab active" onclick="switchTab('won', this)">Most Won</button>
+        <button class="lb-tab" onclick="switchTab('wagered', this)">Most Wagered</button>
+        <button class="lb-tab" onclick="switchTab('winrate', this)">Best Win Rate</button>
+        <button class="lb-tab" onclick="switchTab('streak', this)">Best Multiplier</button>
+      </div>
+
+      <!-- Your rank callout -->
+      <div id="my-rank-bar">
+        <span class="my-rank-text">Your current rank</span>
+        <span class="my-rank-num" id="myRankNum">—</span>
+      </div>
+
+      <!-- Podium (top 3) -->
+      <div id="podium" style="opacity:0"></div>
+
+      <!-- Table -->
+      <div class="lb-table-wrap">
+        <div class="lb-table-header">
+          <div>Rank</div>
+          <div>Player</div>
+          <div>Total Won</div>
+          <div>Total Bets</div>
+          <div>Win Rate</div>
+          <div>Best Multi</div>
+        </div>
+        <div id="lbBody">
+          <!-- skeleton rows -->
+          ${Array.from({length:10}).map((_,i)=>`
+          <div class="skeleton-row" style="animation-delay:${i*60}ms">
+            <div><div class="skel skel-c"></div></div>
+            <div style="display:flex;align-items:center;gap:10px"><div class="skel skel-av"></div><div class="skel skel-md" style="height:11px;width:90px"></div></div>
+            <div><div class="skel skel-sm"></div></div>
+            <div><div class="skel skel-sm" style="width:50%"></div></div>
+            <div><div class="skel skel-sm" style="width:60%"></div></div>
+            <div><div class="skel skel-sm" style="width:55%"></div></div>
+          </div>`).join('')}
+        </div>
+      </div>
+
+      <!-- Empty -->
+      <div id="empty-state">
+        <div class="empty-icon">🏆</div>
+        <div class="empty-text">No data yet — be the first to win big!</div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script src="casino/lyko.js"></script>
+<script>
+// ── Cursor ─────────────────────────────────────────────────────────────────
+const cursor = document.getElementById('cursor');
+document.addEventListener('mousemove', e => { cursor.style.left = e.clientX+'px'; cursor.style.top = e.clientY+'px'; });
+document.querySelectorAll('a,button,.wallet-row,.lb-row').forEach(el => {
+  el.addEventListener('mouseenter', () => cursor.classList.add('big'));
+  el.addEventListener('mouseleave', () => cursor.classList.remove('big'));
+});
+
+// ── State ──────────────────────────────────────────────────────────────────
+let allData = [];
+let currentTab = 'won';
+const AVATAR_COLORS = ['#00e676','#f5a623','#00e5ff','#e94560','#7c3aed','#06b6d4','#84cc16','#f43f5e'];
+
+function avatarColor(name) {
+  let h = 0;
+  for (let i = 0; i < name.length; i++) h = (h * 31 + name.charCodeAt(i)) & 0xffffffff;
+  return AVATAR_COLORS[Math.abs(h) % AVATAR_COLORS.length];
+}
+function avatarLetter(name) { return (name || '?')[0].toUpperCase(); }
+
+// ── Sort helpers ────────────────────────────────────────────────────────────
+function sortData(data, tab) {
+  return [...data].sort((a, b) => {
+    switch (tab) {
+      case 'won': return b.totalWon - a.totalWon;
+      case 'wagered': return b.totalWagered - a.totalWagered;
+      case 'winrate': {
+        const wrA = (a.wins + a.losses) > 0 ? a.wins / (a.wins + a.losses) : 0;
+        const wrB = (b.wins + b.losses) > 0 ? b.wins / (b.wins + b.losses) : 0;
+        return wrB - wrA;
+      }
+      case 'streak': return b.maxMultiplier - a.maxMultiplier;
+    }
+  });
+}
+
+function getSortValue(entry, tab) {
+  switch (tab) {
+    case 'won': return entry.totalWon;
+    case 'wagered': return entry.totalWagered;
+    case 'winrate': {
+      const t = entry.wins + entry.losses;
+      return t > 0 ? (entry.wins / t) * 100 : 0;
+    }
+    case 'streak': return entry.maxMultiplier;
+  }
+}
+
+function formatSortValue(val, tab) {
+  switch (tab) {
+    case 'won': return val.toFixed(2);
+    case 'wagered': return val.toFixed(2);
+    case 'winrate': return val.toFixed(1) + '%';
+    case 'streak': return val.toFixed(2) + '×';
+  }
+}
+
+// ── Column labels ─────────────────────────────────────────────────────────
+const COL_LABELS = {
+  won: ['Rank','Player','Total Won','Total Bets','Win Rate','Best Multi'],
+  wagered: ['Rank','Player','Total Wagered','Total Bets','Win Rate','Best Multi'],
+  winrate: ['Rank','Player','Win Rate','Total Bets','Total Won','Best Multi'],
+  streak: ['Rank','Player','Best Multi','Total Bets','Win Rate','Total Won'],
+};
+
+// ── Load leaderboard ───────────────────────────────────────────────────────
+async function loadLeaderboard() {
+  const btn = document.getElementById('refreshBtn');
+  btn.classList.add('spinning');
+
+  try {
+    const data = await Lyko.getLeaderboard();
+    allData = data.leaderboard || [];
+    renderAll(currentTab);
+    const ts = new Date().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit',second:'2-digit'});
+    document.getElementById('lbSubText').textContent = `${allData.length} players ranked · Updated ${ts}`;
+  } catch (e) {
+    document.getElementById('lbSubText').textContent = 'Failed to load — check worker deployment';
+    // Show placeholder data for preview
+    allData = generatePreviewData();
+    renderAll(currentTab);
+  } finally {
+    btn.classList.remove('spinning');
+  }
+}
+
+// ── Preview data (shown before real data / if worker not deployed) ──────────
+function generatePreviewData() {
+  const names = ['lyko_apex','neon_void','cyber_ghost','blaze_zero','apex_neon','void_ultra','ghost_blaze','cyber_apex','ultra_lyko','neon_blaze'];
+  return names.map((name, i) => ({
+    id: 'preview_' + i, username: name,
+    totalWon: Math.max(0, 5000 - i * 400 - Math.random() * 200),
+    totalWagered: 8000 - i * 500 + Math.random() * 500,
+    totalBets: Math.floor(300 - i * 25 + Math.random() * 50),
+    wins: Math.floor(160 - i * 12),
+    losses: Math.floor(140 - i * 10),
+    maxWin: (50 - i * 4).toFixed(2) * 1,
+    maxMultiplier: (25 - i * 2 + Math.random() * 3),
+    updatedAt: Date.now()
+  }));
+}
+
+// ── Render ─────────────────────────────────────────────────────────────────
+function renderAll(tab) {
+  if (allData.length === 0) {
+    document.getElementById('empty-state').style.display = 'block';
+    document.getElementById('podium').style.opacity = '0';
+    document.getElementById('lbBody').innerHTML = '';
+    return;
+  }
+  document.getElementById('empty-state').style.display = 'none';
+
+  const sorted = sortData(allData, tab);
+  const top10 = sorted.slice(0, 10);
+  const maxVal = getSortValue(sorted[0], tab);
+
+  // Update column headers
+  const labels = COL_LABELS[tab];
+  const header = document.querySelector('.lb-table-header');
+  header.innerHTML = labels.map(l => `<div>${l}</div>`).join('');
+
+  // Render podium
+  renderPodium(sorted.slice(0, 3), tab);
+
+  // Find current user's rank
+  const me = Lyko.getUser();
+  let myRank = -1;
+  if (me) {
+    myRank = sorted.findIndex(e => e.id === me.id);
+    const bar = document.getElementById('my-rank-bar');
+    if (myRank >= 0) {
+      bar.style.display = 'flex';
+      document.getElementById('myRankNum').textContent = '#' + (myRank + 1);
+    } else {
+      bar.style.display = 'none';
+    }
+  }
+
+  // Render rows
+  document.getElementById('lbBody').innerHTML = top10.map((entry, i) => {
+    const rank = i + 1;
+    const isMe = me && entry.id === me.id;
+    const winRate = (entry.wins + entry.losses) > 0
+      ? ((entry.wins / (entry.wins + entry.losses)) * 100).toFixed(1)
+      : '0.0';
+    const wrColor = parseFloat(winRate) >= 50 ? '#00e676' : '#e94560';
+    const val = getSortValue(entry, tab);
+    const barPct = maxVal > 0 ? Math.max(2, (val / maxVal) * 100) : 0;
+    const rankClass = rank === 1 ? 'rank-1' : rank === 2 ? 'rank-2' : rank === 3 ? 'rank-3' : '';
+    const badgeClass = rank === 1 ? 'r1' : rank === 2 ? 'r2' : rank === 3 ? 'r3' : 'rn';
+    const color = avatarColor(entry.username);
+
+    // Pick columns by tab
+    let col3, col4, col5, col6;
+    switch (tab) {
+      case 'won':
+        col3 = `<span class="won-cell">${(entry.totalWon||0).toFixed(2)}</span>`;
+        col4 = `<span class="stat-cell">${entry.totalBets||0}</span>`;
+        col5 = winRateCell(winRate, wrColor);
+        col6 = `<span class="stat-cell">${(entry.maxMultiplier||0).toFixed(2)}×</span>`;
+        break;
+      case 'wagered':
+        col3 = `<span class="won-cell" style="color:var(--gold)">${(entry.totalWagered||0).toFixed(2)}</span>`;
+        col4 = `<span class="stat-cell">${entry.totalBets||0}</span>`;
+        col5 = winRateCell(winRate, wrColor);
+        col6 = `<span class="stat-cell">${(entry.maxMultiplier||0).toFixed(2)}×</span>`;
+        break;
+      case 'winrate':
+        col3 = winRateCell(winRate, wrColor);
+        col4 = `<span class="stat-cell">${entry.totalBets||0}</span>`;
+        col5 = `<span class="stat-cell">${(entry.totalWon||0).toFixed(2)}</span>`;
+        col6 = `<span class="stat-cell">${(entry.maxMultiplier||0).toFixed(2)}×</span>`;
+        break;
+      case 'streak':
+        col3 = `<span class="won-cell" style="color:var(--cyan)">${(entry.maxMultiplier||0).toFixed(2)}×</span>`;
+        col4 = `<span class="stat-cell">${entry.totalBets||0}</span>`;
+        col5 = winRateCell(winRate, wrColor);
+        col6 = `<span class="stat-cell">${(entry.totalWon||0).toFixed(2)}</span>`;
+        break;
+    }
+
+    return `
+    <div class="lb-row ${rankClass} ${isMe ? 'is-me' : ''}" style="animation-delay:${i * 50}ms">
+      <div><div class="rank-badge ${badgeClass}">${rank <= 3 ? ['🥇','🥈','🥉'][rank-1] : rank}</div></div>
+      <div class="player-cell">
+        <div class="player-avatar" style="background:${color}22;color:${color};border:2px solid ${color}44">${avatarLetter(entry.username)}</div>
+        <span class="player-name">${entry.username}${isMe ? '<span class="player-you">YOU</span>' : ''}</span>
+      </div>
+      ${col3}
+      ${col4}
+      ${col5}
+      ${col6}
+      <div class="won-bar-track"><div class="won-bar-fill" style="width:0%;background:${color}55" data-target="${barPct}"></div></div>
+    </div>`;
+  }).join('');
+
+  // Animate bars after paint
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
+      document.querySelectorAll('.won-bar-fill').forEach(el => {
+        el.style.width = el.dataset.target + '%';
+      });
+      // Rebind cursor
+      document.querySelectorAll('.lb-row').forEach(el => {
+        el.addEventListener('mouseenter', () => cursor.classList.add('big'));
+        el.addEventListener('mouseleave', () => cursor.classList.remove('big'));
+      });
+    });
+  });
+}
+
+function winRateCell(wr, color) {
+  return `<div class="wr-cell">
+    <div class="wr-bar-track"><div class="wr-bar-fill" style="width:0%;background:${color}" data-target="${wr}"></div></div>
+    <span class="wr-label" style="color:${color}">${wr}%</span>
+  </div>`;
+}
+
+// ── Podium ─────────────────────────────────────────────────────────────────
+function renderPodium(top3, tab) {
+  const podium = document.getElementById('podium');
+  if (top3.length < 1) { podium.style.opacity = '0'; return; }
+
+  // Reorder for visual podium: 2nd left, 1st center, 3rd right
+  const order = [top3[1], top3[0], top3[2]].filter(Boolean);
+  const visualRanks = [2, 1, 3];
+
+  podium.innerHTML = order.map((entry, vi) => {
+    const rank = visualRanks[vi];
+    const color = rank === 1 ? 'var(--rank1)' : rank === 2 ? 'var(--rank2)' : 'var(--rank3)';
+    const av = avatarColor(entry.username);
+    const val = getSortValue(entry, tab);
+    return `
+    <div class="podium-slot" style="animation:podiumRise .6s ${vi * 100}ms ease both">
+      ${rank === 1 ? '<div class="podium-crown">👑</div>' : ''}
+      <div class="podium-avatar" style="border-color:${color};background:${color}18;color:${color};${rank===1?'width:68px;height:68px;font-size:26px;':''}">${avatarLetter(entry.username)}</div>
+      <div class="podium-name">${entry.username}</div>
+      <div class="podium-won">${formatSortValue(val, tab)}</div>
+      <div class="podium-block">
+        <div class="podium-rank">${rank}</div>
+      </div>
+    </div>`;
+  }).join('');
+
+  podium.style.opacity = '1';
+  podium.style.transition = 'opacity .4s ease';
+}
+
+// ── Tab switching ──────────────────────────────────────────────────────────
+function switchTab(tab, btn) {
+  currentTab = tab;
+  document.querySelectorAll('.lb-tab').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderAll(tab);
+}
+
+// ── Live feed: re-fetch on new bets ───────────────────────────────────────
+let pendingRefresh = null;
+Lyko.onFeedEvent(msg => {
+  if (msg.type === 'bet') {
+    clearTimeout(pendingRefresh);
+    pendingRefresh = setTimeout(() => loadLeaderboard(), 5000);
+  }
+});
+
+// ── Init ──────────────────────────────────────────────────────────────────
+window.addEventListener('DOMContentLoaded', async () => {
+  const user = Lyko.getUser();
+  const token = Lyko.getToken();
+
+  if (!user || !token) {
+    Lyko.showAuthModal(async u => {
+      Lyko.refreshDisplays(u);
+      await loadLeaderboard();
+    });
+    return;
+  }
+
+  const fresh = await Lyko.refreshMe();
+  if (!fresh) {
+    Lyko.showAuthModal(async u => {
+      Lyko.refreshDisplays(u);
+      await loadLeaderboard();
+    });
+    return;
+  }
+
+  Lyko.refreshDisplays(fresh);
+  await loadLeaderboard();
+
+  // Auto-refresh every 60s
+  setInterval(loadLeaderboard, 60000);
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,16 @@
+{
+  "name": "lyko-casino-worker",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy"
+  },
+  "dependencies": {
+    "itty-router": "^4.0.27",
+    "@tsndr/cloudflare-worker-jwt": "^2.4.0"
+  },
+  "devDependencies": {
+    "wrangler": "^3.0.0"
+  }
+}
