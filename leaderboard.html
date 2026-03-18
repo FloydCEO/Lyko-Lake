@@ -290,18 +290,7 @@ select.m-input{appearance:none;}
           <div>Win Rate</div>
           <div>Best Multi</div>
         </div>
-        <div id="lbBody">
-          <!-- skeleton rows -->
-          ${Array.from({length:10}).map((_,i)=>`
-          <div class="skeleton-row" style="animation-delay:${i*60}ms">
-            <div><div class="skel skel-c"></div></div>
-            <div style="display:flex;align-items:center;gap:10px"><div class="skel skel-av"></div><div class="skel skel-md" style="height:11px;width:90px"></div></div>
-            <div><div class="skel skel-sm"></div></div>
-            <div><div class="skel skel-sm" style="width:50%"></div></div>
-            <div><div class="skel skel-sm" style="width:60%"></div></div>
-            <div><div class="skel skel-sm" style="width:55%"></div></div>
-          </div>`).join('')}
-        </div>
+        <div id="lbBody"></div>
       </div>
 
       <!-- Empty -->
@@ -316,7 +305,12 @@ select.m-input{appearance:none;}
 <script src="casino/lyko.js"></script>
 <script>
 // ── Cursor ─────────────────────────────────────────────────────────────────
-document.addEventListener('DOMContentLoaded', () => Lyko.initCursor());
+const cursor = document.getElementById('cursor');
+document.addEventListener('mousemove', e => { cursor.style.left = e.clientX+'px'; cursor.style.top = e.clientY+'px'; });
+document.querySelectorAll('a,button,.wallet-row,.lb-row').forEach(el => {
+  el.addEventListener('mouseenter', () => cursor.classList.add('big'));
+  el.addEventListener('mouseleave', () => cursor.classList.remove('big'));
+});
 
 // ── State ──────────────────────────────────────────────────────────────────
 let allData = [];
@@ -388,9 +382,9 @@ async function loadLeaderboard() {
     document.getElementById('lbSubText').textContent = `${allData.length} players ranked · Updated ${ts}`;
   } catch (e) {
     document.getElementById('lbSubText').textContent = 'Failed to load — check worker deployment';
-    document.getElementById('empty-state').style.display = 'block';
-    document.getElementById('podium').style.opacity = '0';
-    document.getElementById('lbBody').innerHTML = '';
+    // Show placeholder data for preview
+    allData = generatePreviewData();
+    renderAll(currentTab);
   } finally {
     btn.classList.remove('spinning');
   }
@@ -512,7 +506,12 @@ function renderAll(tab) {
       document.querySelectorAll('.won-bar-fill').forEach(el => {
         el.style.width = el.dataset.target + '%';
       });
-});
+      // Rebind cursor
+      document.querySelectorAll('.lb-row').forEach(el => {
+        el.addEventListener('mouseenter', () => cursor.classList.add('big'));
+        el.addEventListener('mouseleave', () => cursor.classList.remove('big'));
+      });
+    });
   });
 }
 
