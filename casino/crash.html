@@ -202,14 +202,43 @@ select.m-input{appearance:none;}
 <!-- Shared Lyko client -->
 <script src="../casino/lyko.js"></script>
 <script>
-// ─── Cursor ───────────────────────────────────────
-const cursor = document.getElementById('cursor');
-document.addEventListener('mousemove', e => { cursor.style.left = e.clientX+'px'; cursor.style.top = e.clientY+'px'; });
-document.querySelectorAll('a,button,.wallet-row').forEach(el => {
-  el.addEventListener('mouseenter', () => cursor.classList.add('big'));
-  el.addEventListener('mouseleave', () => cursor.classList.remove('big'));
-});
+// ── LYKO SHIM ─────────────────────────────────────────────────────────────────
+function loadAcc() { return Lyko.getUser(); }
+function saveAcc(acc) { /* no-op: Lyko backend is source of truth */ }
+function getBalance() { return Lyko.getBalance(); }
+function getActiveCurrency() { return Lyko.getActiveCurrency(); }
+function setCurrency(c) { Lyko.setCurrency(c); }
+function openAccount(e) { if (e) e.preventDefault(); Lyko.openAccount(); }
+function refreshDisplays(acc) { Lyko.refreshDisplays(acc || Lyko.getUser()); }
 
+// adjustBalance: optimistically update local display, then sync via API on recordBet
+function adjustBalance(delta) {
+  const user = Lyko.getUser();
+  if (!user) return;
+  const cur = Lyko.getActiveCurrency();
+  user.balances[cur] = Math.max(0, (user.balances[cur] || 0) + delta);
+  localStorage.setItem('lyko_user', JSON.stringify(user));
+  Lyko.refreshDisplays(user);
+}
+
+// recordBet: called at end of each game round to settle with the backend
+async function recordBet(game, bet, currency, payout, mult) {
+  try {
+    const result = await Lyko.placeBet({ game, bet, payout, profit: payout - bet, currency: currency || Lyko.getActiveCurrency(), multiplier: mult || 0 });
+    Lyko.refreshDisplays(result.user);
+    // Sync local storage with authoritative server balance
+    localStorage.setItem('lyko_user', JSON.stringify(result.user));
+  } catch (e) {
+    console.error('[Lyko] recordBet failed:', e.message);
+    Lyko.refreshMe().then(u => { if (u) Lyko.refreshDisplays(u); });
+  }
+}
+// ─────────────────────────────────────────────────────────────────────────────
+
+document.addEventListener('DOMContentLoaded', () => Lyko.initCursor());
+</script>
+<script>
+// ─── Cursor ───────────────────────────────────────
 // ─── CRASH GAME ───────────────────────────────────
 const canvas = document.getElementById('crashCanvas');
 const ctx = canvas.getContext('2d');

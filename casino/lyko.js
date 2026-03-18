@@ -456,26 +456,31 @@
     }
 
     Lyko.onFeedEvent(addRow);
+  }
 
-    // Fallback fake rows if WS isn't connected yet
-    setTimeout(() => {
-      if (el.children.length === 0) {
-        const names = ['lyko_','neon_','void_','cyber_'];
-        const games = ['Crash','HiLo','Limbo','Plinko','Mines','Chicken','Keno','Pump'];
-        for (let i = 0; i < 6; i++) {
-          const win = Math.random() > 0.44;
-          addRow({
-            type: 'bet',
-            username: names[Math.floor(Math.random()*names.length)] + Math.floor(Math.random()*9999),
-            game: games[Math.floor(Math.random()*games.length)],
-            bet: (Math.random()*50+1),
-            profit: win ? 10 : -5,
-            multiplier: win ? (Math.random()*12+1.1) : 0,
-            currency: 'lyko'
-          });
-        }
-      }
-    }, 3000);
+
+  // ── CURSOR ────────────────────────────────────────────────────────────────────
+  function initCursor() {
+    const cursor = document.getElementById('cursor');
+    if (!cursor) return;
+    cursor.style.opacity = '0';
+    document.addEventListener('mousemove', e => {
+      cursor.style.left = e.clientX + 'px';
+      cursor.style.top  = e.clientY + 'px';
+    });
+    document.addEventListener('mousemove', function show() {
+      cursor.style.opacity = '1';
+      document.removeEventListener('mousemove', show);
+    });
+    // Use event delegation so dynamically added modals/elements work too
+    document.addEventListener('mouseover', e => {
+      if (e.target.closest('a,button,.wallet-row,.game-card,.mine-tile,.play-btn,.cashout-btn,.half-btn,.double-btn,.back-btn,.sidebar-item,.ob-btn,.m-btn,.m-tab,.m-close'))
+        cursor.classList.add('big');
+    });
+    document.addEventListener('mouseout', e => {
+      if (e.target.closest('a,button,.wallet-row,.game-card,.mine-tile,.play-btn,.cashout-btn,.half-btn,.double-btn,.back-btn,.sidebar-item,.ob-btn,.m-btn,.m-tab,.m-close'))
+        cursor.classList.remove('big');
+    });
   }
 
   // ── AUTH GATE ─────────────────────────────────────────────────────────────────
@@ -594,6 +599,7 @@
     refreshDisplays,
     openAccount,
     initLiveFeed,
+    initCursor,
     onFeedEvent,
     // Config
     API
