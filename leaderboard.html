@@ -316,12 +316,7 @@ select.m-input{appearance:none;}
 <script src="casino/lyko.js"></script>
 <script>
 // ── Cursor ─────────────────────────────────────────────────────────────────
-const cursor = document.getElementById('cursor');
-document.addEventListener('mousemove', e => { cursor.style.left = e.clientX+'px'; cursor.style.top = e.clientY+'px'; });
-document.querySelectorAll('a,button,.wallet-row,.lb-row').forEach(el => {
-  el.addEventListener('mouseenter', () => cursor.classList.add('big'));
-  el.addEventListener('mouseleave', () => cursor.classList.remove('big'));
-});
+document.addEventListener('DOMContentLoaded', () => Lyko.initCursor());
 
 // ── State ──────────────────────────────────────────────────────────────────
 let allData = [];
@@ -393,9 +388,9 @@ async function loadLeaderboard() {
     document.getElementById('lbSubText').textContent = `${allData.length} players ranked · Updated ${ts}`;
   } catch (e) {
     document.getElementById('lbSubText').textContent = 'Failed to load — check worker deployment';
-    // Show placeholder data for preview
-    allData = generatePreviewData();
-    renderAll(currentTab);
+    document.getElementById('empty-state').style.display = 'block';
+    document.getElementById('podium').style.opacity = '0';
+    document.getElementById('lbBody').innerHTML = '';
   } finally {
     btn.classList.remove('spinning');
   }
@@ -517,12 +512,7 @@ function renderAll(tab) {
       document.querySelectorAll('.won-bar-fill').forEach(el => {
         el.style.width = el.dataset.target + '%';
       });
-      // Rebind cursor
-      document.querySelectorAll('.lb-row').forEach(el => {
-        el.addEventListener('mouseenter', () => cursor.classList.add('big'));
-        el.addEventListener('mouseleave', () => cursor.classList.remove('big'));
-      });
-    });
+});
   });
 }
 
