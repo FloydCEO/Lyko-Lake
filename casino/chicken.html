@@ -249,6 +249,7 @@ function step(){
     // Boom
     if(stone){stone.textContent='💥';stone.className='stone danger';}
     gameActive=false;
+    recordBet('Chicken', betAmount, getActiveCurrency(), 0, 0);
     document.getElementById('startBtn').disabled=false;
     document.getElementById('difficulty').disabled=false;
     document.getElementById('cashoutBtn').classList.remove('show');
@@ -262,6 +263,7 @@ function cashout(){
   if(!gameActive)return;
   const payout=betAmount*currentMult;
   adjustBalance(payout);
+  recordBet('Chicken', betAmount, getActiveCurrency(), payout, currentMult);
   gameActive=false;
   document.getElementById('startBtn').disabled=false;
   document.getElementById('difficulty').disabled=false;
@@ -270,10 +272,13 @@ function cashout(){
   document.getElementById('statusMsg').textContent='🐔 Cashed out! Won '+(payout-betAmount).toFixed(2)+' '+getActiveCurrency().toUpperCase();
 buildRoad();
 
-    const el=document.getElementById('bal-'+c);if(el)el.textContent=(acc.balances[c]||0).toFixed(2);
-    const row=document.querySelector(`.wallet-row[data-currency="${c}"]`);if(row)row.classList.toggle('active-currency',c===cur);
-  });
 
+}
+}
+}
+}
+}
+}
 // ── LYKO SHIM ─────────────────────────────────────────────────────────────────
 function loadAcc() { return Lyko.getUser(); }
 function saveAcc(acc) { /* no-op */ }

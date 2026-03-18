@@ -288,6 +288,7 @@ function dropBall(){
     const mult=mults[slot]||0.2;
     const payout=bet*mult;
     adjustBalance(payout);
+    recordBet('Plinko', bet, getActiveCurrency(), payout, mult);
     document.getElementById('lastResult').textContent=mult+'×';
     document.getElementById('lastResult').style.color=mult>=1?'var(--lyko)':'var(--accent)';
     document.getElementById('lastPayout').textContent=(payout-bet>=0?'+':'')+((payout-bet).toFixed(2));
@@ -301,10 +302,13 @@ document.getElementById('rowCount').addEventListener('change',()=>{buildSlotsRow
 document.getElementById('riskLevel').addEventListener('change',()=>{buildSlotsRow();drawBoard();});
 buildSlotsRow();drawBoard();
 
-    const el=document.getElementById('bal-'+c);if(el)el.textContent=(acc.balances[c]||0).toFixed(2);
-    const row=document.querySelector(`.wallet-row[data-currency="${c}"]`);if(row)row.classList.toggle('active-currency',c===cur);
-  });
 
+}
+}
+}
+}
+}
+}
 // ── LYKO SHIM ─────────────────────────────────────────────────────────────────
 function loadAcc() { return Lyko.getUser(); }
 function saveAcc(acc) { /* no-op */ }

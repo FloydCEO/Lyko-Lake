@@ -248,8 +248,10 @@ function cashout(){
   if(!gameActive)return;
   const payout=betAmount*currentMult;
   adjustBalance(payout);
+  recordBet('Mines', betAmount, getActiveCurrency(), payout, currentMult);
   endGame(true,payout);
 function endGame(won,payout){
+  if(!won){ recordBet('Mines', betAmount, getActiveCurrency(), 0, 0); }
   gameActive=false;
   document.getElementById('startBtn').disabled=false;
   document.getElementById('mineCount').disabled=false;
@@ -270,10 +272,14 @@ function endGame(won,payout){
   }
 buildGrid(3);
 
-    const el=document.getElementById('bal-'+c);if(el)el.textContent=(acc.balances[c]||0).toFixed(2);
-    const row=document.querySelector(`.wallet-row[data-currency="${c}"]`);if(row)row.classList.toggle('active-currency',c===cur);
-  });
 
+}
+}
+}
+}
+}
+}
+}
 // ── LYKO SHIM ─────────────────────────────────────────────────────────────────
 function loadAcc() { return Lyko.getUser(); }
 function saveAcc(acc) { /* no-op */ }

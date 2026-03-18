@@ -210,7 +210,9 @@ function play(){
     bigMult.className='big-mult '+(win?'win':'lose');
     document.getElementById('resultBar').style.width=win?'100%':'20%';
     document.getElementById('resultBar').style.background=win?'var(--lyko)':'var(--accent)';
-    if(win){adjustBalance(bet*target*0.97);}
+    const payout = win ? bet*target*0.97 : 0;
+    if(win){adjustBalance(payout);}
+    recordBet('Limbo', bet, getActiveCurrency(), payout, win ? clipped : 0);
     addHistory(win,clipped);
     playing=false;
     document.getElementById('playBtn').disabled=false;
@@ -225,10 +227,10 @@ function addHistory(win,mult){
   while(strip.children.length>12)strip.removeChild(strip.lastChild);
 function showFlash(msg){const b=document.getElementById('bigMult');b.textContent=msg;b.className='big-mult lose';setTimeout(()=>{b.textContent='1.00×';b.className='big-mult idle';},1500);}
 
-    const el=document.getElementById('bal-'+c);if(el)el.textContent=(acc.balances[c]||0).toFixed(2);
-    const row=document.querySelector(`.wallet-row[data-currency="${c}"]`);if(row)row.classList.toggle('active-currency',c===cur);
-  });
 
+}
+}
+}
 // ── LYKO SHIM ─────────────────────────────────────────────────────────────────
 function loadAcc() { return Lyko.getUser(); }
 function saveAcc(acc) { /* no-op */ }
