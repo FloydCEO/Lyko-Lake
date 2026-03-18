@@ -202,42 +202,6 @@ select.m-input{appearance:none;}
 <!-- Shared Lyko client -->
 <script src="../casino/lyko.js"></script>
 <script>
-// ── LYKO SHIM ─────────────────────────────────────────────────────────────────
-function loadAcc() { return Lyko.getUser(); }
-function saveAcc(acc) { /* no-op: Lyko backend is source of truth */ }
-function getBalance() { return Lyko.getBalance(); }
-function getActiveCurrency() { return Lyko.getActiveCurrency(); }
-function setCurrency(c) { Lyko.setCurrency(c); }
-function openAccount(e) { if (e) e.preventDefault(); Lyko.openAccount(); }
-function refreshDisplays(acc) { Lyko.refreshDisplays(acc || Lyko.getUser()); }
-
-// adjustBalance: optimistically update local display, then sync via API on recordBet
-function adjustBalance(delta) {
-  const user = Lyko.getUser();
-  if (!user) return;
-  const cur = Lyko.getActiveCurrency();
-  user.balances[cur] = Math.max(0, (user.balances[cur] || 0) + delta);
-  localStorage.setItem('lyko_user', JSON.stringify(user));
-  Lyko.refreshDisplays(user);
-}
-
-// recordBet: called at end of each game round to settle with the backend
-async function recordBet(game, bet, currency, payout, mult) {
-  try {
-    const result = await Lyko.placeBet({ game, bet, payout, profit: payout - bet, currency: currency || Lyko.getActiveCurrency(), multiplier: mult || 0 });
-    Lyko.refreshDisplays(result.user);
-    // Sync local storage with authoritative server balance
-    localStorage.setItem('lyko_user', JSON.stringify(result.user));
-  } catch (e) {
-    console.error('[Lyko] recordBet failed:', e.message);
-    Lyko.refreshMe().then(u => { if (u) Lyko.refreshDisplays(u); });
-  }
-}
-// ─────────────────────────────────────────────────────────────────────────────
-
-document.addEventListener('DOMContentLoaded', () => Lyko.initCursor());
-</script>
-<script>
 // ─── Cursor ───────────────────────────────────────
 // ─── CRASH GAME ───────────────────────────────────
 const canvas = document.getElementById('crashCanvas');
@@ -452,14 +416,15 @@ async function crash() {
     }
   }
 
+  // Always re-enable button regardless of API call result
   document.getElementById('cashoutBtn').classList.remove('show');
+  document.getElementById('betBtn').textContent = 'BET NEXT ROUND';
+  document.getElementById('betBtn').disabled = false;
   document.getElementById('statusDisplay').textContent = 'CRASHED';
   document.getElementById('statusDisplay').style.color = 'var(--accent)';
   const overlay = document.getElementById('multOverlay');
   overlay.className = 'crash-mult-overlay crashed';
   overlay.textContent = finalMult.toFixed(2) + '×';
-  document.getElementById('betBtn').textContent = 'BET NEXT ROUND';
-  document.getElementById('betBtn').disabled = false;
   addHistory(finalMult);
   draw(true);
   renderLiveBets();
@@ -526,34 +491,20 @@ function adjustBet(m) {
 
 // ─── Init ─────────────────────────────────────────
 window.addEventListener('DOMContentLoaded', async () => {
+  Lyko.initCursor();
   let user = Lyko.getUser();
-  const token = Lyko.getToken();
-
-  if (!user || !token) {
-    Lyko.showAuthModal(u => {
-      Lyko.refreshDisplays(u);
-      resize();
-      startCountdown();
-    });
+  if (!user || !Lyko.getToken()) {
+    Lyko.showAuthModal(u => { Lyko.refreshDisplays(u); startCountdown(); });
     return;
   }
-
   const fresh = await Lyko.refreshMe();
   if (!fresh) {
-    Lyko.showAuthModal(u => {
-      Lyko.refreshDisplays(u);
-      resize();
-      startCountdown();
-    });
+    Lyko.showAuthModal(u => { Lyko.refreshDisplays(u); startCountdown(); });
     return;
   }
-
   Lyko.refreshDisplays(fresh);
-  resize();
   startCountdown();
 });
-
-window.addEventListener('resize', () => { resize(); draw(); });
 </script>
 </body>
 </html>

@@ -161,7 +161,11 @@ body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(
     </div>
   </main>
 </div>
+
+
+<script src="../casino/lyko.js"></script>
 <script>
+
 /* getBalance provided by shared system */
 
 function setBet(m){const i=document.getElementById('betAmt');i.value=Math.max(0.01,(parseFloat(i.value)||1)*m).toFixed(2);}
@@ -172,8 +176,6 @@ function generateBurstPoint(){
   // Exponential distribution — avg ~2x, occasional high
   const r=Math.random();
   return Math.max(1.01,0.97/Math.max(r*r,0.001)/2);
-}
-
 function startRound(){
   const bet=parseFloat(document.getElementById('betAmt').value)||1;
   if(bet>getBalance())return;
@@ -186,8 +188,6 @@ function startRound(){
   document.getElementById('multBig').className='mult-big';
   startTime=Date.now();
   inflate();
-}
-
 function inflate(){
   if(!gameActive)return;
   const elapsed=(Date.now()-startTime)/1000;
@@ -203,8 +203,6 @@ function inflate(){
   document.getElementById('gainPanel').textContent=(betAmount*currentMult*0.97-betAmount).toFixed(2);
   if(currentMult>=burstAt){burst();return;}
   animFrame=requestAnimationFrame(inflate);
-}
-
 function cashout(){
   if(!gameActive)return;
   cancelAnimationFrame(animFrame);
@@ -215,8 +213,6 @@ function cashout(){
   document.getElementById('cashoutBtn').classList.remove('show');
   addHistory(true,currentMult);
   document.getElementById('balloon').style.transform='scale(1)';
-}
-
 function burst(){
   gameActive=false;
   cancelAnimationFrame(animFrame);
@@ -233,8 +229,6 @@ function burst(){
     document.getElementById('multBig').textContent='1.00×';
     document.getElementById('multPanel').textContent='1.00×';
   },1500);
-}
-
 function addHistory(win,mult){
   const chips=document.getElementById('histChips');
   const chip=document.createElement('div');
@@ -242,86 +236,19 @@ function addHistory(win,mult){
   chip.textContent=mult.toFixed(2)+'×';
   chips.prepend(chip);
   while(chips.children.length>12)chips.removeChild(chips.lastChild);
-}
-// LYKO CASINO SHARED ACCOUNT SYSTEM - COOKIE BASED
-// Include this snippet in each game page's <script> block
-
-catch{return null;}}
-=${encodeURIComponent(JSON.stringify(v))};expires=${d.toUTCString()};path=/;SameSite=Lax`;}
-const COIN_META={lyko:{bg:'#00e676',fg:'#000',icon:'L'},gold:{bg:'#f5a623',fg:'#000',icon:'G'},cyber:{bg:'#00e5ff',fg:'#000',icon:'C'}};
-
-"]`);if(row)row.classList.toggle('active-currency',c===cur);
+    const el=document.getElementById('bal-'+c);if(el)el.textContent=(acc.balances[c]||0).toFixed(2);
+    const row=document.querySelector(`.wallet-row[data-currency="${c}"]`);if(row)row.classList.toggle('active-currency',c===cur);
   });
-  const balEl=document.getElementById('activeCoinBal');if(balEl)balEl.textContent=(acc.balances[cur]||0).toFixed(2);
-  const nameEl=document.getElementById('activeCoinName');if(nameEl)nameEl.textContent=cur.toUpperCase();
-  const cm=COIN_META[cur];
-  const ic=document.getElementById('topCoinIcon');if(ic){ic.style.background=cm.bg;ic.style.color=cm.fg;ic.textContent=cm.icon;}
-  const un=document.getElementById('usernameNav');if(un)un.textContent=acc.username||'Account';
-}
 
-,totalWon:{},gamesPlayed:0,biggestWin:0,biggestMult:0};
-  acc.stats.totalWagered[currency]=(acc.stats.totalWagered[currency]||0)+bet;
-  if(payout>bet){acc.stats.totalWon=acc.stats.totalWon||{};acc.stats.totalWon[currency]=(acc.stats.totalWon[currency]||0)+(payout-bet);}
-  acc.stats.gamesPlayed=(acc.stats.gamesPlayed||0)+1;
-  const profit=payout-bet;
-  if(profit>(acc.stats.biggestWin||0))acc.stats.biggestWin=profit;
-  if(mult>(acc.stats.biggestMult||0))acc.stats.biggestMult=mult;
-  acc.transactions=acc.transactions||[];
-  acc.transactions.push({type:payout>=bet?'win':'loss',game,bet,payout,profit:parseFloat((payout-bet).toFixed(4)),currency,mult:parseFloat(mult.toFixed(2)),ts:Date.now()});
-  saveAcc(acc);refreshDisplays();
-}
-
-function showAccountModal(){
-  const acc=loadAcc();if(!acc)return;
-  const old=document.getElementById('lykoModal');if(old)old.remove();
-  const txRows=[...(acc.transactions||[])].reverse().slice(0,60).map(tx=>{const c=tx.type==='withdrawal'?'#5a6a90':tx.profit>=0?'#00e676':'#e94560';const s=tx.profit>=0?'+':'';return`<tr><td style="color:#5a6a90;font-size:10px;white-space:nowrap">${new Date(tx.ts).toLocaleDateString()} ${new Date(tx.ts).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})}</td><td>${tx.game}</td><td>${(tx.bet||0).toFixed(2)} ${(tx.currency||'lyko').toUpperCase()}</td><td style="color:#5a6a90">${tx.mult>0?tx.mult.toFixed(2)+'×':'—'}</td><td style="color:${c};font-weight:700">${tx.type==='withdrawal'?'↑ Withdraw':s+(tx.profit||0).toFixed(2)}</td></tr>`;}).join('')||'<tr><td colspan="5" style="padding:20px;text-align:center;color:#5a6a90">No transactions yet</td></tr>';
-  const o=document.createElement('div');o.id='lykoModal';o.style.cssText='position:fixed;inset:0;z-index:10000;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.85);backdrop-filter:blur(4px);';
-  o.innerHTML=`<div style="background:#0d0f1e;border:1px solid #1e2240;width:min(720px,95vw);max-height:88vh;display:flex;flex-direction:column;overflow:hidden;">
-    <div style="padding:20px 24px;border-bottom:1px solid #1e2240;display:flex;justify-content:space-between;align-items:center;flex-shrink:0"><div><div style="font-family:'Orbitron',sans-serif;font-size:18px;font-weight:900;color:#00e676">${acc.username}</div><div style="font-size:10px;color:#5a6a90;margin-top:2px">Member since ${new Date(acc.created).toLocaleDateString()}</div></div><button onclick="document.getElementById('lykoModal').remove()" style="background:none;border:1px solid #1e2240;color:#5a6a90;font-size:16px;padding:6px 12px;cursor:pointer">&times;</button></div>
-    <div style="display:flex;border-bottom:1px solid #1e2240;flex-shrink:0">${['ov:Overview','tx:History','st:Settings','wd:Withdraw'].map(x=>{const[id,label]=x.split(':');return`<button id="mt-${id}" onclick="mSwitch('${id}')" style="flex:1;padding:10px;background:none;border:none;border-bottom:2px solid transparent;color:#5a6a90;font-family:'DM Mono',monospace;font-size:10px;letter-spacing:2px;cursor:pointer;transition:all .2s">${label}</button>`;}).join('')}</div>
-    <div style="overflow-y:auto;flex:1;padding:20px 24px">
-      <div id="mp-ov"><div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin-bottom:18px">${[['Games',acc.stats?.gamesPlayed||0,'#dce8ff'],['Biggest Win',(acc.stats?.biggestWin||0).toFixed(2),'#00e676'],['Best Multi',(acc.stats?.biggestMult||0).toFixed(2)+'×','#f5a623'],['LYKO Wagered',(acc.stats?.totalWagered?.lyko||0).toFixed(2),'#00e676'],['GOLD Wagered',(acc.stats?.totalWagered?.gold||0).toFixed(2),'#f5a623'],['CYBER Wagered',(acc.stats?.totalWagered?.cyber||0).toFixed(2),'#00e5ff']].map(([l,v,c])=>`<div style="background:#121428;border:1px solid #1e2240;padding:14px"><div style="font-size:9px;letter-spacing:2px;color:#5a6a90;text-transform:uppercase;margin-bottom:6px">${l}</div><div style="font-family:'Orbitron',sans-serif;font-size:16px;font-weight:700;color:${c}">${v}</div></div>`).join('')}</div>${['lyko','gold','cyber'].map(c=>{const m=COIN_META[c];const usd=(acc.balances[c]||0)*(c==='lyko'?2:c==='gold'?1.5:0.8);return`<div style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:#121428;border:1px solid #1e2240;margin-bottom:8px"><div style="display:flex;align-items:center;gap:8px"><span style="width:24px;height:24px;border-radius:50%;background:${m.bg};color:${m.fg};display:inline-flex;align-items:center;justify-content:center;font-weight:900;font-size:11px">${m.icon}</span><span>${c.toUpperCase()}</span></div><div style="text-align:right"><div style="font-family:'Orbitron',sans-serif;font-weight:700;color:#dce8ff">${(acc.balances[c]||0).toFixed(2)}</div><div style="font-size:10px;color:#5a6a90">≈ $${usd.toFixed(2)}</div></div></div>`;}).join('')}</div>
-      <div id="mp-tx" style="display:none"><div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:11px"><thead><tr style="border-bottom:1px solid #1e2240">${['Time','Game','Bet','Mult','Profit'].map(h=>`<th style="padding:7px 10px;text-align:left;color:#5a6a90;font-weight:400;font-size:9px;letter-spacing:2px;text-transform:uppercase">${h}</th>`).join('')}</tr></thead><tbody>${txRows}</tbody></table></div></div>
-      <div id="mp-st" style="display:none"><div style="display:flex;flex-direction:column;gap:12px;max-width:380px"><div><div style="font-size:9px;letter-spacing:2px;color:#5a6a90;text-transform:uppercase;margin-bottom:8px">Display Name</div><div style="display:flex;gap:8px"><input id="mni" value="${acc.username}" style="flex:1;background:#121428;border:1px solid #1e2240;color:#dce8ff;font-family:'DM Mono',monospace;font-size:13px;padding:9px 12px;outline:none"><button onclick="mSaveName()" style="padding:9px 16px;background:#00e676;border:none;color:#000;font-family:'Orbitron',sans-serif;font-size:11px;font-weight:700;cursor:pointer">SAVE</button></div></div><div><div style="font-size:9px;letter-spacing:2px;color:#5a6a90;text-transform:uppercase;margin-bottom:8px">Withdrawal Address</div><div style="display:flex;gap:8px"><input id="mwi" value="${acc.withdrawalAddress||''}" placeholder="Address / username" style="flex:1;background:#121428;border:1px solid #1e2240;color:#dce8ff;font-family:'DM Mono',monospace;font-size:13px;padding:9px 12px;outline:none"><button onclick="mSaveWallet()" style="padding:9px 16px;background:#00e676;border:none;color:#000;font-family:'Orbitron',sans-serif;font-size:11px;font-weight:700;cursor:pointer">SAVE</button></div></div><div id="mok" style="display:none;color:#00e676;font-size:11px;letter-spacing:2px">✓ Saved!</div></div></div>
-      <div id="mp-wd" style="display:none"><div style="max-width:380px;display:flex;flex-direction:column;gap:12px"><div style="padding:12px;background:rgba(0,230,118,.06);border:1px solid rgba(0,230,118,.2);font-size:11px;color:#00e676;line-height:1.7">Min 1 coin per withdrawal. 1 LYKO = $2.00 USD.</div><div><div style="font-size:9px;letter-spacing:2px;color:#5a6a90;text-transform:uppercase;margin-bottom:6px">Currency</div><select id="wc" style="width:100%;background:#121428;border:1px solid #1e2240;color:#dce8ff;font-family:'DM Mono',monospace;font-size:13px;padding:9px 12px;outline:none"><option value="lyko">LYKO (${(acc.balances.lyko||0).toFixed(2)})</option><option value="gold">GOLD (${(acc.balances.gold||0).toFixed(2)})</option><option value="cyber">CYBER (${(acc.balances.cyber||0).toFixed(2)})</option></select></div><div><div style="font-size:9px;letter-spacing:2px;color:#5a6a90;text-transform:uppercase;margin-bottom:6px">Amount</div><input id="wa" type="number" min="1" step="0.01" placeholder="0.00" style="width:100%;background:#121428;border:1px solid #1e2240;color:#dce8ff;font-family:'DM Mono',monospace;font-size:13px;padding:9px 12px;outline:none"></div><div><div style="font-size:9px;letter-spacing:2px;color:#5a6a90;text-transform:uppercase;margin-bottom:6px">Destination</div><input id="wd" value="${acc.withdrawalAddress||''}" placeholder="Wallet address" style="width:100%;background:#121428;border:1px solid #1e2240;color:#dce8ff;font-family:'DM Mono',monospace;font-size:13px;padding:9px 12px;outline:none"></div><button onclick="mDoWithdraw()" style="width:100%;padding:13px;background:#00e676;border:none;color:#000;font-family:'Orbitron',sans-serif;font-size:12px;font-weight:700;letter-spacing:2px;cursor:pointer">CONFIRM WITHDRAWAL</button><div id="wmsg" style="display:none;font-size:11px;padding:9px 12px;border:1px solid"></div></div></div>
-    </div>
-  </div>`;
-  document.body.appendChild(o);o.addEventListener('click',e=>{if(e.target===o)o.remove();});mSwitch('ov');
-}
-});}
-}
-}
-}if(!cur||!amt||amt<1||!addr){sm(false,'Fill all fields — min 1 coin.');return;}const acc=loadAcc();if(!acc)return;if((acc.balances[cur]||0)<amt){sm(false,'Insufficient balance.');return;}acc.balances[cur]-=amt;acc.transactions=acc.transactions||[];acc.transactions.push({type:'withdrawal',game:'Wallet',bet:amt,payout:0,profit:-amt,currency:cur,mult:0,address:addr,ts:Date.now()});saveAcc(acc);refreshDisplays();sm(true,`✓ Withdrawn ${amt.toFixed(2)} ${cur.toUpperCase()} → ${addr}`);}
-
-
-// Init
-window.addEventListener('DOMContentLoaded', async () => {
-  let user = Lyko.getUser();
-  if (!user || !Lyko.getToken()) {
-    Lyko.showAuthModal(u => { Lyko.refreshDisplays(u); _afterAuthInit(); });
-    return;
-  }
-  const fresh = await Lyko.refreshMe();
-  if (!fresh) { Lyko.showAuthModal(u => { Lyko.refreshDisplays(u); _afterAuthInit(); }); return; }
-  Lyko.refreshDisplays(fresh);
-  _afterAuthInit();
-  function _afterAuthInit() {
-    const acc = Lyko.getUser(); if (!acc) return;
-    Lyko.refreshDisplays(acc);
-});
-</script>
-<script src="../casino/lyko.js"></script>
-<script>
 // ── LYKO SHIM ─────────────────────────────────────────────────────────────────
 function loadAcc() { return Lyko.getUser(); }
-function saveAcc(acc) { /* no-op: Lyko backend is source of truth */ }
+function saveAcc(acc) { /* no-op */ }
 function getBalance() { return Lyko.getBalance(); }
 function getActiveCurrency() { return Lyko.getActiveCurrency(); }
 function setCurrency(c) { Lyko.setCurrency(c); }
 function openAccount(e) { if (e) e.preventDefault(); Lyko.openAccount(); }
 function refreshDisplays(acc) { Lyko.refreshDisplays(acc || Lyko.getUser()); }
 
-// adjustBalance: optimistically update local display, then sync via API on recordBet
 function adjustBalance(delta) {
   const user = Lyko.getUser();
   if (!user) return;
@@ -331,21 +258,35 @@ function adjustBalance(delta) {
   Lyko.refreshDisplays(user);
 }
 
-// recordBet: called at end of each game round to settle with the backend
 async function recordBet(game, bet, currency, payout, mult) {
   try {
-    const result = await Lyko.placeBet({ game, bet, payout, profit: payout - bet, currency: currency || Lyko.getActiveCurrency(), multiplier: mult || 0 });
+    const result = await Lyko.placeBet({
+      game, bet, payout,
+      profit: payout - bet,
+      currency: currency || Lyko.getActiveCurrency(),
+      multiplier: mult || 0
+    });
     Lyko.refreshDisplays(result.user);
-    // Sync local storage with authoritative server balance
     localStorage.setItem('lyko_user', JSON.stringify(result.user));
   } catch (e) {
     console.error('[Lyko] recordBet failed:', e.message);
     Lyko.refreshMe().then(u => { if (u) Lyko.refreshDisplays(u); });
   }
 }
-// ─────────────────────────────────────────────────────────────────────────────
 
-document.addEventListener('DOMContentLoaded', () => Lyko.initCursor());
+window.addEventListener('DOMContentLoaded', async () => {
+  Lyko.initCursor();
+  let user = Lyko.getUser();
+  if (!user || !Lyko.getToken()) {
+    Lyko.showAuthModal(u => Lyko.refreshDisplays(u));
+    return;
+  }
+  const fresh = await Lyko.refreshMe();
+  if (!fresh) { Lyko.showAuthModal(u => Lyko.refreshDisplays(u)); return; }
+  Lyko.refreshDisplays(fresh);
+});
+// ─────────────────────────────────────────────────────────────────────────────
 </script>
+
 </body>
 </html>
