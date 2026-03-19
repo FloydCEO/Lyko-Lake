@@ -232,7 +232,8 @@ function animateBall(path,onDone){
   const rows=parseInt(document.getElementById('rowCount').value);
   const W=500,H=400;
   const rowH=H/(rows+1);
-  const ballColor='#00e676';
+  const ballColors=['#00e676','#00e5ff','#f5a623','#e94560','#b47aff','#ff6b8a'];
+  const ballColor=ballColors[Math.floor(Math.random()*ballColors.length)];
   let step=0;
   const positions=[];
   let col=0;
@@ -274,13 +275,10 @@ function animateBall(path,onDone){
   tick();
 }
 
-let dropping=false;
 function dropBall(){
-  if(dropping)return;
   const bet=parseFloat(document.getElementById('betAmt').value)||1;
   if(bet>getBalance())return;
-  adjustBalance(-bet);dropping=true;
-  document.getElementById('playBtn').disabled=true;
+  adjustBalance(-bet);
   const rows=parseInt(document.getElementById('rowCount').value);
   const path=[];for(let i=0;i<rows;i++)path.push(Math.random()<0.5);
   animateBall(path,(slot)=>{
@@ -294,8 +292,6 @@ function dropBall(){
     document.getElementById('lastPayout').textContent=(payout-bet>=0?'+':'')+((payout-bet).toFixed(2));
     const slotEl=document.getElementById('slot-'+slot);
     if(slotEl){slotEl.style.transform='scale(1.2)';slotEl.style.zIndex='10';setTimeout(()=>{slotEl.style.transform='';slotEl.style.zIndex='';},600);}
-    dropping=false;
-    document.getElementById('playBtn').disabled=false;
   });
 }
 
