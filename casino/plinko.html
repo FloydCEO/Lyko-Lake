@@ -288,7 +288,6 @@ function dropBall(){
     const mult=mults[slot]||0.2;
     const payout=bet*mult;
     adjustBalance(payout);
-    recordBet('Plinko', bet, getActiveCurrency(), payout, mult);
     document.getElementById('lastResult').textContent=mult+'×';
     document.getElementById('lastResult').style.color=mult>=1?'var(--lyko)':'var(--accent)';
     document.getElementById('lastPayout').textContent=(payout-bet>=0?'+':'')+((payout-bet).toFixed(2));

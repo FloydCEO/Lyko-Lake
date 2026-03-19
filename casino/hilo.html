@@ -309,7 +309,6 @@ function guess(dir){
     document.getElementById('profitDisplay').textContent=(betAmount*currentMult-betAmount).toFixed(2);
     updateOdds();
   } else {
-    recordBet('HiLo', betAmount, getActiveCurrency(), 0, 0);
     gameActive=false;
     document.getElementById('higherBtn').disabled=true;
     document.getElementById('lowerBtn').disabled=true;
@@ -331,7 +330,6 @@ function cashout(){
   if(!gameActive)return;
   const payout=betAmount*currentMult;
   adjustBalance(payout);
-  recordBet('HiLo', betAmount, getActiveCurrency(), payout, currentMult);
   gameActive=false;
   document.getElementById('higherBtn').disabled=true;
   document.getElementById('lowerBtn').disabled=true;

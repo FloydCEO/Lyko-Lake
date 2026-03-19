@@ -232,7 +232,6 @@ function play(){
       const mult=payTable[Math.min(matches,payTable.length-1)]||0;
       const payout=bet*mult;
       if(payout>0)adjustBalance(payout);
-      recordBet('Keno', bet, getActiveCurrency(), payout, mult);
       document.getElementById('matchCount').textContent=matches+' hits';
       document.getElementById('multDisplay').textContent=mult+'×';
       drawing=false;

@@ -249,7 +249,6 @@ function step(){
     // Boom
     if(stone){stone.textContent='💥';stone.className='stone danger';}
     gameActive=false;
-    recordBet('Chicken', betAmount, getActiveCurrency(), 0, 0);
     document.getElementById('startBtn').disabled=false;
     document.getElementById('difficulty').disabled=false;
     document.getElementById('cashoutBtn').classList.remove('show');
@@ -263,7 +262,6 @@ function cashout(){
   if(!gameActive)return;
   const payout=betAmount*currentMult;
   adjustBalance(payout);
-  recordBet('Chicken', betAmount, getActiveCurrency(), payout, currentMult);
   gameActive=false;
   document.getElementById('startBtn').disabled=false;
   document.getElementById('difficulty').disabled=false;

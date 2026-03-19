@@ -248,10 +248,8 @@ function cashout(){
   if(!gameActive)return;
   const payout=betAmount*currentMult;
   adjustBalance(payout);
-  recordBet('Mines', betAmount, getActiveCurrency(), payout, currentMult);
   endGame(true,payout);
 function endGame(won,payout){
-  if(!won){ recordBet('Mines', betAmount, getActiveCurrency(), 0, 0); }
   gameActive=false;
   document.getElementById('startBtn').disabled=false;
   document.getElementById('mineCount').disabled=false;

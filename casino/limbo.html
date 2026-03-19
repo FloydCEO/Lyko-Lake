@@ -210,9 +210,7 @@ function play(){
     bigMult.className='big-mult '+(win?'win':'lose');
     document.getElementById('resultBar').style.width=win?'100%':'20%';
     document.getElementById('resultBar').style.background=win?'var(--lyko)':'var(--accent)';
-    const payout = win ? bet*target*0.97 : 0;
-    if(win){adjustBalance(payout);}
-    recordBet('Limbo', bet, getActiveCurrency(), payout, win ? clipped : 0);
+    if(win){adjustBalance(bet*target*0.97);}
     addHistory(win,clipped);
     playing=false;
     document.getElementById('playBtn').disabled=false;

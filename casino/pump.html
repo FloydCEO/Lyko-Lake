@@ -209,13 +209,11 @@ function cashout(){
   gameActive=false;
   const payout=betAmount*currentMult*0.97;
   adjustBalance(payout);
-  recordBet('Pump', betAmount, getActiveCurrency(), payout, currentMult);
   document.getElementById('playBtn').disabled=false;
   document.getElementById('cashoutBtn').classList.remove('show');
   addHistory(true,currentMult);
   document.getElementById('balloon').style.transform='scale(1)';
 function burst(){
-  if(gameActive){ recordBet('Pump', betAmount, getActiveCurrency(), 0, 0); }
   gameActive=false;
   cancelAnimationFrame(animFrame);
   document.getElementById('balloon').className='popped';
