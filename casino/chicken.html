@@ -95,6 +95,7 @@ select.bet-input{appearance:none;}
     <div class="sidebar-logo"><a href="../casino.html"><div class="logo-icon">L</div>LYKO</a></div>
     <div class="sidebar-section">
       <div class="sidebar-label">Originals</div>
+      <a class="sidebar-item" href="crash.html"><span class="sidebar-icon">💥</span> Crash</a>
       <a class="sidebar-item" href="hilo.html"><span class="sidebar-icon">🃏</span> HiLo</a>
       <a class="sidebar-item" href="limbo.html"><span class="sidebar-icon">🎯</span> Limbo</a>
       <a class="sidebar-item" href="plinko.html"><span class="sidebar-icon">⚪</span> Plinko</a>
@@ -106,6 +107,7 @@ select.bet-input{appearance:none;}
     <div class="sidebar-section">
       <div class="sidebar-label">Navigate</div>
       <a class="sidebar-item" href="../casino.html"><span class="sidebar-icon">🎰</span> Casino Lobby</a>
+      <a class="sidebar-item" href="../leaderboard.html"><span class="sidebar-icon">🏆</span> Leaderboard</a>
       <a class="sidebar-item" href="#" onclick="openAccount(event)"><span class="sidebar-icon">👤</span> <span id="usernameNav">Account</span></a>
     </div>
     <div class="sidebar-wallet">
@@ -174,8 +176,6 @@ select.bet-input{appearance:none;}
 <script src="../casino/lyko.js"></script>
 <script>
 
-/* getBalance provided by shared system */
-
 function setBet(m){const i=document.getElementById('betAmt');i.value=Math.max(0.01,(parseFloat(i.value)||1)*m).toFixed(2);}
 
 const safeProbs={easy:0.70,medium:0.55,hard:0.40};
@@ -184,15 +184,16 @@ let gameActive=false,betAmount=0,currentMult=1,stepsCount=0,chickenPos=0,roadDat
 function getMultStep(difficulty){
   const base={easy:1.3,medium:1.6,hard:2.2};
   return base[difficulty]||1.6;
+}
+
 function buildRoad(){
   const road=document.getElementById('road');
   road.innerHTML='';
-  // Start
   const startStep=document.createElement('div');
   startStep.className='road-step';
   startStep.innerHTML='<div class="stone start-stone" id="stone-0"><span class="chicken-emoji" id="chicken">🐔</span>🏠</div><div class="stone-mult active" id="mult-0">Start</div>';
   road.appendChild(startStep);
-  // Steps
+  roadData=[];
   for(let i=1;i<=10;i++){
     const mult=(Math.pow(getMultStep(document.getElementById('difficulty').value),i)*0.97).toFixed(2);
     roadData.push(parseFloat(mult));
@@ -201,6 +202,8 @@ function buildRoad(){
     step.innerHTML=`<div class="stone" id="stone-${i}"></div><div class="stone-mult" id="mult-${i}">${mult}×</div>`;
     road.appendChild(step);
   }
+}
+
 function updateRoad(){
   for(let i=0;i<=10;i++){
     const stone=document.getElementById('stone-'+i);
@@ -210,15 +213,15 @@ function updateRoad(){
     if(i===chickenPos)stone.classList.add('current');
     if(i===chickenPos+1&&gameActive)stone.classList.add('next-target');
   }
-  // Move chicken
   const chicken=document.getElementById('chicken');
   const targetStone=document.getElementById('stone-'+chickenPos);
   if(chicken&&targetStone){targetStone.prepend(chicken);}
+}
+
 function startGame(){
   const bet=parseFloat(document.getElementById('betAmt').value)||1;
   if(bet>getBalance())return;
   adjustBalance(-bet);betAmount=bet;currentMult=1;stepsCount=0;chickenPos=0;gameActive=true;
-  roadData=[];
   buildRoad();updateRoad();
   document.getElementById('startBtn').disabled=true;
   document.getElementById('difficulty').disabled=true;
@@ -228,6 +231,8 @@ function startGame(){
   document.getElementById('multDisplay').textContent='1.00×';
   document.getElementById('profitDisplay').textContent='0.00';
   document.getElementById('statusMsg').textContent='Step forward or cash out!';
+}
+
 function step(){
   if(!gameActive)return;
   const diff=document.getElementById('difficulty').value;
@@ -246,45 +251,39 @@ function step(){
     updateRoad();
     if(chickenPos>=10){cashout();}
   } else {
-    // Boom
-    if(stone){stone.textContent='💥';stone.className='stone danger';}
+    if(stone){stone.innerHTML='💥';stone.className='stone danger';}
     gameActive=false;
+    recordBet('Chicken',betAmount,getActiveCurrency(),0,0);
     document.getElementById('startBtn').disabled=false;
     document.getElementById('difficulty').disabled=false;
     document.getElementById('cashoutBtn').classList.remove('show');
     document.getElementById('goBtn').style.display='none';
     document.getElementById('statusMsg').textContent='💥 The chicken fell! Better luck next time.';
-    // Move chicken to fallen position
     const chicken=document.getElementById('chicken');
     if(chicken&&stone){stone.prepend(chicken);}
   }
+}
+
 function cashout(){
   if(!gameActive)return;
   const payout=betAmount*currentMult;
   adjustBalance(payout);
+  recordBet('Chicken',betAmount,getActiveCurrency(),payout,currentMult);
   gameActive=false;
   document.getElementById('startBtn').disabled=false;
   document.getElementById('difficulty').disabled=false;
   document.getElementById('cashoutBtn').classList.remove('show');
   document.getElementById('goBtn').style.display='none';
   document.getElementById('statusMsg').textContent='🐔 Cashed out! Won '+(payout-betAmount).toFixed(2)+' '+getActiveCurrency().toUpperCase();
+}
+
 buildRoad();
 
-
-}
-}
-}
-}
-}
-}
 // ── LYKO SHIM ─────────────────────────────────────────────────────────────────
-function loadAcc() { return Lyko.getUser(); }
-function saveAcc(acc) { /* no-op */ }
 function getBalance() { return Lyko.getBalance(); }
 function getActiveCurrency() { return Lyko.getActiveCurrency(); }
 function setCurrency(c) { Lyko.setCurrency(c); }
 function openAccount(e) { if (e) e.preventDefault(); Lyko.openAccount(); }
-function refreshDisplays(acc) { Lyko.refreshDisplays(acc || Lyko.getUser()); }
 
 function adjustBalance(delta) {
   const user = Lyko.getUser();
@@ -322,7 +321,7 @@ window.addEventListener('DOMContentLoaded', async () => {
   if (!fresh) { Lyko.showAuthModal(u => Lyko.refreshDisplays(u)); return; }
   Lyko.refreshDisplays(fresh);
 });
-// ─────────────────────────────────────────────────────────────────────────────
+
 </script>
 
 </body>

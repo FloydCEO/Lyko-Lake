@@ -127,6 +127,7 @@ body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(
     <div class="sidebar-logo"><a href="../casino.html"><div class="logo-icon">L</div>LYKO</a></div>
     <div class="sidebar-section">
       <div class="sidebar-label">Originals</div>
+      <a class="sidebar-item" href="crash.html"><span class="sidebar-icon">💥</span> Crash</a>
       <a class="sidebar-item active" href="hilo.html"><span class="sidebar-icon">🃏</span> HiLo</a>
       <a class="sidebar-item" href="limbo.html"><span class="sidebar-icon">🎯</span> Limbo</a>
       <a class="sidebar-item" href="plinko.html"><span class="sidebar-icon">⚪</span> Plinko</a>
@@ -138,6 +139,7 @@ body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(
     <div class="sidebar-section">
       <div class="sidebar-label">Navigate</div>
       <a class="sidebar-item" href="../casino.html"><span class="sidebar-icon">🎰</span> Casino Lobby</a>
+      <a class="sidebar-item" href="../leaderboard.html"><span class="sidebar-icon">🏆</span> Leaderboard</a>
       <a class="sidebar-item" href="#" onclick="openAccount(event)"><span class="sidebar-icon">👤</span> <span id="usernameNav">Account</span></a>
     </div>
     <div class="sidebar-wallet">
@@ -241,14 +243,9 @@ body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(
 
 <script src="../casino/lyko.js"></script>
 <script>
-// Cursor
-// Currency
-
-/* getBalance provided by shared system */
 
 function setBet(mult){const i=document.getElementById('betAmt');i.value=Math.max(0.01,(parseFloat(i.value)||1)*mult).toFixed(2);}
 
-// Cards
 const ranks=['2','3','4','5','6','7','8','9','10','J','Q','K','A'];
 const suits=['♠','♥','♦','♣'];
 const suitColors={'♠':'#dce8ff','♣':'#dce8ff','♥':'#e94560','♦':'#e94560'};
@@ -261,9 +258,39 @@ let streak=0;
 
 function buildDeck(){deck=[];for(let r of ranks)for(let s of suits)deck.push({rank:r,suit:s,val:ranks.indexOf(r)});}
 function drawCard(){if(deck.length===0)buildDeck();const i=Math.floor(Math.random()*deck.length);return deck.splice(i,1)[0];}
-function renderCard(el,card){const tl=el.querySelector('.card-tl')||{textContent:''};const br=el.querySelector('.card-br')||{textContent:''};el.querySelector('#curr-tl').textContent=card.rank;el.querySelector('#curr-br').textContent=card.rank;el.querySelector('#curr-rank').textContent=card.rank;el.querySelector('#curr-suit').textContent=card.suit;el.querySelector('#curr-suit').style.color=suitColors[card.suit];el.querySelector('#curr-tl').style.color=suitColors[card.suit];el.querySelector('#curr-br').style.color=suitColors[card.suit];}
-function calcOdds(card){const v=card.val;const higher=ranks.length-1-v;const lower=v;const equal=3;const total=deck.length||51;const hProb=higher*4/total;const lProb=lower*4/total;return{hProb,lProb,hMult:hProb>0?((0.97/hProb)).toFixed(2):'∞',lMult:lProb>0?((0.97/lProb)).toFixed(2):'∞'};}
-function updateOdds(){if(!currentCard)return;const o=calcOdds(currentCard);document.getElementById('higherOdds').textContent=o.hMult+'×';document.getElementById('lowerOdds').textContent=o.lMult+'×';const total=Math.min(deck.length,51);const v=currentCard.val;const winCards=(ranks.length-1-v+v)*4;document.getElementById('winChance').textContent=Math.round(winCards/total*50)+'%';}
+
+function renderCard(el,card){
+  el.querySelector('#curr-tl').textContent=card.rank;
+  el.querySelector('#curr-br').textContent=card.rank;
+  el.querySelector('#curr-rank').textContent=card.rank;
+  el.querySelector('#curr-suit').textContent=card.suit;
+  el.querySelector('#curr-suit').style.color=suitColors[card.suit];
+  el.querySelector('#curr-tl').style.color=suitColors[card.suit];
+  el.querySelector('#curr-br').style.color=suitColors[card.suit];
+}
+
+function calcOdds(card){
+  const v=card.val;
+  const higher=ranks.length-1-v;
+  const lower=v;
+  const total=deck.length||51;
+  const hProb=higher*4/total;
+  const lProb=lower*4/total;
+  return{hProb,lProb,hMult:hProb>0?(0.97/hProb).toFixed(2):'∞',lMult:lProb>0?(0.97/lProb).toFixed(2):'∞'};
+}
+
+function updateOdds(){
+  if(!currentCard)return;
+  const o=calcOdds(currentCard);
+  document.getElementById('higherOdds').textContent=o.hMult+'×';
+  document.getElementById('lowerOdds').textContent=o.lMult+'×';
+  const total=Math.min(deck.length,51);
+  const v=currentCard.val;
+  const higherCards=(ranks.length-1-v)*4;
+  const lowerCards=v*4;
+  const bestChance=Math.max(higherCards,lowerCards);
+  document.getElementById('winChance').textContent=Math.round(bestChance/total*100)+'%';
+}
 
 function startGame(){
   const bet=parseFloat(document.getElementById('betAmt').value)||1;
@@ -277,7 +304,7 @@ function startGame(){
   document.getElementById('multBig').textContent='1.00×';
   document.getElementById('multDisplay').textContent='1.00×';
   document.getElementById('streakDisplay').textContent='0';
-  document.getElementById('profitDisplay').textContent=(bet*(1)-bet).toFixed(2);
+  document.getElementById('profitDisplay').textContent=(bet*1-bet).toFixed(2);
   document.getElementById('higherBtn').disabled=false;
   document.getElementById('lowerBtn').disabled=false;
   document.getElementById('skipBtn').disabled=false;
@@ -285,19 +312,18 @@ function startGame(){
   document.getElementById('cashoutBtn').classList.add('show');
   document.getElementById('resultMsg').style.display='none';
   updateOdds();
+}
+
 function guess(dir){
   if(!gameActive)return;
   const next=drawCard();
-  // Copy current to prev
   const prevEl=document.getElementById('prevCard');
   prevEl.innerHTML=`<div class="card-tl" style="color:${suitColors[currentCard.suit]}">${currentCard.rank}</div><div class="card-rank" style="font-size:42px;font-weight:900">${currentCard.rank}</div><div class="card-suit" style="font-size:24px;margin-top:4px;color:${suitColors[currentCard.suit]}">${currentCard.suit}</div><div class="card-br" style="color:${suitColors[currentCard.suit]};transform:rotate(180deg)">${currentCard.rank}</div>`;
   prevEl.className='playing-card';
-  
   const correct=(dir==='higher'&&next.val>currentCard.val)||(dir==='lower'&&next.val<currentCard.val);
   currentCard=next;
   renderCard(document.getElementById('currCard'),currentCard);
   document.getElementById('currCard').className='playing-card revealed '+(correct?'win-card':'lose-card');
-  
   if(correct){
     const o=calcOdds({val:next.val});
     const stepMult=dir==='higher'?parseFloat(o.hMult)||1.5:parseFloat(o.lMult)||1.5;
@@ -315,9 +341,12 @@ function guess(dir){
     document.getElementById('skipBtn').disabled=true;
     document.getElementById('startBtn').disabled=false;
     document.getElementById('cashoutBtn').classList.remove('show');
+    recordBet('HiLo',betAmount,getActiveCurrency(),0,0);
     showResult('💥 Wrong! Lost '+betAmount.toFixed(2)+' '+getActiveCurrency().toUpperCase(),'lose');
     streak=0;
   }
+}
+
 function skipCard(){
   if(!gameActive)return;
   const next=drawCard();
@@ -326,10 +355,13 @@ function skipCard(){
   renderCard(document.getElementById('currCard'),currentCard);
   document.getElementById('currCard').className='playing-card revealed';
   updateOdds();
+}
+
 function cashout(){
   if(!gameActive)return;
   const payout=betAmount*currentMult;
   adjustBalance(payout);
+  recordBet('HiLo',betAmount,getActiveCurrency(),payout,currentMult);
   gameActive=false;
   document.getElementById('higherBtn').disabled=true;
   document.getElementById('lowerBtn').disabled=true;
@@ -337,25 +369,20 @@ function cashout(){
   document.getElementById('startBtn').disabled=false;
   document.getElementById('cashoutBtn').classList.remove('show');
   showResult('✓ Cashed out! Won '+(payout-betAmount).toFixed(2)+' '+getActiveCurrency().toUpperCase(),'win');
+}
+
 function showResult(msg,type){
   const el=document.getElementById('resultMsg');
   el.textContent=msg;el.className='result-msg '+type;el.style.display='block';
+}
+
 buildDeck();
 
-
-}
-}
-}
-}
-}
 // ── LYKO SHIM ─────────────────────────────────────────────────────────────────
-function loadAcc() { return Lyko.getUser(); }
-function saveAcc(acc) { /* no-op */ }
 function getBalance() { return Lyko.getBalance(); }
 function getActiveCurrency() { return Lyko.getActiveCurrency(); }
 function setCurrency(c) { Lyko.setCurrency(c); }
 function openAccount(e) { if (e) e.preventDefault(); Lyko.openAccount(); }
-function refreshDisplays(acc) { Lyko.refreshDisplays(acc || Lyko.getUser()); }
 
 function adjustBalance(delta) {
   const user = Lyko.getUser();
@@ -393,7 +420,6 @@ window.addEventListener('DOMContentLoaded', async () => {
   if (!fresh) { Lyko.showAuthModal(u => Lyko.refreshDisplays(u)); return; }
   Lyko.refreshDisplays(fresh);
 });
-// ─────────────────────────────────────────────────────────────────────────────
 </script>
 
 </body>

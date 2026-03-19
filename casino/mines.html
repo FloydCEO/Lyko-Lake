@@ -90,6 +90,7 @@ select.bet-input{appearance:none;background-image:url("data:image/svg+xml,%3Csvg
     <div class="sidebar-logo"><a href="../casino.html"><div class="logo-icon">L</div>LYKO</a></div>
     <div class="sidebar-section">
       <div class="sidebar-label">Originals</div>
+      <a class="sidebar-item" href="crash.html"><span class="sidebar-icon">💥</span> Crash</a>
       <a class="sidebar-item" href="hilo.html"><span class="sidebar-icon">🃏</span> HiLo</a>
       <a class="sidebar-item" href="limbo.html"><span class="sidebar-icon">🎯</span> Limbo</a>
       <a class="sidebar-item" href="plinko.html"><span class="sidebar-icon">⚪</span> Plinko</a>
@@ -101,6 +102,7 @@ select.bet-input{appearance:none;background-image:url("data:image/svg+xml,%3Csvg
     <div class="sidebar-section">
       <div class="sidebar-label">Navigate</div>
       <a class="sidebar-item" href="../casino.html"><span class="sidebar-icon">🎰</span> Casino Lobby</a>
+      <a class="sidebar-item" href="../leaderboard.html"><span class="sidebar-icon">🏆</span> Leaderboard</a>
       <a class="sidebar-item" href="#" onclick="openAccount(event)"><span class="sidebar-icon">👤</span> <span id="usernameNav">Account</span></a>
     </div>
     <div class="sidebar-wallet">
@@ -172,8 +174,6 @@ select.bet-input{appearance:none;background-image:url("data:image/svg+xml,%3Csvg
 <script src="../casino/lyko.js"></script>
 <script>
 
-/* getBalance provided by shared system */
-
 function setBet(m){const i=document.getElementById('betAmt');i.value=Math.max(0.01,(parseFloat(i.value)||1)*m).toFixed(2);}
 
 let board=[],minePositions=new Set(),revealed=new Set(),gameActive=false,betAmount=0,currentMult=1,safePicks=0;
@@ -182,14 +182,18 @@ function calcMult(safe,mines){
   const total=25;
   let m=1;
   for(let i=0;i<safe;i++){
-    const remaining=total-i;const safeRemaining=remaining-mines;
+    const remaining=total-i;
+    const safeRemaining=remaining-mines;
     m*=(remaining/(safeRemaining))*0.97;
   }
   return m;
+}
+
 function startGame(){
   const bet=parseFloat(document.getElementById('betAmt').value)||1;
   const mines=parseInt(document.getElementById('mineCount').value)||3;
-  if(bet>getBalance()){return;}
+  const bal=getBalance();
+  if(bet>bal){return;}
   adjustBalance(-bet);betAmount=bet;currentMult=1;safePicks=0;gameActive=true;
   minePositions=new Set();
   while(minePositions.size<mines){minePositions.add(Math.floor(Math.random()*25));}
@@ -202,6 +206,8 @@ function startGame(){
   document.getElementById('gemsLeft').textContent=(25-mines);
   document.getElementById('multDisplay').textContent='1.00×';
   document.getElementById('nextTile').textContent=calcMult(1,mines).toFixed(2)+'×';
+}
+
 function buildGrid(mines){
   const grid=document.getElementById('minesGrid');
   grid.innerHTML='';
@@ -213,6 +219,8 @@ function buildGrid(mines){
     tile.onclick=()=>pickTile(i);
     grid.appendChild(tile);
   }
+}
+
 function pickTile(i){
   if(!gameActive||revealed.has(i))return;
   revealed.add(i);
@@ -221,11 +229,11 @@ function pickTile(i){
   if(minePositions.has(i)){
     tile.textContent='💣';
     tile.className='mine-tile revealed-mine';
-    // Reveal all mines
     minePositions.forEach(mi=>{
       const mt=document.getElementById('minesGrid').children[mi];
       if(!revealed.has(mi)){mt.textContent='💣';mt.className='mine-tile show-mine';}
     });
+    recordBet('Mines',betAmount,getActiveCurrency(),0,0);
     endGame(false);
   } else {
     tile.textContent='💎';
@@ -239,23 +247,29 @@ function pickTile(i){
       document.getElementById('nextTile').textContent=calcMult(safePicks+1,mines).toFixed(2)+'×';
     } else {cashout();}
   }
+}
+
 function pickRandom(){
   if(!gameActive)return;
   const unrevealed=[];
   for(let i=0;i<25;i++){if(!revealed.has(i))unrevealed.push(i);}
   if(unrevealed.length>0){pickTile(unrevealed[Math.floor(Math.random()*unrevealed.length)]);}
+}
+
 function cashout(){
   if(!gameActive)return;
   const payout=betAmount*currentMult;
   adjustBalance(payout);
+  recordBet('Mines',betAmount,getActiveCurrency(),payout,currentMult);
   endGame(true,payout);
+}
+
 function endGame(won,payout){
   gameActive=false;
   document.getElementById('startBtn').disabled=false;
   document.getElementById('mineCount').disabled=false;
   document.getElementById('cashoutBtn').classList.remove('show');
   document.getElementById('randomBtn').style.display='none';
-  // Disable all tiles
   Array.from(document.getElementById('minesGrid').children).forEach(t=>{
     if(!t.classList.contains('revealed-gem')&&!t.classList.contains('revealed-mine')&&!t.classList.contains('show-mine')){
       t.classList.add('disabled');t.onclick=null;
@@ -268,24 +282,15 @@ function endGame(won,payout){
     document.body.appendChild(overlay);
     setTimeout(()=>overlay.remove(),2000);
   }
+}
+
 buildGrid(3);
 
-
-}
-}
-}
-}
-}
-}
-}
 // ── LYKO SHIM ─────────────────────────────────────────────────────────────────
-function loadAcc() { return Lyko.getUser(); }
-function saveAcc(acc) { /* no-op */ }
 function getBalance() { return Lyko.getBalance(); }
 function getActiveCurrency() { return Lyko.getActiveCurrency(); }
 function setCurrency(c) { Lyko.setCurrency(c); }
 function openAccount(e) { if (e) e.preventDefault(); Lyko.openAccount(); }
-function refreshDisplays(acc) { Lyko.refreshDisplays(acc || Lyko.getUser()); }
 
 function adjustBalance(delta) {
   const user = Lyko.getUser();
@@ -323,7 +328,6 @@ window.addEventListener('DOMContentLoaded', async () => {
   if (!fresh) { Lyko.showAuthModal(u => Lyko.refreshDisplays(u)); return; }
   Lyko.refreshDisplays(fresh);
 });
-// ─────────────────────────────────────────────────────────────────────────────
 </script>
 
 </body>

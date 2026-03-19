@@ -88,6 +88,7 @@ body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(
     <div class="sidebar-logo"><a href="../casino.html"><div class="logo-icon">L</div>LYKO</a></div>
     <div class="sidebar-section">
       <div class="sidebar-label">Originals</div>
+      <a class="sidebar-item" href="crash.html"><span class="sidebar-icon">💥</span> Crash</a>
       <a class="sidebar-item" href="hilo.html"><span class="sidebar-icon">🃏</span> HiLo</a>
       <a class="sidebar-item active" href="limbo.html"><span class="sidebar-icon">🎯</span> Limbo</a>
       <a class="sidebar-item" href="plinko.html"><span class="sidebar-icon">⚪</span> Plinko</a>
@@ -99,6 +100,7 @@ body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(
     <div class="sidebar-section">
       <div class="sidebar-label">Navigate</div>
       <a class="sidebar-item" href="../casino.html"><span class="sidebar-icon">🎰</span> Casino Lobby</a>
+      <a class="sidebar-item" href="../leaderboard.html"><span class="sidebar-icon">🏆</span> Leaderboard</a>
       <a class="sidebar-item" href="#" onclick="openAccount(event)"><span class="sidebar-icon">👤</span> <span id="usernameNav">Account</span></a>
     </div>
     <div class="sidebar-wallet">
@@ -171,8 +173,6 @@ body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(
 <script src="../casino/lyko.js"></script>
 <script>
 
-/* getBalance provided by shared system */
-
 function setBet(m){const i=document.getElementById('betAmt');i.value=Math.max(0.01,(parseFloat(i.value)||1)*m).toFixed(2);}
 
 document.getElementById('targetMult').addEventListener('input',updateStats);
@@ -187,6 +187,7 @@ function updateStats(){
   document.getElementById('wcdTarget').textContent=t.toFixed(2)+'×';
   document.getElementById('wcdChance').textContent=wc+'%';
   document.getElementById('wcdPayout').textContent=payout+'×';
+}
 updateStats();
 
 let playing=false;
@@ -201,7 +202,6 @@ function play(){
   bigMult.className='big-mult idle';bigMult.textContent='...';
   document.getElementById('resultBar').style.width='0';
   setTimeout(()=>{
-    // Generate result — weighted exponential
     const rand=Math.random();
     const result=0.99/Math.max(rand,0.001);
     const clipped=Math.min(result,100000);
@@ -210,12 +210,16 @@ function play(){
     bigMult.className='big-mult '+(win?'win':'lose');
     document.getElementById('resultBar').style.width=win?'100%':'20%';
     document.getElementById('resultBar').style.background=win?'var(--lyko)':'var(--accent)';
-    if(win){adjustBalance(bet*target*0.97);}
+    const payout=win?bet*target*0.97:0;
+    if(win){adjustBalance(payout);}
+    recordBet('Limbo',bet,getActiveCurrency(),payout,win?target:clipped);
     addHistory(win,clipped);
     playing=false;
     document.getElementById('playBtn').disabled=false;
     updateStats();
   },600);
+}
+
 function addHistory(win,mult){
   const strip=document.getElementById('histStrip');
   const chip=document.createElement('div');
@@ -223,20 +227,15 @@ function addHistory(win,mult){
   chip.textContent=mult.toFixed(2)+'×';
   strip.prepend(chip);
   while(strip.children.length>12)strip.removeChild(strip.lastChild);
+}
+
 function showFlash(msg){const b=document.getElementById('bigMult');b.textContent=msg;b.className='big-mult lose';setTimeout(()=>{b.textContent='1.00×';b.className='big-mult idle';},1500);}
 
-
-}
-}
-}
 // ── LYKO SHIM ─────────────────────────────────────────────────────────────────
-function loadAcc() { return Lyko.getUser(); }
-function saveAcc(acc) { /* no-op */ }
 function getBalance() { return Lyko.getBalance(); }
 function getActiveCurrency() { return Lyko.getActiveCurrency(); }
 function setCurrency(c) { Lyko.setCurrency(c); }
 function openAccount(e) { if (e) e.preventDefault(); Lyko.openAccount(); }
-function refreshDisplays(acc) { Lyko.refreshDisplays(acc || Lyko.getUser()); }
 
 function adjustBalance(delta) {
   const user = Lyko.getUser();
@@ -274,7 +273,7 @@ window.addEventListener('DOMContentLoaded', async () => {
   if (!fresh) { Lyko.showAuthModal(u => Lyko.refreshDisplays(u)); return; }
   Lyko.refreshDisplays(fresh);
 });
-// ─────────────────────────────────────────────────────────────────────────────
+
 </script>
 
 </body>

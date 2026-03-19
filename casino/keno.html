@@ -88,6 +88,7 @@ body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(
     <div class="sidebar-logo"><a href="../casino.html"><div class="logo-icon">L</div>LYKO</a></div>
     <div class="sidebar-section">
       <div class="sidebar-label">Originals</div>
+      <a class="sidebar-item" href="crash.html"><span class="sidebar-icon">💥</span> Crash</a>
       <a class="sidebar-item" href="hilo.html"><span class="sidebar-icon">🃏</span> HiLo</a>
       <a class="sidebar-item" href="limbo.html"><span class="sidebar-icon">🎯</span> Limbo</a>
       <a class="sidebar-item" href="plinko.html"><span class="sidebar-icon">⚪</span> Plinko</a>
@@ -99,6 +100,7 @@ body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(
     <div class="sidebar-section">
       <div class="sidebar-label">Navigate</div>
       <a class="sidebar-item" href="../casino.html"><span class="sidebar-icon">🎰</span> Casino Lobby</a>
+      <a class="sidebar-item" href="../leaderboard.html"><span class="sidebar-icon">🏆</span> Leaderboard</a>
       <a class="sidebar-item" href="#" onclick="openAccount(event)"><span class="sidebar-icon">👤</span> <span id="usernameNav">Account</span></a>
     </div>
     <div class="sidebar-wallet">
@@ -159,11 +161,8 @@ body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(
 <script src="../casino/lyko.js"></script>
 <script>
 
-/* getBalance provided by shared system */
-
 function setBet(m){const i=document.getElementById('betAmt');i.value=Math.max(0.01,(parseFloat(i.value)||1)*m).toFixed(2);}
 
-// Payout table (spots_selected -> [mult for 0 matches, 1 match, 2 matches, ...]
 const payouts={
   1:[0,2.7],
   2:[0,0,4],
@@ -188,11 +187,15 @@ function buildGrid(){
     el.onclick=()=>toggleNum(i,el);
     grid.appendChild(el);
   }
+}
+
 function toggleNum(n,el){
   if(drawing)return;
   if(selected.has(n)){selected.delete(n);el.classList.remove('selected');}
   else if(selected.size<10){selected.add(n);el.classList.add('selected');}
   document.getElementById('selectedCount').textContent=selected.size+' / 10';
+}
+
 function randomPick(){
   if(drawing)return;
   clearPicks();
@@ -201,6 +204,8 @@ function randomPick(){
   const picks=nums.slice(0,Math.floor(Math.random()*9)+2);
   picks.forEach(n=>{selected.add(n);const el=document.querySelector(`[data-n="${n}"]`);if(el)el.classList.add('selected');});
   document.getElementById('selectedCount').textContent=selected.size+' / 10';
+}
+
 function clearPicks(){
   if(drawing)return;
   selected.clear();
@@ -208,15 +213,15 @@ function clearPicks(){
   document.getElementById('selectedCount').textContent='0 / 10';
   document.getElementById('matchCount').textContent='—';
   document.getElementById('multDisplay').textContent='—';
+}
+
 function play(){
   if(drawing||selected.size===0)return;
   const bet=parseFloat(document.getElementById('betAmt').value)||1;
   if(bet>getBalance())return;
   adjustBalance(-bet);drawing=true;
   document.getElementById('playBtn').disabled=true;
-  // Reset drawn state
   document.querySelectorAll('.keno-num').forEach(el=>{el.classList.remove('drawn','hit','miss-draw');if(selected.has(parseInt(el.dataset.n)))el.classList.add('selected');});
-  // Draw 20 numbers
   const pool=Array.from({length:40},(_,i)=>i+1);
   for(let i=pool.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[pool[i],pool[j]]=[pool[j],pool[i]];}
   const drawn=new Set(pool.slice(0,20));
@@ -224,7 +229,6 @@ function play(){
   const drawnArr=[...drawn];
   function revealNext(){
     if(revealed>=20){
-      // Count matches
       let matches=0;
       selected.forEach(n=>{if(drawn.has(n))matches++;});
       const spots=selected.size;
@@ -232,6 +236,7 @@ function play(){
       const mult=payTable[Math.min(matches,payTable.length-1)]||0;
       const payout=bet*mult;
       if(payout>0)adjustBalance(payout);
+      recordBet('Keno',bet,getActiveCurrency(),payout,mult);
       document.getElementById('matchCount').textContent=matches+' hits';
       document.getElementById('multDisplay').textContent=mult+'×';
       drawing=false;
@@ -248,22 +253,15 @@ function play(){
     setTimeout(revealNext,80);
   }
   revealNext();
+}
+
 buildGrid();
 
-
-}
-}
-}
-}
-}
 // ── LYKO SHIM ─────────────────────────────────────────────────────────────────
-function loadAcc() { return Lyko.getUser(); }
-function saveAcc(acc) { /* no-op */ }
 function getBalance() { return Lyko.getBalance(); }
 function getActiveCurrency() { return Lyko.getActiveCurrency(); }
 function setCurrency(c) { Lyko.setCurrency(c); }
 function openAccount(e) { if (e) e.preventDefault(); Lyko.openAccount(); }
-function refreshDisplays(acc) { Lyko.refreshDisplays(acc || Lyko.getUser()); }
 
 function adjustBalance(delta) {
   const user = Lyko.getUser();
@@ -301,7 +299,7 @@ window.addEventListener('DOMContentLoaded', async () => {
   if (!fresh) { Lyko.showAuthModal(u => Lyko.refreshDisplays(u)); return; }
   Lyko.refreshDisplays(fresh);
 });
-// ─────────────────────────────────────────────────────────────────────────────
+
 </script>
 
 </body>
