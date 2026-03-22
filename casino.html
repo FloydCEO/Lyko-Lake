@@ -77,6 +77,7 @@ body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(
 .game-card[data-game="chicken"] .game-thumb{background:linear-gradient(135deg,#1a2a0a,#253a10);}
 .game-card[data-game="keno"] .game-thumb{background:linear-gradient(135deg,#2a0a1a,#3a1025);}
 .game-card[data-game="pump"] .game-thumb{background:linear-gradient(135deg,#1a0a0a,#3a1010);}
+.game-card[data-game="blackjack"] .game-thumb{background:linear-gradient(135deg,#0a1a0a,#0d2e1a);}
 .thumb-icon{transition:transform .3s;filter:drop-shadow(0 0 14px rgba(0,230,118,.25));}
 .game-card:hover .thumb-icon{transform:scale(1.15) rotate(-5deg);}
 .thumb-badge{position:absolute;top:10px;right:10px;font-size:8px;letter-spacing:2px;padding:3px 8px;background:var(--lyko);color:#000;font-weight:700;text-transform:uppercase;border-radius:2px;}
@@ -140,6 +141,7 @@ select.m-input{appearance:none;}
       <div class="sidebar-label">Originals</div>
       <a class="sidebar-item" href="casino/crash.html"><span class="sidebar-icon">💥</span> Crash</a>
       <a class="sidebar-item" href="casino/hilo.html"><span class="sidebar-icon">🃏</span> HiLo</a>
+      <a class="sidebar-item" href="casino/blackjack.html"><span class="sidebar-icon">🂡</span> Blackjack</a>
       <a class="sidebar-item" href="casino/limbo.html"><span class="sidebar-icon">🎯</span> Limbo</a>
       <a class="sidebar-item" href="casino/plinko.html"><span class="sidebar-icon">⚪</span> Plinko</a>
       <a class="sidebar-item" href="casino/mines.html"><span class="sidebar-icon">💎</span> Mines</a>
@@ -199,6 +201,10 @@ select.m-input{appearance:none;}
         <a class="game-card" data-game="hilo" href="casino/hilo.html">
           <div class="game-thumb"><span class="thumb-icon">🃏</span><span class="thumb-badge">Original</span></div>
           <div class="game-info"><div class="game-name">HI<span class="hl">LO</span></div><p class="game-desc">Guess higher or lower. Chain correct guesses to multiply your winnings.</p><div class="game-meta"><span class="game-vol">Med–High</span><span class="game-play">Play</span></div></div>
+        </a>
+        <a class="game-card" data-game="blackjack" href="casino/blackjack.html">
+          <div class="game-thumb"><span class="thumb-icon">🂡</span><span class="thumb-badge">Original</span></div>
+          <div class="game-info"><div class="game-name">BLACK<span class="hl">JACK</span></div><p class="game-desc">Beat the dealer to 21. Hit, stand or double down. Blackjack pays 3:2.</p><div class="game-meta"><span class="game-vol">Low–Med</span><span class="game-play">Play</span></div></div>
         </a>
         <a class="game-card" data-game="limbo" href="casino/limbo.html">
           <div class="game-thumb"><span class="thumb-icon">🎯</span><span class="thumb-badge">Original</span></div>
