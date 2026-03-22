@@ -150,6 +150,7 @@ select.m-input{appearance:none;}
     <div id="game-area">
       <div id="bet-panel">
         <div class="panel-title">Cyber</div>
+        <div style="padding:8px 10px;background:rgba(0,229,255,.08);border:1px solid rgba(0,229,255,.3);font-size:9px;letter-spacing:2px;color:var(--cyan);text-align:center;">⚡ CYBER COIN ONLY</div>
         <div class="input-group">
           <div class="input-label">Bet Amount</div>
           <div class="input-row">
@@ -259,8 +260,10 @@ function cascade(matches) {
 }
 
 async function spin() {
+  // Cyber Slots only accepts CYBER coin
+  Lyko.setActiveCurrency('cyber');
   const bet = parseFloat(document.getElementById('betAmt').value)||10;
-  if (bet>Lyko.getBalance()) { document.getElementById('resultDisplay').textContent='Insufficient balance!'; document.getElementById('resultDisplay').className='result-display lose'; return; }
+  if (bet>Lyko.getBalance('cyber')) { document.getElementById('resultDisplay').textContent='Insufficient CYBER balance!'; document.getElementById('resultDisplay').className='result-display lose'; return; }
   if (spinning) return;
   spinning = true;
 
@@ -340,7 +343,7 @@ async function spin() {
 }
 
 function adjustBet(m) { const i=document.getElementById('betAmt'); i.value=Math.max(0.01,(parseFloat(i.value)||10)*m).toFixed(2); }
-function adjustBalance(delta) { const user=Lyko.getUser(); if(!user)return; const cur=Lyko.getActiveCurrency(); user.balances[cur]=Math.max(0,(user.balances[cur]||0)+delta); localStorage.setItem('lyko_user',JSON.stringify(user)); Lyko.refreshDisplays(user); }
+function adjustBalance(delta) { const user=Lyko.getUser(); if(!user)return; const cur='cyber'; user.balances[cur]=Math.max(0,(user.balances[cur]||0)+delta); localStorage.setItem('lyko_user',JSON.stringify(user)); Lyko.refreshDisplays(user); }
 function setCurrency(c) { Lyko.setCurrency(c); }
 function openAccount(e) { if(e)e.preventDefault(); Lyko.openAccount(); }
 
@@ -356,6 +359,7 @@ window.addEventListener('DOMContentLoaded', async () => {
   if(!user||!Lyko.getToken()){Lyko.showAuthModal(u=>Lyko.refreshDisplays(u));return;}
   const fresh=await Lyko.refreshMe();
   if(!fresh){Lyko.showAuthModal(u=>Lyko.refreshDisplays(u));return;}
+  Lyko.setActiveCurrency('cyber');
   Lyko.refreshDisplays(fresh);
 });
 </script>

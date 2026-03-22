@@ -8,6 +8,17 @@
   // ── CONFIG ──────────────────────────────────────────────────────────────────
   // Change this to your deployed worker URL after: wrangler deploy
   const API = 'https://lyko-casino.lillykobusiness69.workers.dev';
+
+  // ── EXCHANGE RATES (relative to LYKO = 1.0) ──────────────────────────────────
+  // LYKO is the base. GOLD is worth 2x LYKO. CYBER is worth 4x LYKO.
+  // Example: 1 GOLD = 2 LYKO, 1 CYBER = 4 LYKO
+  const RATES = { lyko: 1, gold: 2, cyber: 4 };
+
+  // ── GAMBLE SWITCH STATE ───────────────────────────────────────────────────────
+  // When active, the player sees bets in switchCurrency but payouts go to baseCurrency
+  let _switchActive = false;
+  let _switchBase = 'lyko';       // the real currency bets are deducted/paid in
+  let _switchView = 'lyko';       // the display currency the player chose
   // For local dev use: const API = 'http://localhost:8787';
 
   // ── STORAGE ─────────────────────────────────────────────────────────────────
@@ -178,6 +189,56 @@
     refreshDisplays();
   }
 
+  // ── GAMBLE SWITCH HELPERS ──────────────────────────────────────────────────────
+  // Convert an amount from one currency to another using RATES
+  function convertAmount(amount, fromCur, toCur) {
+    if (fromCur === toCur) return amount;
+    const inLyko = amount * RATES[fromCur];
+    return parseFloat((inLyko / RATES[toCur]).toFixed(4));
+  }
+
+  // Start a gamble-switch session: player will see bets in viewCur but pays in baseCur
+  function startGambleSwitch(baseCur, viewCur) {
+    _switchActive = true;
+    _switchBase = baseCur;
+    _switchView = viewCur;
+    localStorage.setItem('lyko_switch', JSON.stringify({ active: true, base: baseCur, view: viewCur }));
+    refreshDisplays();
+  }
+
+  function stopGambleSwitch() {
+    _switchActive = false;
+    _switchBase = getActiveCurrency();
+    _switchView = getActiveCurrency();
+    localStorage.removeItem('lyko_switch');
+    refreshDisplays();
+  }
+
+  function getGambleSwitch() {
+    // Restore from storage on reload
+    if (!_switchActive) {
+      try {
+        const s = JSON.parse(localStorage.getItem('lyko_switch') || 'null');
+        if (s && s.active) { _switchActive = true; _switchBase = s.base; _switchView = s.view; }
+      } catch {}
+    }
+    return { active: _switchActive, base: _switchBase, view: _switchView };
+  }
+
+  // Get the displayed bet amount in view currency (for UI input)
+  function toViewAmount(realAmount) {
+    const sw = getGambleSwitch();
+    if (!sw.active || sw.base === sw.view) return realAmount;
+    return convertAmount(realAmount, sw.base, sw.view);
+  }
+
+  // Convert a displayed (view) amount back to real (base) currency for placing bet
+  function toBaseAmount(viewAmount) {
+    const sw = getGambleSwitch();
+    if (!sw.active || sw.base === sw.view) return viewAmount;
+    return convertAmount(viewAmount, sw.view, sw.base);
+  }
+
   // ── ACCOUNT MODAL ─────────────────────────────────────────────────────────────
   async function openAccount() {
     const user = getUser();
@@ -211,6 +272,7 @@
     <button class="m-tab on" id="tab-ov" onclick="switchMTab('ov')">Overview</button>
     <button class="m-tab" id="tab-tx" onclick="switchMTab('tx')">History</button>
     <button class="m-tab" id="tab-st" onclick="switchMTab('st')">Settings</button>
+    <button class="m-tab" id="tab-cv" onclick="switchMTab('cv')">Convert</button>
     <button class="m-tab" id="tab-wd" onclick="switchMTab('wd')">Withdraw</button>
   </div>
   <div class="m-body">
@@ -269,6 +331,74 @@
             <button class="m-btn" onclick="mSaveName()">SAVE</button>
           </div>
           <div id="mSettingOk" style="display:none;margin-top:8px;font-size:10px;color:var(--lyko);letter-spacing:2px">✓ SAVED</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CONVERT -->
+    <div id="mpanel-cv" style="display:none">
+      <div style="max-width:440px;display:flex;flex-direction:column;gap:16px;">
+
+        <!-- Exchange rates info -->
+        <div style="padding:12px 14px;background:rgba(0,230,118,.05);border:1px solid rgba(0,230,118,.2);font-size:10px;color:var(--dim);line-height:1.8;">
+          Exchange Rates &nbsp;·&nbsp;
+          <span style="color:#00e676">1 LYKO</span> = 
+          <span style="color:#f5a623">0.5 GOLD</span> = 
+          <span style="color:#00e5ff">0.25 CYBER</span>
+        </div>
+
+        <!-- Convert form -->
+        <div>
+          <div class="m-section-label">From</div>
+          <div style="display:flex;gap:8px;">
+            <select id="cvFrom" class="m-input" onchange="mUpdateConvert()" style="flex:1">
+              <option value="lyko">LYKO (bal: ${(user.balances.lyko||0).toFixed(2)})</option>
+              <option value="gold">GOLD (bal: ${(user.balances.gold||0).toFixed(2)})</option>
+              <option value="cyber">CYBER (bal: ${(user.balances.cyber||0).toFixed(2)})</option>
+            </select>
+            <input id="cvAmt" type="number" min="0.01" step="0.01" placeholder="Amount" class="m-input" style="flex:1" oninput="mUpdateConvert()">
+          </div>
+        </div>
+        <div style="text-align:center;font-size:20px;color:var(--dim)">⇅</div>
+        <div>
+          <div class="m-section-label">To</div>
+          <div style="display:flex;gap:8px;">
+            <select id="cvTo" class="m-input" onchange="mUpdateConvert()" style="flex:1">
+              <option value="gold">GOLD</option>
+              <option value="cyber">CYBER</option>
+              <option value="lyko">LYKO</option>
+            </select>
+            <div id="cvResult" class="m-input" style="flex:1;background:var(--void);display:flex;align-items:center;color:var(--lyko);font-weight:700;font-family:'Orbitron',sans-serif;">—</div>
+          </div>
+        </div>
+
+        <button class="m-btn m-btn-full" onclick="mDoConvert()" style="background:var(--cyan);color:#000;">CONVERT</button>
+        <div id="cvMsg" style="display:none;font-size:11px;letter-spacing:1px;padding:10px 12px;border:1px solid"></div>
+
+        <!-- Gamble Switch -->
+        <div style="margin-top:8px;border-top:1px solid var(--border);padding-top:16px;">
+          <div class="m-section-label">Gamble Switch</div>
+          <div style="font-size:10px;color:var(--dim);line-height:1.8;margin-bottom:12px;">
+            Bet using a different currency view. Your real balance stays in your base coin — 
+            winnings are converted back and paid in your base currency automatically.
+          </div>
+          <div style="display:flex;gap:8px;margin-bottom:8px;">
+            <select id="swBase" class="m-input" style="flex:1">
+              <option value="lyko">Base: LYKO</option>
+              <option value="gold">Base: GOLD</option>
+              <option value="cyber">Base: CYBER</option>
+            </select>
+            <select id="swView" class="m-input" style="flex:1">
+              <option value="gold">View as: GOLD</option>
+              <option value="cyber">View as: CYBER</option>
+              <option value="lyko">View as: LYKO</option>
+            </select>
+          </div>
+          <div id="swStatus" style="font-size:10px;letter-spacing:2px;color:var(--dim);margin-bottom:10px;min-height:16px;"></div>
+          <div style="display:flex;gap:8px;">
+            <button class="m-btn" style="flex:1" onclick="mStartSwitch()">ENABLE SWITCH</button>
+            <button class="m-btn" style="flex:1;background:var(--accent);color:#fff;" onclick="mStopSwitch()">DISABLE</button>
+          </div>
         </div>
       </div>
     </div>
@@ -386,7 +516,7 @@
 
   // ── Modal helpers (global so inline onclick works) ─────────────────────────
   window.switchMTab = function(t) {
-    ['ov','tx','st','wd'].forEach(x => {
+    ['ov','tx','st','cv','wd'].forEach(x => {
       const b = document.getElementById('tab-'+x);
       const p = document.getElementById('mpanel-'+x);
       if (!b || !p) return;
@@ -429,6 +559,56 @@
       Lyko.refreshDisplays(result.user);
       showMsg(true, `✓ Withdrawn ${amt.toFixed(2)} ${cur.toUpperCase()} → ${addr}`);
     } catch(e) { showMsg(false, e.message); }
+  };
+
+  window.mUpdateConvert = function() {
+    const from = document.getElementById('cvFrom')?.value;
+    const to   = document.getElementById('cvTo')?.value;
+    const amt  = parseFloat(document.getElementById('cvAmt')?.value);
+    const res  = document.getElementById('cvResult');
+    if (!res) return;
+    if (!from || !to || !amt || isNaN(amt) || amt <= 0) { res.textContent = '—'; return; }
+    if (from === to) { res.textContent = amt.toFixed(2); return; }
+    const converted = Lyko.convertAmount(amt, from, to);
+    res.textContent = converted.toFixed(4) + ' ' + to.toUpperCase();
+  };
+
+  window.mDoConvert = function() {
+    const from = document.getElementById('cvFrom')?.value;
+    const to   = document.getElementById('cvTo')?.value;
+    const amt  = parseFloat(document.getElementById('cvAmt')?.value);
+    const msgEl = document.getElementById('cvMsg');
+    function showMsg(ok, msg) {
+      if (msgEl) { msgEl.style.display='block'; msgEl.style.borderColor=ok?'#00e676':'#e94560'; msgEl.style.color=ok?'#00e676':'#e94560'; msgEl.textContent=msg; }
+    }
+    if (!from || !to || !amt || isNaN(amt) || amt < 0.01) { showMsg(false,'Enter a valid amount.'); return; }
+    if (from === to) { showMsg(false,'Pick two different currencies.'); return; }
+    const user = Lyko.getUser();
+    if (!user) return;
+    if ((user.balances[from]||0) < amt) { showMsg(false,'Insufficient balance.'); return; }
+    const converted = Lyko.convertAmount(amt, from, to);
+    user.balances[from] = parseFloat(((user.balances[from]||0) - amt).toFixed(4));
+    user.balances[to]   = parseFloat(((user.balances[to]||0) + converted).toFixed(4));
+    localStorage.setItem('lyko_user', JSON.stringify(user));
+    Lyko.refreshDisplays(user);
+    showMsg(true, `✓ Converted ${amt.toFixed(2)} ${from.toUpperCase()} → ${converted.toFixed(4)} ${to.toUpperCase()}`);
+    // Sync with server (record as zero-profit internal transfer)
+    Lyko.updateMe({}).catch(()=>{});
+  };
+
+  window.mStartSwitch = function() {
+    const base = document.getElementById('swBase')?.value;
+    const view = document.getElementById('swView')?.value;
+    if (base === view) { const el=document.getElementById('swStatus'); if(el) el.textContent='Base and view must differ.'; return; }
+    Lyko.startGambleSwitch(base, view);
+    const el = document.getElementById('swStatus');
+    if (el) el.style.color='#00e676', el.textContent=`✓ Switch ON — betting in ${base.toUpperCase()}, showing ${view.toUpperCase()}`;
+  };
+
+  window.mStopSwitch = function() {
+    Lyko.stopGambleSwitch();
+    const el = document.getElementById('swStatus');
+    if (el) el.style.color='var(--dim)', el.textContent='Switch disabled.';
   };
 
   // ── LIVE FEED UI ──────────────────────────────────────────────────────────────
@@ -602,7 +782,15 @@
     initCursor,
     onFeedEvent,
     // Config
-    API
+    API,
+    // Currency conversion
+    convertAmount,
+    startGambleSwitch,
+    stopGambleSwitch,
+    getGambleSwitch,
+    toViewAmount,
+    toBaseAmount,
+    RATES
   };
 
   // Make openAccount globally accessible (used by inline onclicks)
