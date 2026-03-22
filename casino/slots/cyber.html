@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cyber Slots — Lyko's Casino</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=DM+Mono:ital,wght@0,300;0,400;1,300&display=swap');
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+:root{--void:#07080f;--deep:#0d0f1e;--surface:#121428;--border:#1e2240;--accent:#e94560;--gold:#f5a623;--cyan:#00e5ff;--lyko:#00e676;--text:#dce8ff;--dim:#5a6a90;}
+html,body{width:100%;min-height:100%;background:var(--void);color:var(--text);font-family:'DM Mono',monospace;overflow-x:hidden;cursor:none;}
+#cursor{position:fixed;top:0;left:0;width:12px;height:12px;background:var(--cyan);border-radius:50%;pointer-events:none;z-index:99999;transform:translate(-50%,-50%);transition:width .15s,height .15s;mix-blend-mode:difference;}
+#cursor.big{width:36px;height:36px;}
+body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(0,229,255,.02) 1px,transparent 1px),linear-gradient(90deg,rgba(0,229,255,.02) 1px,transparent 1px);background-size:40px 40px;pointer-events:none;z-index:0;}
+#shell{display:flex;min-height:100vh;position:relative;z-index:2;}
+#sidebar{width:220px;min-height:100vh;background:var(--deep);border-right:1px solid var(--border);display:flex;flex-direction:column;position:sticky;top:0;height:100vh;flex-shrink:0;z-index:10;overflow-y:auto;}
+.sidebar-logo{padding:28px 24px 20px;border-bottom:1px solid var(--border);}
+.sidebar-logo a{font-family:'Orbitron',sans-serif;font-size:22px;font-weight:900;color:var(--lyko);text-decoration:none;letter-spacing:2px;display:flex;align-items:center;gap:10px;}
+.logo-icon{width:32px;height:32px;background:var(--lyko);border-radius:8px;display:flex;align-items:center;justify-content:center;font-family:'Orbitron',sans-serif;font-weight:900;font-size:16px;color:#000;}
+.sidebar-section{padding:16px 0;border-bottom:1px solid var(--border);}
+.sidebar-label{font-size:9px;letter-spacing:3px;color:var(--dim);text-transform:uppercase;padding:0 20px 10px;}
+.sidebar-item{display:flex;align-items:center;gap:12px;padding:10px 20px;color:var(--dim);text-decoration:none;font-size:12px;letter-spacing:1px;transition:color .2s,background .2s;cursor:none;}
+.sidebar-item:hover,.sidebar-item.active{color:var(--text);background:rgba(0,229,255,.05);}
+.sidebar-item.active{color:var(--cyan);border-left:2px solid var(--cyan);}
+.sidebar-icon{font-size:16px;width:20px;text-align:center;}
+.sidebar-wallet{margin-top:auto;padding:20px;border-top:1px solid var(--border);}
+.wallet-label{font-size:9px;letter-spacing:3px;color:var(--dim);text-transform:uppercase;margin-bottom:12px;}
+.wallet-row{display:flex;align-items:center;justify-content:space-between;padding:8px 12px;background:var(--surface);border:1px solid var(--border);border-radius:4px;cursor:none;transition:border-color .2s;margin-bottom:6px;}
+.wallet-row:hover{border-color:var(--lyko);}
+.wallet-row.active-currency{border-color:var(--lyko);background:rgba(0,230,118,.06);}
+.wallet-coin{display:flex;align-items:center;gap:8px;font-size:11px;}
+.coin-icon{width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:10px;}
+.coin-lyko{background:var(--lyko);color:#000;}.coin-gold{background:var(--gold);color:#000;}.coin-cyber{background:var(--cyan);color:#000;}
+.wallet-amount{font-size:11px;color:var(--text);font-weight:700;}
+#main{flex:1;display:flex;flex-direction:column;}
+#topbar{height:64px;background:var(--deep);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 32px;position:sticky;top:0;z-index:9;}
+.topbar-title{font-family:'Orbitron',sans-serif;font-size:14px;font-weight:700;color:var(--dim);letter-spacing:3px;}
+.topbar-right{display:flex;align-items:center;gap:12px;}
+.active-bal{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:700;padding:8px 16px;background:rgba(0,229,255,.08);border:1px solid rgba(0,229,255,.3);border-radius:4px;color:var(--cyan);}
+.back-btn{font-size:10px;letter-spacing:2px;color:var(--dim);text-decoration:none;padding:8px 14px;border:1px solid var(--border);transition:all .2s;cursor:none;}
+.back-btn:hover{color:var(--text);border-color:var(--dim);}
+#game-area{display:flex;flex:1;}
+#bet-panel{width:260px;background:var(--deep);border-right:1px solid var(--border);padding:24px;flex-shrink:0;display:flex;flex-direction:column;gap:14px;}
+.panel-title{font-family:'Orbitron',sans-serif;font-size:11px;font-weight:700;color:var(--dim);letter-spacing:3px;}
+.input-group{display:flex;flex-direction:column;gap:6px;}
+.input-label{font-size:9px;letter-spacing:2px;color:var(--dim);text-transform:uppercase;}
+.input-row{display:flex;gap:6px;align-items:center;}
+.bet-input{flex:1;background:var(--surface);border:1px solid var(--border);color:var(--text);font-family:'DM Mono',monospace;font-size:13px;padding:10px 12px;outline:none;transition:border-color .2s;}
+.bet-input:focus{border-color:var(--cyan);}
+.half-btn,.double-btn{padding:8px 10px;background:var(--surface);border:1px solid var(--border);color:var(--dim);font-family:'DM Mono',monospace;font-size:10px;cursor:none;transition:all .2s;}
+.half-btn:hover,.double-btn:hover{border-color:var(--cyan);color:var(--cyan);}
+.play-btn{width:100%;padding:14px;background:var(--cyan);border:none;color:#000;font-family:'Orbitron',sans-serif;font-size:12px;font-weight:700;letter-spacing:2px;cursor:none;transition:all .2s;margin-top:4px;}
+.play-btn:hover{background:#33eeff;box-shadow:0 0 20px rgba(0,229,255,.4);}
+.play-btn:disabled{background:var(--dim);cursor:not-allowed;}
+.stat-row{display:flex;justify-content:space-between;font-size:11px;padding:8px 0;border-bottom:1px solid var(--border);}
+.stat-label{color:var(--dim);}
+.stat-val{color:var(--text);font-weight:700;}
+.stat-val.cyan{color:var(--cyan);}
+.stat-val.green{color:var(--lyko);}
+.cascade-banner{padding:10px;background:rgba(0,229,255,.1);border:1px solid rgba(0,229,255,.3);font-family:'Orbitron',sans-serif;font-size:11px;font-weight:700;color:var(--cyan);text-align:center;letter-spacing:2px;display:none;}
+.cascade-banner.show{display:block;}
+#play-area{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:24px;padding:32px;}
+.slot-machine{background:var(--deep);border:2px solid var(--cyan);padding:24px;display:flex;flex-direction:column;align-items:center;gap:20px;position:relative;}
+.slot-machine::before{content:'⚡ CYBER SLOTS ⚡';position:absolute;top:-14px;left:50%;transform:translateX(-50%);background:var(--deep);padding:0 16px;font-family:'Orbitron',sans-serif;font-size:10px;font-weight:700;letter-spacing:3px;color:var(--cyan);}
+.grid{display:grid;grid-template-columns:repeat(5,72px);grid-template-rows:repeat(4,72px);gap:4px;background:var(--void);padding:8px;border:1px solid var(--border);}
+.cell{width:72px;height:72px;background:var(--surface);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:32px;transition:all .3s;position:relative;}
+.cell.hit{border-color:var(--cyan);background:rgba(0,229,255,.1);box-shadow:0 0 12px rgba(0,229,255,.3);animation:cellPop .3s ease;}
+.cell.jackpot{border-color:var(--lyko);background:rgba(0,230,118,.15);box-shadow:0 0 20px rgba(0,230,118,.4);}
+@keyframes cellPop{0%{transform:scale(1)}50%{transform:scale(1.15)}100%{transform:scale(1)}}
+.result-display{font-family:'Orbitron',sans-serif;font-size:16px;font-weight:900;letter-spacing:2px;min-height:24px;text-align:center;}
+.result-display.win{color:var(--cyan);text-shadow:0 0 20px rgba(0,229,255,.5);}
+.result-display.lose{color:var(--dim);}
+.result-display.jackpot{color:var(--lyko);text-shadow:0 0 30px rgba(0,230,118,.6);}
+.mult-display{font-family:'Orbitron',sans-serif;font-size:36px;font-weight:900;color:var(--cyan);text-shadow:0 0 30px rgba(0,229,255,.4);min-height:44px;}
+.m-overlay{position:fixed;inset:0;z-index:10000;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.85);backdrop-filter:blur(4px);}
+.m-box{background:#0d0f1e;border:1px solid #1e2240;width:min(740px,95vw);max-height:90vh;display:flex;flex-direction:column;overflow:hidden;}
+.m-header{padding:22px 28px;border-bottom:1px solid #1e2240;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
+.m-tabs{display:flex;border-bottom:1px solid #1e2240;flex-shrink:0;}
+.m-tab{flex:1;padding:11px;background:none;border:none;border-bottom:2px solid transparent;color:#5a6a90;font-family:'DM Mono',monospace;font-size:10px;letter-spacing:2px;text-transform:uppercase;cursor:pointer;transition:all .2s;}
+.m-tab.on{border-bottom-color:#00e676;color:#00e676;}
+.m-body{overflow-y:auto;flex:1;padding:22px 28px;}
+.m-stat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin-bottom:20px;}
+.m-stat{background:#121428;border:1px solid #1e2240;padding:14px;}
+.m-stat-label{font-size:9px;letter-spacing:2px;color:#5a6a90;text-transform:uppercase;margin-bottom:6px;}
+.m-stat-val{font-family:'Orbitron',sans-serif;font-size:17px;font-weight:700;}
+.m-input{width:100%;background:#121428;border:1px solid #1e2240;color:#dce8ff;font-family:'DM Mono',monospace;font-size:13px;padding:10px 12px;outline:none;transition:border-color .2s;}
+.m-input:focus{border-color:#00e676;}
+.m-btn{padding:10px 18px;background:#00e676;border:none;color:#000;font-family:'Orbitron',sans-serif;font-size:11px;font-weight:700;letter-spacing:1px;cursor:pointer;transition:all .2s;}
+.m-btn:hover{background:#00ff85;}
+.m-btn-full{width:100%;padding:14px;font-size:12px;letter-spacing:2px;}
+.m-row{display:flex;align-items:center;justify-content:space-between;padding:11px 14px;background:#121428;border:1px solid #1e2240;margin-bottom:8px;}
+.m-close{background:none;border:1px solid #1e2240;color:#5a6a90;font-size:18px;padding:6px 12px;cursor:pointer;}
+.m-section-label{font-size:9px;letter-spacing:3px;color:#5a6a90;text-transform:uppercase;margin-bottom:10px;}
+.tx-table{width:100%;border-collapse:collapse;font-size:11px;}
+.tx-table th{padding:7px 10px;text-align:left;color:#5a6a90;font-weight:400;letter-spacing:2px;font-size:9px;text-transform:uppercase;border-bottom:1px solid #1e2240;}
+.tx-table td{padding:8px 10px;}
+select.m-input{appearance:none;}
+.ob-box{background:var(--deep);border:1px solid var(--border);padding:48px;width:min(460px,90vw);text-align:center;}
+.ob-logo{width:64px;height:64px;background:var(--lyko);border-radius:16px;display:inline-flex;align-items:center;justify-content:center;font-family:'Orbitron',sans-serif;font-weight:900;font-size:32px;color:#000;margin-bottom:24px;}
+.ob-title{font-family:'Orbitron',sans-serif;font-size:26px;font-weight:900;color:#fff;margin-bottom:8px;}
+.ob-sub{font-size:10px;color:var(--dim);letter-spacing:3px;text-transform:uppercase;margin-bottom:24px;}
+.ob-input{width:100%;background:var(--surface);border:1px solid var(--border);color:var(--text);font-family:'DM Mono',monospace;font-size:16px;padding:14px;outline:none;text-align:center;letter-spacing:2px;transition:border-color .2s;}
+.ob-input:focus{border-color:var(--lyko);}
+.ob-btn{width:100%;padding:16px;background:var(--lyko);border:none;color:#000;font-family:'Orbitron',sans-serif;font-size:13px;font-weight:900;letter-spacing:3px;cursor:pointer;transition:all .2s;}
+.ob-btn:hover{background:#00ff85;}
+.ob-starting{margin-top:16px;font-size:10px;color:var(--dim);letter-spacing:1px;}
+.ob-starting b{color:var(--lyko);}
+</style>
+</head>
+<body>
+<div id="cursor"></div>
+<div id="shell">
+  <aside id="sidebar">
+    <div class="sidebar-logo"><a href="../../casino.html"><div class="logo-icon">L</div>LYKO</a></div>
+    <div class="sidebar-section">
+      <div class="sidebar-label">Slots</div>
+      <a class="sidebar-item" href="../slots.html"><span class="sidebar-icon">🎰</span> All Slots</a>
+      <a class="sidebar-item" href="classic.html"><span class="sidebar-icon">🍒</span> Classic</a>
+      <a class="sidebar-item" href="neon.html"><span class="sidebar-icon">🌟</span> Neon</a>
+      <a class="sidebar-item active" href="cyber.html"><span class="sidebar-icon">⚡</span> Cyber</a>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-label">Navigate</div>
+      <a class="sidebar-item" href="../../casino.html"><span class="sidebar-icon">←</span> Back to Originals</a>
+      <a class="sidebar-item" href="../../leaderboard.html"><span class="sidebar-icon">🏆</span> Leaderboard</a>
+      <a class="sidebar-item" href="#" onclick="openAccount(event)"><span class="sidebar-icon">👤</span> <span id="usernameNav">Account</span></a>
+    </div>
+    <div class="sidebar-wallet">
+      <div class="wallet-label">Balances</div>
+      <div class="wallet-row active-currency" data-currency="lyko" onclick="setCurrency('lyko')"><div class="wallet-coin"><div class="coin-icon coin-lyko">L</div><span>LYKO</span></div><span class="wallet-amount" id="bal-lyko">—</span></div>
+      <div class="wallet-row" data-currency="gold" onclick="setCurrency('gold')"><div class="wallet-coin"><div class="coin-icon coin-gold">G</div><span>GOLD</span></div><span class="wallet-amount" id="bal-gold">—</span></div>
+      <div class="wallet-row" data-currency="cyber" onclick="setCurrency('cyber')"><div class="wallet-coin"><div class="coin-icon coin-cyber">C</div><span>CYBER</span></div><span class="wallet-amount" id="bal-cyber">—</span></div>
+      <button onclick="openAccount()" style="width:100%;margin-top:10px;padding:8px;background:rgba(0,230,118,.08);border:1px solid rgba(0,230,118,.3);color:#00e676;font-family:'DM Mono',monospace;font-size:10px;letter-spacing:2px;cursor:pointer;">VIEW ACCOUNT</button>
+    </div>
+  </aside>
+
+  <main id="main">
+    <div id="topbar">
+      <span class="topbar-title">CYBER SLOTS</span>
+      <div class="topbar-right">
+        <div class="active-bal">
+          <span id="topCoinIcon" style="width:18px;height:18px;background:var(--lyko);border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:9px;font-weight:900;color:#000;">L</span>
+          <span id="activeCoinBal">—</span>
+          <span id="activeCoinName" style="font-size:9px;color:var(--dim)">LYKO</span>
+        </div>
+        <a href="../slots.html" class="back-btn">← SLOTS</a>
+      </div>
+    </div>
+
+    <div id="game-area">
+      <div id="bet-panel">
+        <div class="panel-title">Cyber</div>
+        <div class="input-group">
+          <div class="input-label">Bet Amount</div>
+          <div class="input-row">
+            <input class="bet-input" id="betAmt" type="number" value="10" min="0.01" step="0.01">
+            <button class="half-btn" onclick="adjustBet(0.5)">½</button>
+            <button class="double-btn" onclick="adjustBet(2)">2×</button>
+          </div>
+        </div>
+        <div class="stat-row"><span class="stat-label">Multiplier</span><span class="stat-val cyan" id="totalMult">1.00×</span></div>
+        <div class="stat-row"><span class="stat-label">Cascades</span><span class="stat-val cyan" id="cascadeCount">0</span></div>
+        <div class="stat-row"><span class="stat-label">Last Win</span><span class="stat-val" id="lastWin">—</span></div>
+        <div class="stat-row"><span class="stat-label">Session Won</span><span class="stat-val green" id="sessionWon">0.00</span></div>
+        <div class="cascade-banner" id="cascadeBanner">⚡ CASCADE!</div>
+        <button class="play-btn" id="spinBtn" onclick="spin()">⚡ SPIN</button>
+      </div>
+
+      <div id="play-area">
+        <div class="mult-display" id="multDisplay"></div>
+        <div class="slot-machine">
+          <div class="grid" id="grid"></div>
+          <div class="result-display" id="resultDisplay"></div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script src="../../casino/lyko.js"></script>
+<script>
+// 5×4 grid cascading slots
+const COLS = 5, ROWS = 4;
+const SYMBOLS = ['⚡','⚡','💠','💠','🔷','🔷','🌀','🌀','⭐','🎯'];
+const PAYS = { '⚡':10,'💠':8,'🔷':6,'🌀':5,'⭐':15,'🎯':20 };
+let grid = [], spinning = false, sessionWon = 0;
+
+function randSym() { return SYMBOLS[Math.floor(Math.random()*SYMBOLS.length)]; }
+
+function buildGrid() {
+  grid = Array.from({length:COLS}, () => Array.from({length:ROWS}, randSym));
+}
+
+function renderGrid(highlights=[]) {
+  const el = document.getElementById('grid');
+  el.innerHTML = '';
+  for (let r = 0; r < ROWS; r++) {
+    for (let c = 0; c < COLS; c++) {
+      const cell = document.createElement('div');
+      cell.className = 'cell';
+      cell.textContent = grid[c][r];
+      if (highlights.some(h=>h.c===c&&h.r===r)) {
+        cell.classList.add(highlights.find(h=>h.c===c&&h.r===r).jackpot ? 'jackpot' : 'hit');
+      }
+      el.appendChild(cell);
+    }
+  }
+}
+
+function findMatches() {
+  // Find clusters of 3+ same symbol (horizontal or vertical)
+  const matched = new Set();
+  // Horizontal
+  for (let r=0;r<ROWS;r++) {
+    let run = 1;
+    for (let c=1;c<COLS;c++) {
+      if (grid[c][r]===grid[c-1][r]) { run++; }
+      else {
+        if (run>=3) for(let i=c-run;i<c;i++) matched.add(`${i},${r}`);
+        run=1;
+      }
+    }
+    if (run>=3) for(let i=COLS-run;i<COLS;i++) matched.add(`${i},${r}`);
+  }
+  // Vertical
+  for (let c=0;c<COLS;c++) {
+    let run=1;
+    for (let r=1;r<ROWS;r++) {
+      if (grid[c][r]===grid[c][r-1]) { run++; }
+      else {
+        if (run>=3) for(let i=r-run;i<r;i++) matched.add(`${c},${i}`);
+        run=1;
+      }
+    }
+    if (run>=3) for(let i=ROWS-run;i<ROWS;i++) matched.add(`${c},${i}`);
+  }
+  return [...matched].map(k => { const [c,r]=k.split(',').map(Number); return {c,r,sym:grid[c][r]}; });
+}
+
+function calcMatchValue(matches) {
+  const counts = {};
+  for (const m of matches) counts[m.sym] = (counts[m.sym]||0)+1;
+  let mult = 0;
+  for (const [sym,cnt] of Object.entries(counts)) {
+    mult += (PAYS[sym]||5) * (cnt/3);
+  }
+  return Math.max(0, parseFloat(mult.toFixed(2)));
+}
+
+function cascade(matches) {
+  // Remove matched cells and drop new ones
+  for (const {c,r} of matches) grid[c][r] = null;
+  // Drop down
+  for (let c=0;c<COLS;c++) {
+    const surviving = grid[c].filter(s=>s!==null);
+    const newOnes = Array.from({length:ROWS-surviving.length}, randSym);
+    grid[c] = [...newOnes, ...surviving];
+  }
+}
+
+async function spin() {
+  const bet = parseFloat(document.getElementById('betAmt').value)||10;
+  if (bet>Lyko.getBalance()) { document.getElementById('resultDisplay').textContent='Insufficient balance!'; document.getElementById('resultDisplay').className='result-display lose'; return; }
+  if (spinning) return;
+  spinning = true;
+
+  const btn = document.getElementById('spinBtn');
+  btn.disabled = true;
+  document.getElementById('resultDisplay').textContent = '';
+  document.getElementById('multDisplay').textContent = '';
+  document.getElementById('cascadeCount').textContent = '0';
+  document.getElementById('totalMult').textContent = '1.00×';
+  document.getElementById('cascadeBanner').className = 'cascade-banner';
+
+  adjustBalance(-bet);
+  buildGrid();
+  renderGrid();
+  await new Promise(r=>setTimeout(r,400));
+
+  let totalMult = 0, cascades = 0;
+  let isJackpot = false;
+
+  while (true) {
+    const matches = findMatches();
+    if (matches.length === 0) break;
+
+    const matchMult = calcMatchValue(matches);
+    const cascadeBonus = Math.pow(1.25, cascades); // each cascade multiplies by 1.25
+    const roundMult = parseFloat((matchMult * cascadeBonus).toFixed(2));
+    totalMult += roundMult;
+
+    if (totalMult >= 50) isJackpot = true;
+
+    const highlights = matches.map(m => ({...m, jackpot: isJackpot}));
+    renderGrid(highlights);
+
+    document.getElementById('totalMult').textContent = totalMult.toFixed(2)+'×';
+    document.getElementById('multDisplay').textContent = totalMult.toFixed(2)+'×';
+
+    if (cascades > 0) {
+      document.getElementById('cascadeBanner').className = 'cascade-banner show';
+      document.getElementById('cascadeBanner').textContent = `⚡ CASCADE ×${cascades+1}!`;
+    }
+
+    await new Promise(r=>setTimeout(r,700));
+    cascade(matches);
+    renderGrid();
+    await new Promise(r=>setTimeout(r,300));
+    cascades++;
+    document.getElementById('cascadeCount').textContent = cascades;
+  }
+
+  const payout = totalMult > 0 ? parseFloat((bet * totalMult).toFixed(2)) : 0;
+  const profit = payout - bet;
+
+  if (payout > 0) adjustBalance(payout);
+  sessionWon += profit;
+  document.getElementById('sessionWon').textContent = sessionWon.toFixed(2);
+  document.getElementById('lastWin').textContent = payout > 0 ? payout.toFixed(2) : '0.00';
+
+  if (isJackpot) {
+    document.getElementById('resultDisplay').textContent = '🎰 JACKPOT! ' + payout.toFixed(2);
+    document.getElementById('resultDisplay').className = 'result-display jackpot';
+  } else if (totalMult > 0) {
+    document.getElementById('resultDisplay').textContent = `WIN! ${totalMult.toFixed(2)}× → ${payout.toFixed(2)}`;
+    document.getElementById('resultDisplay').className = 'result-display win';
+  } else {
+    document.getElementById('resultDisplay').textContent = 'No clusters — spin again!';
+    document.getElementById('resultDisplay').className = 'result-display lose';
+    document.getElementById('multDisplay').textContent = '';
+  }
+
+  try {
+    const result = await Lyko.placeBet({ game:'Cyber Slots', bet, payout, profit, currency:Lyko.getActiveCurrency(), multiplier:totalMult });
+    Lyko.refreshDisplays(result.user);
+  } catch(e) { Lyko.refreshMe().then(u=>{ if(u) Lyko.refreshDisplays(u); }); }
+
+  spinning = false;
+  btn.disabled = false;
+}
+
+function adjustBet(m) { const i=document.getElementById('betAmt'); i.value=Math.max(0.01,(parseFloat(i.value)||10)*m).toFixed(2); }
+function adjustBalance(delta) { const user=Lyko.getUser(); if(!user)return; const cur=Lyko.getActiveCurrency(); user.balances[cur]=Math.max(0,(user.balances[cur]||0)+delta); localStorage.setItem('lyko_user',JSON.stringify(user)); Lyko.refreshDisplays(user); }
+function setCurrency(c) { Lyko.setCurrency(c); }
+function openAccount(e) { if(e)e.preventDefault(); Lyko.openAccount(); }
+
+buildGrid();
+renderGrid();
+
+window.addEventListener('DOMContentLoaded', async () => {
+  Lyko.initCursor();
+  const cursor=document.getElementById('cursor');
+  document.addEventListener('mousemove',e=>{cursor.style.left=e.clientX+'px';cursor.style.top=e.clientY+'px';});
+  document.querySelectorAll('a,button,.wallet-row').forEach(el=>{el.addEventListener('mouseenter',()=>cursor.classList.add('big'));el.addEventListener('mouseleave',()=>cursor.classList.remove('big'));});
+  let user=Lyko.getUser();
+  if(!user||!Lyko.getToken()){Lyko.showAuthModal(u=>Lyko.refreshDisplays(u));return;}
+  const fresh=await Lyko.refreshMe();
+  if(!fresh){Lyko.showAuthModal(u=>Lyko.refreshDisplays(u));return;}
+  Lyko.refreshDisplays(fresh);
+});
+</script>
+</body>
+</html>

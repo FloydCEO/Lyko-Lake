@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Classic Slots — Lyko's Casino</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=DM+Mono:ital,wght@0,300;0,400;1,300&display=swap');
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+:root{--void:#07080f;--deep:#0d0f1e;--surface:#121428;--border:#1e2240;--accent:#e94560;--gold:#f5a623;--cyan:#00e5ff;--lyko:#00e676;--text:#dce8ff;--dim:#5a6a90;}
+html,body{width:100%;min-height:100%;background:var(--void);color:var(--text);font-family:'DM Mono',monospace;overflow-x:hidden;cursor:none;}
+#cursor{position:fixed;top:0;left:0;width:12px;height:12px;background:var(--lyko);border-radius:50%;pointer-events:none;z-index:99999;transform:translate(-50%,-50%);transition:width .15s,height .15s;mix-blend-mode:difference;}
+#cursor.big{width:36px;height:36px;}
+body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(0,230,118,.03) 1px,transparent 1px),linear-gradient(90deg,rgba(0,230,118,.03) 1px,transparent 1px);background-size:40px 40px;pointer-events:none;z-index:0;}
+#shell{display:flex;min-height:100vh;position:relative;z-index:2;}
+#sidebar{width:220px;min-height:100vh;background:var(--deep);border-right:1px solid var(--border);display:flex;flex-direction:column;position:sticky;top:0;height:100vh;flex-shrink:0;z-index:10;overflow-y:auto;}
+.sidebar-logo{padding:28px 24px 20px;border-bottom:1px solid var(--border);}
+.sidebar-logo a{font-family:'Orbitron',sans-serif;font-size:22px;font-weight:900;color:var(--lyko);text-decoration:none;letter-spacing:2px;display:flex;align-items:center;gap:10px;}
+.logo-icon{width:32px;height:32px;background:var(--lyko);border-radius:8px;display:flex;align-items:center;justify-content:center;font-family:'Orbitron',sans-serif;font-weight:900;font-size:16px;color:#000;}
+.sidebar-section{padding:16px 0;border-bottom:1px solid var(--border);}
+.sidebar-label{font-size:9px;letter-spacing:3px;color:var(--dim);text-transform:uppercase;padding:0 20px 10px;}
+.sidebar-item{display:flex;align-items:center;gap:12px;padding:10px 20px;color:var(--dim);text-decoration:none;font-size:12px;letter-spacing:1px;transition:color .2s,background .2s;cursor:none;}
+.sidebar-item:hover,.sidebar-item.active{color:var(--text);background:rgba(0,230,118,.05);}
+.sidebar-item.active{color:var(--lyko);border-left:2px solid var(--lyko);}
+.sidebar-icon{font-size:16px;width:20px;text-align:center;}
+.sidebar-wallet{margin-top:auto;padding:20px;border-top:1px solid var(--border);}
+.wallet-label{font-size:9px;letter-spacing:3px;color:var(--dim);text-transform:uppercase;margin-bottom:12px;}
+.wallet-row{display:flex;align-items:center;justify-content:space-between;padding:8px 12px;background:var(--surface);border:1px solid var(--border);border-radius:4px;cursor:none;transition:border-color .2s;margin-bottom:6px;}
+.wallet-row:hover{border-color:var(--lyko);}
+.wallet-row.active-currency{border-color:var(--lyko);background:rgba(0,230,118,.06);}
+.wallet-coin{display:flex;align-items:center;gap:8px;font-size:11px;}
+.coin-icon{width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:10px;}
+.coin-lyko{background:var(--lyko);color:#000;}.coin-gold{background:var(--gold);color:#000;}.coin-cyber{background:var(--cyan);color:#000;}
+.wallet-amount{font-size:11px;color:var(--text);font-weight:700;}
+#main{flex:1;display:flex;flex-direction:column;}
+#topbar{height:64px;background:var(--deep);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 32px;position:sticky;top:0;z-index:9;}
+.topbar-title{font-family:'Orbitron',sans-serif;font-size:14px;font-weight:700;color:var(--dim);letter-spacing:3px;}
+.topbar-right{display:flex;align-items:center;gap:12px;}
+.active-bal{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:700;padding:8px 16px;background:rgba(0,230,118,.08);border:1px solid rgba(0,230,118,.3);border-radius:4px;color:var(--lyko);}
+.back-btn{font-size:10px;letter-spacing:2px;color:var(--dim);text-decoration:none;padding:8px 14px;border:1px solid var(--border);transition:all .2s;cursor:none;}
+.back-btn:hover{color:var(--text);border-color:var(--dim);}
+#game-area{display:flex;flex:1;}
+#bet-panel{width:260px;background:var(--deep);border-right:1px solid var(--border);padding:24px;flex-shrink:0;display:flex;flex-direction:column;gap:14px;}
+.panel-title{font-family:'Orbitron',sans-serif;font-size:11px;font-weight:700;color:var(--dim);letter-spacing:3px;}
+.input-group{display:flex;flex-direction:column;gap:6px;}
+.input-label{font-size:9px;letter-spacing:2px;color:var(--dim);text-transform:uppercase;}
+.input-row{display:flex;gap:6px;align-items:center;}
+.bet-input{flex:1;background:var(--surface);border:1px solid var(--border);color:var(--text);font-family:'DM Mono',monospace;font-size:13px;padding:10px 12px;outline:none;transition:border-color .2s;}
+.bet-input:focus{border-color:var(--lyko);}
+.half-btn,.double-btn{padding:8px 10px;background:var(--surface);border:1px solid var(--border);color:var(--dim);font-family:'DM Mono',monospace;font-size:10px;cursor:none;transition:all .2s;}
+.half-btn:hover,.double-btn:hover{border-color:var(--gold);color:var(--gold);}
+.play-btn{width:100%;padding:14px;background:var(--gold);border:none;color:#000;font-family:'Orbitron',sans-serif;font-size:12px;font-weight:700;letter-spacing:2px;cursor:none;transition:all .2s;margin-top:4px;}
+.play-btn:hover{background:#ffbe3d;box-shadow:0 0 20px rgba(245,166,35,.4);}
+.play-btn:disabled{background:var(--dim);cursor:not-allowed;box-shadow:none;}
+.stat-row{display:flex;justify-content:space-between;font-size:11px;padding:8px 0;border-bottom:1px solid var(--border);}
+.stat-label{color:var(--dim);}
+.stat-val{color:var(--text);font-weight:700;}
+.stat-val.green{color:var(--lyko);}
+.stat-val.gold{color:var(--gold);}
+.stat-val.red{color:var(--accent);}
+#play-area{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:32px;padding:40px;}
+
+/* SLOT MACHINE */
+.slot-machine{background:var(--deep);border:2px solid var(--gold);padding:32px;display:flex;flex-direction:column;align-items:center;gap:24px;position:relative;}
+.slot-machine::before{content:'🍒 CLASSIC SLOTS 🍒';position:absolute;top:-14px;left:50%;transform:translateX(-50%);background:var(--deep);padding:0 16px;font-family:'Orbitron',sans-serif;font-size:10px;font-weight:700;letter-spacing:3px;color:var(--gold);}
+.reels{display:flex;gap:8px;background:var(--void);border:1px solid var(--border);padding:12px;position:relative;}
+.reels::after{content:'';position:absolute;top:50%;left:0;right:0;height:2px;background:rgba(245,166,35,.3);transform:translateY(-50%);pointer-events:none;}
+.reel{width:90px;height:90px;background:var(--surface);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:52px;overflow:hidden;position:relative;}
+.reel-inner{display:flex;flex-direction:column;align-items:center;transition:transform 0s;}
+.reel-inner.spinning{animation:reelSpin .08s linear infinite;}
+@keyframes reelSpin{0%{transform:translateY(0)}100%{transform:translateY(-90px)}}
+.payline-flash{position:absolute;inset:0;border:3px solid var(--gold);opacity:0;animation:paylineFlash 1s ease 3;}
+@keyframes paylineFlash{0%,100%{opacity:0}50%{opacity:1}}
+.result-display{font-family:'Orbitron',sans-serif;font-size:18px;font-weight:900;letter-spacing:2px;min-height:28px;text-align:center;}
+.result-display.win{color:var(--gold);text-shadow:0 0 20px rgba(245,166,35,.5);}
+.result-display.lose{color:var(--dim);}
+.result-display.jackpot{color:var(--lyko);text-shadow:0 0 30px rgba(0,230,118,.6);animation:jackpotPulse 0.5s ease infinite alternate;}
+@keyframes jackpotPulse{from{text-shadow:0 0 20px rgba(0,230,118,.4)}to{text-shadow:0 0 50px rgba(0,230,118,.8)}}
+
+/* Pay table */
+.pay-table{width:100%;max-width:400px;background:var(--deep);border:1px solid var(--border);}
+.pay-table-title{font-size:9px;letter-spacing:3px;color:var(--dim);text-transform:uppercase;padding:10px 16px;border-bottom:1px solid var(--border);}
+.pay-row{display:flex;justify-content:space-between;align-items:center;padding:8px 16px;border-bottom:1px solid rgba(30,34,64,.5);font-size:12px;}
+.pay-symbols{font-size:18px;letter-spacing:4px;}
+.pay-mult{font-family:'Orbitron',sans-serif;font-weight:700;color:var(--gold);}
+
+.m-overlay{position:fixed;inset:0;z-index:10000;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.85);backdrop-filter:blur(4px);}
+.m-box{background:#0d0f1e;border:1px solid #1e2240;width:min(740px,95vw);max-height:90vh;display:flex;flex-direction:column;overflow:hidden;}
+.m-header{padding:22px 28px;border-bottom:1px solid #1e2240;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
+.m-tabs{display:flex;border-bottom:1px solid #1e2240;flex-shrink:0;}
+.m-tab{flex:1;padding:11px;background:none;border:none;border-bottom:2px solid transparent;color:#5a6a90;font-family:'DM Mono',monospace;font-size:10px;letter-spacing:2px;text-transform:uppercase;cursor:pointer;transition:all .2s;}
+.m-tab.on{border-bottom-color:#00e676;color:#00e676;}
+.m-body{overflow-y:auto;flex:1;padding:22px 28px;}
+.m-stat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin-bottom:20px;}
+.m-stat{background:#121428;border:1px solid #1e2240;padding:14px;}
+.m-stat-label{font-size:9px;letter-spacing:2px;color:#5a6a90;text-transform:uppercase;margin-bottom:6px;}
+.m-stat-val{font-family:'Orbitron',sans-serif;font-size:17px;font-weight:700;}
+.m-input{width:100%;background:#121428;border:1px solid #1e2240;color:#dce8ff;font-family:'DM Mono',monospace;font-size:13px;padding:10px 12px;outline:none;transition:border-color .2s;}
+.m-input:focus{border-color:#00e676;}
+.m-btn{padding:10px 18px;background:#00e676;border:none;color:#000;font-family:'Orbitron',sans-serif;font-size:11px;font-weight:700;letter-spacing:1px;cursor:pointer;transition:all .2s;}
+.m-btn:hover{background:#00ff85;}
+.m-btn-full{width:100%;padding:14px;font-size:12px;letter-spacing:2px;}
+.m-row{display:flex;align-items:center;justify-content:space-between;padding:11px 14px;background:#121428;border:1px solid #1e2240;margin-bottom:8px;}
+.m-close{background:none;border:1px solid #1e2240;color:#5a6a90;font-size:18px;padding:6px 12px;cursor:pointer;}
+.m-section-label{font-size:9px;letter-spacing:3px;color:#5a6a90;text-transform:uppercase;margin-bottom:10px;}
+.tx-table{width:100%;border-collapse:collapse;font-size:11px;}
+.tx-table th{padding:7px 10px;text-align:left;color:#5a6a90;font-weight:400;letter-spacing:2px;font-size:9px;text-transform:uppercase;border-bottom:1px solid #1e2240;}
+.tx-table td{padding:8px 10px;}
+select.m-input{appearance:none;}
+.ob-box{background:var(--deep);border:1px solid var(--border);padding:48px;width:min(460px,90vw);text-align:center;}
+.ob-logo{width:64px;height:64px;background:var(--lyko);border-radius:16px;display:inline-flex;align-items:center;justify-content:center;font-family:'Orbitron',sans-serif;font-weight:900;font-size:32px;color:#000;margin-bottom:24px;}
+.ob-title{font-family:'Orbitron',sans-serif;font-size:26px;font-weight:900;color:#fff;margin-bottom:8px;}
+.ob-sub{font-size:10px;color:var(--dim);letter-spacing:3px;text-transform:uppercase;margin-bottom:24px;}
+.ob-input{width:100%;background:var(--surface);border:1px solid var(--border);color:var(--text);font-family:'DM Mono',monospace;font-size:16px;padding:14px;outline:none;text-align:center;letter-spacing:2px;transition:border-color .2s;}
+.ob-input:focus{border-color:var(--lyko);}
+.ob-btn{width:100%;padding:16px;background:var(--lyko);border:none;color:#000;font-family:'Orbitron',sans-serif;font-size:13px;font-weight:900;letter-spacing:3px;cursor:pointer;transition:all .2s;}
+.ob-btn:hover{background:#00ff85;}
+.ob-starting{margin-top:16px;font-size:10px;color:var(--dim);letter-spacing:1px;}
+.ob-starting b{color:var(--lyko);}
+</style>
+</head>
+<body>
+<div id="cursor"></div>
+<div id="shell">
+  <aside id="sidebar">
+    <div class="sidebar-logo"><a href="../../casino.html"><div class="logo-icon">L</div>LYKO</a></div>
+    <div class="sidebar-section">
+      <div class="sidebar-label">Slots</div>
+      <a class="sidebar-item" href="../slots.html"><span class="sidebar-icon">🎰</span> All Slots</a>
+      <a class="sidebar-item active" href="classic.html"><span class="sidebar-icon">🍒</span> Classic</a>
+      <a class="sidebar-item" href="neon.html"><span class="sidebar-icon">🌟</span> Neon</a>
+      <a class="sidebar-item" href="cyber.html"><span class="sidebar-icon">⚡</span> Cyber</a>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-label">Navigate</div>
+      <a class="sidebar-item" href="../../casino.html"><span class="sidebar-icon">←</span> Back to Originals</a>
+      <a class="sidebar-item" href="../../leaderboard.html"><span class="sidebar-icon">🏆</span> Leaderboard</a>
+      <a class="sidebar-item" href="#" onclick="openAccount(event)"><span class="sidebar-icon">👤</span> <span id="usernameNav">Account</span></a>
+    </div>
+    <div class="sidebar-wallet">
+      <div class="wallet-label">Balances</div>
+      <div class="wallet-row active-currency" data-currency="lyko" onclick="setCurrency('lyko')"><div class="wallet-coin"><div class="coin-icon coin-lyko">L</div><span>LYKO</span></div><span class="wallet-amount" id="bal-lyko">—</span></div>
+      <div class="wallet-row" data-currency="gold" onclick="setCurrency('gold')"><div class="wallet-coin"><div class="coin-icon coin-gold">G</div><span>GOLD</span></div><span class="wallet-amount" id="bal-gold">—</span></div>
+      <div class="wallet-row" data-currency="cyber" onclick="setCurrency('cyber')"><div class="wallet-coin"><div class="coin-icon coin-cyber">C</div><span>CYBER</span></div><span class="wallet-amount" id="bal-cyber">—</span></div>
+      <button onclick="openAccount()" style="width:100%;margin-top:10px;padding:8px;background:rgba(0,230,118,.08);border:1px solid rgba(0,230,118,.3);color:#00e676;font-family:'DM Mono',monospace;font-size:10px;letter-spacing:2px;cursor:pointer;">VIEW ACCOUNT</button>
+    </div>
+  </aside>
+
+  <main id="main">
+    <div id="topbar">
+      <span class="topbar-title">CLASSIC SLOTS</span>
+      <div class="topbar-right">
+        <div class="active-bal">
+          <span id="topCoinIcon" style="width:18px;height:18px;background:var(--lyko);border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:9px;font-weight:900;color:#000;">L</span>
+          <span id="activeCoinBal">—</span>
+          <span id="activeCoinName" style="font-size:9px;color:var(--dim)">LYKO</span>
+        </div>
+        <a href="../slots.html" class="back-btn">← SLOTS</a>
+      </div>
+    </div>
+
+    <div id="game-area">
+      <div id="bet-panel">
+        <div class="panel-title">Classic</div>
+        <div class="input-group">
+          <div class="input-label">Bet Amount</div>
+          <div class="input-row">
+            <input class="bet-input" id="betAmt" type="number" value="5" min="0.01" step="0.01">
+            <button class="half-btn" onclick="adjustBet(0.5)">½</button>
+            <button class="double-btn" onclick="adjustBet(2)">2×</button>
+          </div>
+        </div>
+        <div class="stat-row"><span class="stat-label">Last Win</span><span class="stat-val gold" id="lastWin">—</span></div>
+        <div class="stat-row"><span class="stat-label">Multiplier</span><span class="stat-val" id="lastMult">—</span></div>
+        <div class="stat-row"><span class="stat-label">Total Won</span><span class="stat-val green" id="sessionWon">0.00</span></div>
+        <button class="play-btn" id="spinBtn" onclick="spin()">🍒 SPIN</button>
+      </div>
+
+      <div id="play-area">
+        <div class="slot-machine">
+          <div class="reels">
+            <div class="reel" id="reel0"><div class="reel-inner" id="inner0">🍒</div></div>
+            <div class="reel" id="reel1"><div class="reel-inner" id="inner1">🍒</div></div>
+            <div class="reel" id="reel2"><div class="reel-inner" id="inner2">🍒</div></div>
+          </div>
+          <div class="result-display" id="resultDisplay"></div>
+        </div>
+
+        <div class="pay-table">
+          <div class="pay-table-title">Pay Table</div>
+          <div class="pay-row"><span class="pay-symbols">7️⃣7️⃣7️⃣</span><span class="pay-mult">JACKPOT 50×</span></div>
+          <div class="pay-row"><span class="pay-symbols">💎💎💎</span><span class="pay-mult">25×</span></div>
+          <div class="pay-row"><span class="pay-symbols">🔔🔔🔔</span><span class="pay-mult">15×</span></div>
+          <div class="pay-row"><span class="pay-symbols">🍋🍋🍋</span><span class="pay-mult">10×</span></div>
+          <div class="pay-row"><span class="pay-symbols">🍊🍊🍊</span><span class="pay-mult">8×</span></div>
+          <div class="pay-row"><span class="pay-symbols">🍒🍒🍒</span><span class="pay-mult">5×</span></div>
+          <div class="pay-row"><span class="pay-symbols">🍒🍒 any</span><span class="pay-mult">2×</span></div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script src="../../casino/lyko.js"></script>
+<script>
+// ── SLOT LOGIC ────────────────────────────────────────────────────────────────
+const SYMBOLS = ['🍒','🍒','🍒','🍊','🍊','🍋','🍋','🔔','🔔','💎','7️⃣'];
+// Weights: cherry most common, 7 rarest
+
+let spinning = false;
+let sessionWon = 0;
+
+function getSymbol() {
+  return SYMBOLS[Math.floor(Math.random() * SYMBOLS.length)];
+}
+
+function getMultiplier(r0, r1, r2) {
+  if (r0 === '7️⃣' && r1 === '7️⃣' && r2 === '7️⃣') return { mult: 50, label: '🎰 JACKPOT! 50×', type: 'jackpot' };
+  if (r0 === '💎' && r1 === '💎' && r2 === '💎') return { mult: 25, label: '💎 DIAMONDS! 25×', type: 'win' };
+  if (r0 === '🔔' && r1 === '🔔' && r2 === '🔔') return { mult: 15, label: '🔔 BELLS! 15×', type: 'win' };
+  if (r0 === '🍋' && r1 === '🍋' && r2 === '🍋') return { mult: 10, label: '🍋 LEMONS! 10×', type: 'win' };
+  if (r0 === '🍊' && r1 === '🍊' && r2 === '🍊') return { mult: 8, label: '🍊 ORANGES! 8×', type: 'win' };
+  if (r0 === '🍒' && r1 === '🍒' && r2 === '🍒') return { mult: 5, label: '🍒 CHERRIES! 5×', type: 'win' };
+  if ((r0 === '🍒' && r1 === '🍒') || (r0 === '🍒' && r2 === '🍒') || (r1 === '🍒' && r2 === '🍒')) {
+    return { mult: 2, label: '🍒🍒 Two Cherries! 2×', type: 'win' };
+  }
+  return { mult: 0, label: 'No win — spin again!', type: 'lose' };
+}
+
+async function spin() {
+  const bet = parseFloat(document.getElementById('betAmt').value) || 5;
+  if (bet > Lyko.getBalance()) { document.getElementById('resultDisplay').textContent = 'Insufficient balance!'; document.getElementById('resultDisplay').className = 'result-display lose'; return; }
+  if (spinning) return;
+  spinning = true;
+
+  const btn = document.getElementById('spinBtn');
+  btn.disabled = true;
+  document.getElementById('resultDisplay').textContent = '';
+  document.getElementById('resultDisplay').className = 'result-display';
+
+  // Deduct bet locally
+  adjustBalance(-bet);
+
+  // Animate reels
+  const spinDurations = [600, 800, 1000];
+  const results = [getSymbol(), getSymbol(), getSymbol()];
+
+  for (let i = 0; i < 3; i++) {
+    const inner = document.getElementById('inner' + i);
+    inner.style.animation = 'none';
+    inner.classList.add('spinning'); // won't work directly but triggers repaint
+    inner.style.animation = 'reelSpin .08s linear infinite';
+  }
+
+  // Stop reels one by one
+  for (let i = 0; i < 3; i++) {
+    await new Promise(r => setTimeout(r, spinDurations[i]));
+    const inner = document.getElementById('inner' + i);
+    inner.style.animation = 'none';
+    inner.textContent = results[i];
+  }
+
+  // Check result
+  const { mult, label, type } = getMultiplier(results[0], results[1], results[2]);
+  const payout = mult > 0 ? bet * mult : 0;
+  const profit = payout - bet;
+
+  if (payout > 0) adjustBalance(payout);
+
+  document.getElementById('resultDisplay').textContent = label;
+  document.getElementById('resultDisplay').className = 'result-display ' + type;
+  document.getElementById('lastWin').textContent = payout > 0 ? payout.toFixed(2) : '0.00';
+  document.getElementById('lastMult').textContent = mult > 0 ? mult + '×' : '—';
+
+  if (payout > 0) {
+    sessionWon += profit;
+    document.getElementById('sessionWon').textContent = sessionWon.toFixed(2);
+  }
+
+  // Record server-side
+  try {
+    const result = await Lyko.placeBet({
+      game: 'Classic Slots', bet, payout, profit,
+      currency: Lyko.getActiveCurrency(), multiplier: mult
+    });
+    Lyko.refreshDisplays(result.user);
+  } catch(e) {
+    Lyko.refreshMe().then(u => { if(u) Lyko.refreshDisplays(u); });
+  }
+
+  spinning = false;
+  btn.disabled = false;
+}
+
+function adjustBet(m) { const i = document.getElementById('betAmt'); i.value = Math.max(0.01, (parseFloat(i.value)||5)*m).toFixed(2); }
+function adjustBalance(delta) { const user = Lyko.getUser(); if(!user) return; const cur = Lyko.getActiveCurrency(); user.balances[cur] = Math.max(0,(user.balances[cur]||0)+delta); localStorage.setItem('lyko_user',JSON.stringify(user)); Lyko.refreshDisplays(user); }
+function setCurrency(c) { Lyko.setCurrency(c); }
+function openAccount(e) { if(e) e.preventDefault(); Lyko.openAccount(); }
+
+window.addEventListener('DOMContentLoaded', async () => {
+  Lyko.initCursor();
+  const cursor = document.getElementById('cursor');
+  document.addEventListener('mousemove', e => { cursor.style.left=e.clientX+'px'; cursor.style.top=e.clientY+'px'; });
+  document.querySelectorAll('a,button,.wallet-row').forEach(el => {
+    el.addEventListener('mouseenter', () => cursor.classList.add('big'));
+    el.addEventListener('mouseleave', () => cursor.classList.remove('big'));
+  });
+  let user = Lyko.getUser();
+  if (!user || !Lyko.getToken()) { Lyko.showAuthModal(u => Lyko.refreshDisplays(u)); return; }
+  const fresh = await Lyko.refreshMe();
+  if (!fresh) { Lyko.showAuthModal(u => Lyko.refreshDisplays(u)); return; }
+  Lyko.refreshDisplays(fresh);
+});
+</script>
+</body>
+</html>

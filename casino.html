@@ -77,7 +77,6 @@ body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(
 .game-card[data-game="chicken"] .game-thumb{background:linear-gradient(135deg,#1a2a0a,#253a10);}
 .game-card[data-game="keno"] .game-thumb{background:linear-gradient(135deg,#2a0a1a,#3a1025);}
 .game-card[data-game="pump"] .game-thumb{background:linear-gradient(135deg,#1a0a0a,#3a1010);}
-.game-card[data-game="blackjack"] .game-thumb{background:linear-gradient(135deg,#0a1a0a,#0d2e1a);}
 .thumb-icon{transition:transform .3s;filter:drop-shadow(0 0 14px rgba(0,230,118,.25));}
 .game-card:hover .thumb-icon{transform:scale(1.15) rotate(-5deg);}
 .thumb-badge{position:absolute;top:10px;right:10px;font-size:8px;letter-spacing:2px;padding:3px 8px;background:var(--lyko);color:#000;font-weight:700;text-transform:uppercase;border-radius:2px;}
@@ -141,13 +140,19 @@ select.m-input{appearance:none;}
       <div class="sidebar-label">Originals</div>
       <a class="sidebar-item" href="casino/crash.html"><span class="sidebar-icon">💥</span> Crash</a>
       <a class="sidebar-item" href="casino/hilo.html"><span class="sidebar-icon">🃏</span> HiLo</a>
-      <a class="sidebar-item" href="casino/blackjack.html"><span class="sidebar-icon">🂡</span> Blackjack</a>
       <a class="sidebar-item" href="casino/limbo.html"><span class="sidebar-icon">🎯</span> Limbo</a>
       <a class="sidebar-item" href="casino/plinko.html"><span class="sidebar-icon">⚪</span> Plinko</a>
       <a class="sidebar-item" href="casino/mines.html"><span class="sidebar-icon">💎</span> Mines</a>
       <a class="sidebar-item" href="casino/chicken.html"><span class="sidebar-icon">🐔</span> Chicken</a>
       <a class="sidebar-item" href="casino/keno.html"><span class="sidebar-icon">🔢</span> Keno</a>
       <a class="sidebar-item" href="casino/pump.html"><span class="sidebar-icon">🎈</span> Pump</a>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-label">Slots</div>
+      <a class="sidebar-item" href="casino/slots.html"><span class="sidebar-icon">🎰</span> All Slots</a>
+      <a class="sidebar-item" href="casino/slots/classic.html"><span class="sidebar-icon">🍒</span> Classic</a>
+      <a class="sidebar-item" href="casino/slots/neon.html"><span class="sidebar-icon">🌟</span> Neon</a>
+      <a class="sidebar-item" href="casino/slots/cyber.html"><span class="sidebar-icon">⚡</span> Cyber</a>
     </div>
     <div class="sidebar-section">
       <div class="sidebar-label">Navigate</div>
@@ -202,10 +207,6 @@ select.m-input{appearance:none;}
           <div class="game-thumb"><span class="thumb-icon">🃏</span><span class="thumb-badge">Original</span></div>
           <div class="game-info"><div class="game-name">HI<span class="hl">LO</span></div><p class="game-desc">Guess higher or lower. Chain correct guesses to multiply your winnings.</p><div class="game-meta"><span class="game-vol">Med–High</span><span class="game-play">Play</span></div></div>
         </a>
-        <a class="game-card" data-game="blackjack" href="casino/blackjack.html">
-          <div class="game-thumb"><span class="thumb-icon">🂡</span><span class="thumb-badge">Original</span></div>
-          <div class="game-info"><div class="game-name">BLACK<span class="hl">JACK</span></div><p class="game-desc">Beat the dealer to 21. Hit, stand or double down. Blackjack pays 3:2.</p><div class="game-meta"><span class="game-vol">Low–Med</span><span class="game-play">Play</span></div></div>
-        </a>
         <a class="game-card" data-game="limbo" href="casino/limbo.html">
           <div class="game-thumb"><span class="thumb-icon">🎯</span><span class="thumb-badge">Original</span></div>
           <div class="game-info"><div class="game-name"><span class="hl">LIMBO</span></div><p class="game-desc">Set your target multiplier. Hit it and win instantly.</p><div class="game-meta"><span class="game-vol">Variable</span><span class="game-play">Play</span></div></div>
@@ -233,6 +234,24 @@ select.m-input{appearance:none;}
       </div>
     </div>
 
+    
+    <div id="slots-section" style="padding:0 40px 40px;">
+      <div class="section-label">Slot Games</div>
+      <div class="games-grid">
+        <a class="game-card" data-game="classic" href="casino/slots/classic.html">
+          <div class="game-thumb" style="background:linear-gradient(135deg,#1a1a0a,#2e2a05);"><span class="thumb-icon">🍒</span><span class="thumb-badge hot">HOT</span></div>
+          <div class="game-info"><div class="game-name">CLAS<span class="hl">SIC</span></div><p class="game-desc">3 reels, classic symbols. Cherries, bars, sevens — pure old-school slots action.</p><div class="game-meta"><span class="game-vol">Low–Med</span><span class="game-play">Play</span></div></div>
+        </a>
+        <a class="game-card" data-game="neon" href="casino/slots/neon.html">
+          <div class="game-thumb" style="background:linear-gradient(135deg,#0a0a2e,#10104a);"><span class="thumb-icon">🌟</span><span class="thumb-badge">Original</span></div>
+          <div class="game-info"><div class="game-name">NE<span class="hl">ON</span></div><p class="game-desc">5 reels of glowing neon symbols. Free spins, wilds, and multiplier chains.</p><div class="game-meta"><span class="game-vol">Medium</span><span class="game-play">Play</span></div></div>
+        </a>
+        <a class="game-card" data-game="cyber" href="casino/slots/cyber.html">
+          <div class="game-thumb" style="background:linear-gradient(135deg,#001a2e,#00253a);"><span class="thumb-icon">⚡</span><span class="thumb-badge">Original</span></div>
+          <div class="game-info"><div class="game-name">CY<span class="hl">BER</span></div><p class="game-desc">Futuristic 5×4 grid slots. Cascading wins and a massive jackpot bonus round.</p><div class="game-meta"><span class="game-vol">High</span><span class="game-play">Play</span></div></div>
+        </a>
+      </div>
+    </div>
     <div id="live-section">
       <div class="section-label">Live Bets</div>
       <div class="live-feed">
