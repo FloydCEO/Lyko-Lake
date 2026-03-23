@@ -72,6 +72,11 @@
   async function refreshMe() {
     try {
       const data = await request('GET', '/api/me');
+      // Also fetch wallet balances so cold storage shows correctly on casino page
+      try {
+        const wdata = await request('GET', '/api/wallet');
+        data.user.walletBalances = wdata.walletBalances || { lyko: 0, gold: 0, cyber: 0 };
+      } catch {}
       setUser(data.user);
       return data.user;
     } catch { return null; }
@@ -158,6 +163,12 @@
     if (!user) user = getUser();
     if (!user) return;
     const b = user.balances || {};
+    // Update wallet balance displays if they exist on the page
+    const wb = user.walletBalances || {};
+    ['lyko','gold','cyber'].forEach(c => {
+      const el = document.getElementById('wbal-' + c);
+      if (el) el.textContent = (wb[c] || 0).toFixed(2);
+    });
     ['lyko','gold','cyber'].forEach(c => {
       const el = document.getElementById('bal-' + c);
       if (el) el.textContent = (b[c] || 0).toFixed(2);
@@ -292,11 +303,19 @@
         <canvas id="wlChart" style="width:100%;height:140px;background:var(--surface);border:1px solid var(--border);border-radius:2px"></canvas>
       </div>
       <div style="margin-bottom:14px">
-        <div class="m-section-label">Balances</div>
+        <div class="m-section-label">Casino Balances (For Gambling)</div>
         ${['lyko','gold','cyber'].map(c => `
           <div class="m-row">
             <span style="font-size:11px">${c.toUpperCase()}</span>
             <span style="font-family:'Orbitron',sans-serif;font-weight:700">${(user.balances[c]||0).toFixed(2)}</span>
+          </div>`).join('')}
+      </div>
+      <div style="margin-bottom:14px">
+        <div class="m-section-label">Wallet Balances (Cold Storage)</div>
+        ${['lyko','gold','cyber'].map(c => `
+          <div class="m-row">
+            <span style="font-size:11px;color:var(--cyan)">${c.toUpperCase()}</span>
+            <span style="font-family:'Orbitron',sans-serif;font-weight:700;color:var(--cyan)">${((user.walletBalances||{})[c]||0).toFixed(2)}</span>
           </div>`).join('')}
       </div>
       <button class="m-btn" style="background:var(--accent);color:#fff;font-size:10px;letter-spacing:2px;padding:8px 16px" onclick="Lyko.logout()">SIGN OUT</button>
@@ -516,6 +535,7 @@
 
   // ── Modal helpers (global so inline onclick works) ─────────────────────────
   window.switchMTab = function(t) {
+    if (t === 'cv' && typeof window.mRefreshConvertLabels === 'function') window.mRefreshConvertLabels();
     ['ov','tx','st','cv','wd'].forEach(x => {
       const b = document.getElementById('tab-'+x);
       const p = document.getElementById('mpanel-'+x);
@@ -575,7 +595,7 @@
     mRefreshConvertLabels();
   };
 
-  function mRefreshConvertLabels() {
+  window.mRefreshConvertLabels = function() {
     const u = Lyko.getUser();
     if (!u) return;
     const b = u.balances || {};
@@ -586,12 +606,12 @@
       Array.from(sel.options).forEach(opt => {
         if (labels[opt.value]) {
           opt.text = id === 'cvFrom'
-            ? `${labels[opt.value]} (bal: ${(b[opt.value]||0).toFixed(2)})`
+            ? labels[opt.value] + ' (bal: ' + (b[opt.value]||0).toFixed(2) + ')'
             : labels[opt.value];
         }
       });
     });
-  }
+  };
 
   window.mDoConvert = async function() {
     const from  = document.getElementById('cvFrom')?.value;
