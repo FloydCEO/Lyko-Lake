@@ -573,11 +573,12 @@
     res.textContent = converted.toFixed(4) + ' ' + to.toUpperCase();
   };
 
-  window.mDoConvert = function() {
-    const from = document.getElementById('cvFrom')?.value;
-    const to   = document.getElementById('cvTo')?.value;
-    const amt  = parseFloat(document.getElementById('cvAmt')?.value);
+  window.mDoConvert = async function() {
+    const from  = document.getElementById('cvFrom')?.value;
+    const to    = document.getElementById('cvTo')?.value;
+    const amt   = parseFloat(document.getElementById('cvAmt')?.value);
     const msgEl = document.getElementById('cvMsg');
+    const btn   = document.querySelector('[onclick="mDoConvert()"]');
     function showMsg(ok, msg) {
       if (msgEl) { msgEl.style.display='block'; msgEl.style.borderColor=ok?'#00e676':'#e94560'; msgEl.style.color=ok?'#00e676':'#e94560'; msgEl.textContent=msg; }
     }
@@ -585,15 +586,31 @@
     if (from === to) { showMsg(false,'Pick two different currencies.'); return; }
     const user = Lyko.getUser();
     if (!user) return;
-    if ((user.balances[from]||0) < amt) { showMsg(false,'Insufficient balance.'); return; }
-    const converted = Lyko.convertAmount(amt, from, to);
-    user.balances[from] = parseFloat(((user.balances[from]||0) - amt).toFixed(4));
-    user.balances[to]   = parseFloat(((user.balances[to]||0) + converted).toFixed(4));
-    localStorage.setItem('lyko_user', JSON.stringify(user));
-    Lyko.refreshDisplays(user);
-    showMsg(true, `✓ Converted ${amt.toFixed(2)} ${from.toUpperCase()} → ${converted.toFixed(4)} ${to.toUpperCase()}`);
-    // Sync with server (record as zero-profit internal transfer)
-    Lyko.updateMe({}).catch(()=>{});
+    if ((user.balances[from]||0) < amt) { showMsg(false,'Insufficient ' + from.toUpperCase() + ' balance.'); return; }
+
+    // Disable button while request is in flight
+    if (btn) { btn.disabled = true; btn.textContent = '...'; }
+
+    try {
+      // Hit the server — this is the real conversion, not just localStorage
+      const res = await fetch(Lyko.API + '/api/convert', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + Lyko.getToken() },
+        body: JSON.stringify({ from, to, amount: amt })
+      });
+      const data = await res.json();
+      if (!res.ok) { showMsg(false, data.error || 'Conversion failed.'); return; }
+
+      // Update local state from server response
+      localStorage.setItem('lyko_user', JSON.stringify(data.user));
+      Lyko.refreshDisplays(data.user);
+      showMsg(true, `✓ Converted ${data.spent.toFixed(2)} ${from.toUpperCase()} → ${data.received.toFixed(4)} ${to.toUpperCase()}`);
+      document.getElementById('cvAmt').value = '';
+    } catch(e) {
+      showMsg(false, 'Network error — try again.');
+    } finally {
+      if (btn) { btn.disabled = false; btn.textContent = 'CONVERT'; }
+    }
   };
 
   window.mStartSwitch = function() {
