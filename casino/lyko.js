@@ -571,7 +571,27 @@
     if (from === to) { res.textContent = amt.toFixed(2); return; }
     const converted = Lyko.convertAmount(amt, from, to);
     res.textContent = converted.toFixed(4) + ' ' + to.toUpperCase();
+    // Update the balance hints in dropdowns from live user data
+    mRefreshConvertLabels();
   };
+
+  function mRefreshConvertLabels() {
+    const u = Lyko.getUser();
+    if (!u) return;
+    const b = u.balances || {};
+    const labels = { lyko: 'LYKO', gold: 'GOLD', cyber: 'CYBER' };
+    ['cvFrom', 'cvTo'].forEach(id => {
+      const sel = document.getElementById(id);
+      if (!sel) return;
+      Array.from(sel.options).forEach(opt => {
+        if (labels[opt.value]) {
+          opt.text = id === 'cvFrom'
+            ? `${labels[opt.value]} (bal: ${(b[opt.value]||0).toFixed(2)})`
+            : labels[opt.value];
+        }
+      });
+    });
+  }
 
   window.mDoConvert = async function() {
     const from  = document.getElementById('cvFrom')?.value;
@@ -604,6 +624,8 @@
       // Update local state from server response
       localStorage.setItem('lyko_user', JSON.stringify(data.user));
       Lyko.refreshDisplays(data.user);
+      // Refresh the dropdown balance labels so they show updated amounts
+      if (typeof mRefreshConvertLabels === 'function') mRefreshConvertLabels();
       showMsg(true, `✓ Converted ${data.spent.toFixed(2)} ${from.toUpperCase()} → ${data.received.toFixed(4)} ${to.toUpperCase()}`);
       document.getElementById('cvAmt').value = '';
     } catch(e) {
